@@ -131,7 +131,7 @@ int exprGetBreakResult(exprObj *o)
     if(o->breakerfunc == NULL)
         return 0;
 
-    return o->breakerfunc(o);
+    return (*(o->breakerfunc))(o);
     }
 
 /* Get the user data */

@@ -71,7 +71,7 @@ int exprEvalNode(exprObj *o, exprNode *n, EXPRTYPE *val)
         case EXPR_NODETYPE_FUNCTION:
             if(n->data.function.fptr)
                 {
-                return (n->data.function.fptr)(o, n->data.function.nodes, n->data.function.nodecount, n->data.function.refitems, n->data.function.refcount, val);
+                return (*(n->data.function.fptr))(o, n->data.function.nodes, n->data.function.nodecount, n->data.function.refitems, n->data.function.refcount, val);
                 }
             else
                 {

@@ -33,7 +33,7 @@ extern "C" {
     Version number
 */
 #define EXPR_VERSIONMAJOR 1
-#define EXPR_VERSIONMINOR 2
+#define EXPR_VERSIONMINOR 3
 
 
 /* Define type of data to use */
