@@ -186,7 +186,7 @@ int exprMultiParse(exprObj *o, exprNode *n, char *expr)
     if(tmp == NULL)
         return EXPR_ERROR_MEMORY;
 
-    memset(tmp, 0, sizeof(tmp) * num);
+    memset(tmp, 0, sizeof(exprNode) * num);
 
     /* Set the current node's data */
     n->type = EXPR_NODETYPE_FUNCTION;
@@ -427,6 +427,15 @@ int exprInternalParseAssign(exprObj *o, exprNode *n, char *expr, int start, int 
         of the variable's value at evaluation time.  Because of this,
         we must make sure the variable does exists in the variable list.
     */
+
+    /* Make sure name is not a constant name */
+    l = exprGetConstList(o);
+    if(l)
+        {
+        exprValListGetAddress(l, buf, &addr);
+        if(addr)
+            return EXPR_ERROR_CONSTANTASSIGN;
+        }
 
     /* Get the variable list */
     l = exprGetVarList(o);
@@ -821,6 +830,15 @@ int exprInternalParseFunction(exprObj *o, exprNode *n, char *expr, int start, in
                                 strncpy(buf, expr + lv + 1, len);
                                 buf[len] = '\0';
 
+                                /* Make sure it is not a constant */
+                                vars = exprGetConstList(o);
+                                if(vars)
+                                    {
+                                    exprValListGetAddress(vars, buf, &addr);
+                                    if(addr)
+                                        return EXPR_ERROR_REFCONSTANT;
+                                    }
+
                                 /* Get variable list */
                                 vars = exprGetVarList(o);
                                 if(vars == NULL)
@@ -873,6 +891,15 @@ int exprInternalParseFunction(exprObj *o, exprNode *n, char *expr, int start, in
             /* Copy name into buffer */
             strncpy(buf, expr + lv + 1, len);
             buf[len] = '\0';
+
+            /* Make sure it is not a constant */
+            vars = exprGetConstList(o);
+            if(vars)
+                {
+                exprValListGetAddress(vars, buf, &addr);
+                if(addr)
+                    return EXPR_ERROR_REFCONSTANT;
+                }
 
             /* Get variable list */
             vars = exprGetVarList(o);
@@ -942,11 +969,17 @@ int exprInternalParseVarVal(exprObj *o, exprNode *n, char *expr, int start, int 
         l = exprGetConstList(o);
         if(l != NULL)
             {
-            if(exprValListGet(l, buf, &val) == EXPR_ERROR_NOERROR)
+            if(exprValListGetAddress(l, buf, &addr) == EXPR_ERROR_NOERROR)
                 {
                 /* We found it in the constant list */
-                n->type = EXPR_NODETYPE_VALUE;
-                n->data.value.value = val;
+
+                /*
+                    Treat is like a variable node so application can change
+                    constant value and it will reflect in expression
+                */
+
+                n->type = EXPR_NODETYPE_VARIABLE;
+                n->data.variable.var_addr = addr;
                 return EXPR_ERROR_NOERROR;
                 }
             }

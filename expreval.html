@@ -193,11 +193,16 @@ Stop commenting out&gt;
 				<li>Free the function, variable, and constant lists</li>
 			</ul>
 			You can manipulate the lists in any order after their creation.
-			However, functions and constants are translated during the parse,
-			so after parsing an expression, manipulating the function and
-			constant lists will make no change to an expression.  Variables
-			can be manipulated after a parse to change the result of an
-			expression.</p>
+			However, functions are translated during the parse, so after
+			parsing an expression, manipulating the function list will make
+                        no change to an expression.  Variables and constants can be
+			manipulated after a parse to change the result of an expression.
+                        However, you must add any constants to be used by an expression
+			to the constant list <b>BEFORE</b> parsing the expression,
+			otherwise it will be seen as a variable.  Applications can change
+			both variables and constants, however the expression can only
+			change variables.  Expressions may <b>NOT</b> assign to a constant
+			and expressions may <b>NOT</b> use constants as a reference parameter.</p>
 		<p><b>Function, variable, and constant list example:</b>
 			<ul>
 				<pre>
@@ -776,6 +781,9 @@ if(d2 == 0.0)
 				<li>EXPR_ERROR_DIVBYZERO - An attemp to divide by zero has occured</li>
 				<li>EXPR_ERROR_NOVARLIST - No variable list for the expression</li>
 				<li>EXPR_ERROR_BREAK - The expression was broken by the break function</li>
+				<li>EXPR_ERROR_CONSTANTASSIGN - The expresion attempted to assign to a constant.</li>
+				<li>EXPR_ERROR_REFCONSTANT - The expression attempted to pass a constant as a
+					reference parameter.</li>
 			</ul>
 		</p>
 		<p><b>Objects:</b>

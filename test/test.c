@@ -42,10 +42,10 @@ void main(void)
     char buf[2048];
     char cbuf[2048];
     int pos, count;
-    exprObj *e;
-    exprFuncList *f;
-    exprValList *v;
-    exprValList *c;
+    exprObj *e = NULL;
+    exprFuncList *f = NULL;
+    exprValList *v = NULL;
+    exprValList *c = NULL;
     int err;
     EXPRTYPE val;
     time_t t1, t2;
@@ -61,10 +61,17 @@ void main(void)
     if(err != 0)
         {
         /* Free stuff */
-        exprFree(e);
-        exprFuncListFree(f);
-        exprValListFree(c);
-        exprValListFree(v);
+        if(e)
+            exprFree(e);
+
+        if(f)
+            exprFuncListFree(f);
+
+        if(c)
+            exprValListFree(c);
+
+        if(v)
+            exprValListFree(v);
 
         if(err != -1)
             printf("Error: %d\n", err);
@@ -125,10 +132,10 @@ void main(void)
         longjmp(jumper, err);
         }
 
-    err = exprValListAdd(v, "pos", 0.0);
+    err = exprValListAdd(c, "pos", 0.0);
     if(err != EXPR_ERROR_NOERROR)
         {
-        printf("Error adding variable \'pos\'\n");
+        printf("Error adding constant \'pos\'\n");
         longjmp(jumper, err);
         }
 
@@ -139,7 +146,7 @@ void main(void)
         longjmp(jumper, err);
         }
 
-    exprValListGetAddress(v, "pos", &e_pos);
+    exprValListGetAddress(c, "pos", &e_pos);
     exprValListGetAddress(v, "res", &e_res);
 
     if(e_pos == NULL || e_res == NULL)

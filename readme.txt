@@ -52,3 +52,9 @@ ExprEval is pretty much up and running and very operational.
   EXPR_REQUIREREFCOUNTMIN
   EXPR_REQUIREREFCOUNTMAX
   EXPR_REQUIREREFCOUNTRANGE
+* Added feature to disable assigning to a variable with the
+  same name as a constant.
+* Added feature to enable applications to change the value of
+  a constant while the expression can not.  You must add
+  any constants to the constant list BEFORE you parse the
+  expression.

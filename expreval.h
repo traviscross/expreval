@@ -33,7 +33,7 @@ extern "C" {
     Version number
 */
 #define EXPR_VERSIONMAJOR 1
-#define EXPR_VERSIONMINOR 0
+#define EXPR_VERSIONMINOR 2
 
 
 /* Define type of data to use */
@@ -77,6 +77,8 @@ typedef double EXPRTYPE;
 #define EXPR_ERROR_DIVBYZERO 20 /* Attempted a division by zero */
 #define EXPR_ERROR_NOVARLIST 21 /* No variable list found but one is needed */
 #define EXPR_ERROR_BREAK 22 /* Expression was broken by break function */
+#define EXPR_ERROR_CONSTANTASSIGN 23 /* Assignment to a constant */
+#define EXPR_ERROR_REFCONSTANT 24 /* Constant used as a reference parameter */
 
 
 /* Macros */
