@@ -1,0 +1,57 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: expreval - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\DOCUME~1\MainUser\LOCALS~1\Temp\RSP72.tmp" with contents
+[
+/nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /Fp"Debug/expreval.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"D:\projects\expreval\expreval.c"
+"D:\projects\expreval\exprfunc.c"
+"D:\projects\expreval\exprincl.c"
+"D:\projects\expreval\exprinit.c"
+"D:\projects\expreval\exprint.c"
+"D:\projects\expreval\exprobj.c"
+"D:\projects\expreval\exprpars.c"
+"D:\projects\expreval\exprutil.c"
+"D:\projects\expreval\exprval.c"
+]
+Creating command line "cl.exe @C:\DOCUME~1\MainUser\LOCALS~1\Temp\RSP72.tmp" 
+Creating temporary file "C:\DOCUME~1\MainUser\LOCALS~1\Temp\RSP73.tmp" with contents
+[
+/nologo /out:"Debug\expreval.lib" 
+.\Debug\expreval.obj
+.\Debug\exprfunc.obj
+.\Debug\exprincl.obj
+.\Debug\exprinit.obj
+.\Debug\exprint.obj
+.\Debug\exprmem.obj
+.\Debug\exprobj.obj
+.\Debug\exprpars.obj
+.\Debug\exprutil.obj
+.\Debug\exprval.obj
+]
+Creating command line "link.exe -lib @C:\DOCUME~1\MainUser\LOCALS~1\Temp\RSP73.tmp"
+<h3>Output Window</h3>
+Compiling...
+expreval.c
+exprfunc.c
+exprincl.c
+exprinit.c
+exprint.c
+exprobj.c
+exprpars.c
+exprutil.c
+exprval.c
+Creating library...
+
+
+
+<h3>Results</h3>
+expreval.lib - 0 error(s), 0 warning(s)
+</pre>
+</body>
+</html>
