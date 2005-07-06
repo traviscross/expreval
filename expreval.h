@@ -1,4 +1,4 @@
-/* 
+/*
     File: ExprEval.h
     Auth: Brian Allen Vanderburg II
     Date: Thursday, April 24, 2003
@@ -25,7 +25,7 @@ extern "C" {
 
 
 /*
-    We always use fast variable access, this define does nothing    
+    We always use fast variable access, this define does nothing
 */
 #define EXPR_FAST_VAR_ACCESS
 
@@ -33,7 +33,7 @@ extern "C" {
     Version number
 */
 #define EXPR_VERSIONMAJOR 1
-#define EXPR_VERSIONMINOR 3
+#define EXPR_VERSIONMINOR 4
 
 
 /* Define type of data to use */
@@ -151,7 +151,7 @@ if(refcount < c1 || refcount > c2) \
     return EXPR_ERROR_BADNUMBERARGUMENTS;
 
 /* Check for a math error.
-   Using this macro requires <errno.h> 
+   Using this macro requires <errno.h>
    For use in custom functions
    Assumes exprObj *o, EXPRTYPE *val */
 #define EXPR_CHECKMATHERR() \
@@ -194,7 +194,7 @@ if(exprGetBreakResult(o))\
 
 /* Declare a function solver */
 #define EXPR_FUNCTIONSOLVER(func_name)\
-int func_name##(struct _exprObj *o, struct _exprNode *n, int count, EXPRTYPE **refitems, int refcount, EXPRTYPE *val)
+int func_name(struct _exprObj *o, struct _exprNode *n, int count, EXPRTYPE **refitems, int refcount, EXPRTYPE *val)
 
 
 /* Forward declarations */
@@ -254,7 +254,7 @@ typedef struct _exprVal
     EXPRTYPE vval; /* Value of the value */
 
     struct _exprVal *left; /* For binary tree search */
-    struct _exprVal *right; 
+    struct _exprVal *right;
     } exprVal;
 
 /* Value list */

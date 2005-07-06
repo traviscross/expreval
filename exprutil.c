@@ -1,4 +1,4 @@
-/* 
+/*
     File: ExprUtil.c
     Auth: Brian Allen Vanderburg II
     Date: Monday, April 28, 2003
@@ -125,16 +125,16 @@ int exprStripChars(char *buf)
     }
 
 
-/* This function validates the characters of an expression 
+/* This function validates the characters of an expression
    after the expression has been stripped of comments and whitespace*/
 int exprValidChars(char *buf)
     {
     int pos ;
-        
+
     /* Loop through each item */
     for(pos = 0; buf[pos] != '\0'; pos++)
         {
-        
+
         /* Semicolon */
         if(buf[pos] == ';')
             continue;
@@ -146,7 +146,7 @@ int exprValidChars(char *buf)
         /* Equal sign */
         if(buf[pos] == '=')
             continue;
-        
+
         /* Letters or numbers */
         if(isalnum(buf[pos]))
             continue;

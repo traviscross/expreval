@@ -1,4 +1,4 @@
-/* 
+/*
     File: ExprInt.h
     Auth: Brian Allen Vanderburg II
     Date: Wednesday, April 30, 2003

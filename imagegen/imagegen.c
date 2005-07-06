@@ -110,7 +110,7 @@ void main(void)
     printf("Width: ");
     gets(file);
     w = atoi(file);
-    
+
     /* Get height */
     printf("Height: ");
     gets(file);
@@ -198,7 +198,7 @@ void main(void)
     if(exprCreate(&e_init, f, v, c, NULL, NULL, NULL) != EXPR_ERROR_NOERROR)
         longjmp(jumper, 1);
 
-    
+
     /* Create the variables needed in the variable list */
     exprValListAdd(v, "x", 0.0);
     exprValListAdd(v, "y", 0.0);
@@ -249,7 +249,7 @@ void main(void)
         longjmp(jumper, 1);
         }
 
-    
+
     /* Prepare the image file */
     outf = fopen(file, "wb");
     if(outf == NULL)
@@ -260,7 +260,7 @@ void main(void)
 
     fprintf(outf, "P6\n%d %d\n256\n", w, h);
 
-    
+
     /* Do init expression */
     exprEval(e_init, &res);
 
@@ -276,7 +276,7 @@ void main(void)
             /* Do pixel expression */
             *e_x = (EXPRTYPE)x; /* Set both variables (in case expression changed them) */
             *e_y = (EXPRTYPE)y;
-    
+
             exprEval(e_pix, &res);
 
             /* Use variables for result */

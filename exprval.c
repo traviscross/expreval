@@ -1,4 +1,4 @@
-/* 
+/*
     File: ExprVal.c
     Auth: Brian Allen Vanderburg II
     Date: Thursday, April 24, 2003
@@ -46,7 +46,7 @@ int exprValListAdd(exprValList *v, char *name, EXPRTYPE val)
     exprVal *tmp;
     exprVal *cur;
     int result;
-    
+
     if(v == NULL)
         return EXPR_ERROR_NULLPOINTER;
 
@@ -74,7 +74,7 @@ int exprValListAdd(exprValList *v, char *name, EXPRTYPE val)
             {
             /* This is it, just assign */
             cur->vval = val;
-            
+
             break;
             }
         else if(result > 0) /* To the right */

@@ -81,7 +81,7 @@ void main(void)
 
     /* Get an expression */
     printf("Enter expression: ");
-    gets(buf);  
+    gets(buf);
 
     /* How many times to execute the expression */
     printf("Count: ");
@@ -99,7 +99,7 @@ void main(void)
     /* Add a function */
     exprFuncListAdd(f, my_func, "myfunc", 1, 1, 1, 1);
 
-	
+
     /* Init funclist */
     err = exprFuncListInit(f);
     if(err != EXPR_ERROR_NOERROR)
@@ -155,7 +155,7 @@ void main(void)
         longjmp(jumper, EXPR_ERROR_UNKNOWN);
         }
 
-	
+
 
     /* Create expr */
     err = exprCreate(&e, f, v, c, NULL, breaker, 0);
@@ -185,11 +185,11 @@ void main(void)
         err = exprEval(e, &val);
 #if(1)
         if(err != EXPR_ERROR_NOERROR)
-	        printf("Eval Error: %d\n", err);
+            printf("Eval Error: %d\n", err);
 #endif
         }
 
-		
+
     t2 = time(NULL);
     diff = difftime(t2, t1);
 
@@ -209,4 +209,4 @@ void main(void)
 
     /* We are done */
     longjmp(jumper, -1);
-	}
+    }

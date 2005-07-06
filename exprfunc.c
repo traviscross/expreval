@@ -47,7 +47,7 @@ int exprFuncListAdd(exprFuncList *f, exprFuncType ptr, char *name, int min, int 
     exprFunc *tmp;
     exprFunc *cur;
     int result;
-    
+
     if(f == NULL)
         return EXPR_ERROR_NULLPOINTER;
 
@@ -105,7 +105,7 @@ int exprFuncListAdd(exprFuncList *f, exprFuncType ptr, char *name, int min, int 
             cur->max = max;
             cur->refmin = refmin;
             cur->refmax = refmax;
-            
+
             break;
             }
         else if(result > 0) /* To the right */

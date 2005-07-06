@@ -43,7 +43,7 @@ int exprEval(exprObj *o, EXPRTYPE *val)
 int exprEvalNode(exprObj *o, exprNode *n, EXPRTYPE *val)
     {
     int err;
-    
+
     if(o == NULL || n == NULL)
         return EXPR_ERROR_NULLPOINTER;
 

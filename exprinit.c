@@ -58,10 +58,9 @@ int exprFuncListInit(exprFuncList *f)
     EXPR_ADDFUNC("logn", __expr_logn, 2, 2, 0, 0);
     EXPR_ADDFUNC("ceil", __expr_ceil, 1, 1, 0, 0);
     EXPR_ADDFUNC("floor", __expr_floor, 1, 1, 0, 0);
-    EXPR_ADDFUNC("rand", __expr_rand, 0, 0, 0, 0);
-    EXPR_ADDFUNC("random", __expr_random, 2, 2, 0, 0);
-    EXPR_ADDFUNC("randomize", __expr_randomize, 0, 0, 0, 0);
-    EXPR_ADDFUNC("srand", __expr_srand, 1, 1, 0, 0);
+    EXPR_ADDFUNC("rand", __expr_rand, 0, 0, 1, 1);
+    EXPR_ADDFUNC("random", __expr_random, 2, 2, 1, 1);
+    EXPR_ADDFUNC("randomize", __expr_randomize, 0, 0, 1, 1);
     EXPR_ADDFUNC("deg", __expr_deg, 1, 1, 0, 0);
     EXPR_ADDFUNC("rad", __expr_rad, 1, 1, 0, 0);
     EXPR_ADDFUNC("recttopolr", __expr_recttopolr, 2, 2, 0, 0);
@@ -122,8 +121,6 @@ EXPR_FUNCTIONSOLVER(__expr_abs)
     int err;
     EXPRTYPE d1;
 
-    EXPR_REQUIRECOUNT(1);
-
     /* Evaluate the nodes */
     EXPR_EVALNODE(0, d1);
 
@@ -137,8 +134,6 @@ EXPR_FUNCTIONSOLVER(__expr_mod)
     {
     int err;
     EXPRTYPE d1, d2;
-
-    EXPR_REQUIRECOUNT(2);
 
     EXPR_EVALNODE(0, d1);
     EXPR_EVALNODE(1, d2);
@@ -158,8 +153,6 @@ EXPR_FUNCTIONSOLVER(__expr_ipart)
     int err;
     EXPRTYPE d1;
 
-    EXPR_REQUIRECOUNT(1);
-
     EXPR_EVALNODE(0, d1);
 
     EXPR_CLEARMATHERR();
@@ -177,8 +170,6 @@ EXPR_FUNCTIONSOLVER(__expr_fpart)
     int err;
     EXPRTYPE d1, tmp;
 
-    EXPR_REQUIRECOUNT(1);
-
     EXPR_EVALNODE(0, d1);
 
     EXPR_CLEARMATHERR();
@@ -195,8 +186,6 @@ EXPR_FUNCTIONSOLVER(__expr_min)
     {
     int err, pos;
     EXPRTYPE d1, tmp;
-
-    EXPR_REQUIRECOUNTMIN(1);
 
     /* Get the first one */
     EXPR_EVALNODE(0, tmp);
@@ -223,8 +212,6 @@ EXPR_FUNCTIONSOLVER(__expr_max)
     {
     int err, pos;
     EXPRTYPE d1, tmp;
-
-    EXPR_REQUIRECOUNTMIN(1);
 
     /* Get the first one */
     EXPR_EVALNODE(0, tmp);
@@ -253,16 +240,13 @@ EXPR_FUNCTIONSOLVER(__expr_pow)
     int err;
     EXPRTYPE d1, d2;
 
-    /* need 2 arguments */
-    EXPR_REQUIRECOUNT(2);
-
     EXPR_EVALNODE(0, d1);
     EXPR_EVALNODE(1, d2);
 
-    
+
     /* Clear any error previously set */
     EXPR_CLEARMATHERR();
-    
+
     *val = pow(d1, d2);
 
     /* Check for math error */
@@ -278,13 +262,10 @@ EXPR_FUNCTIONSOLVER(__expr_sqrt)
     int err;
     EXPRTYPE d1;
 
-    /* Need 1 argument */
-    EXPR_REQUIRECOUNT(1);
-
     /* Get argument */
     EXPR_EVALNODE(0, d1);
 
-    
+
     EXPR_CLEARMATHERR();
 
     *val = sqrt(d1);
@@ -301,8 +282,6 @@ EXPR_FUNCTIONSOLVER(__expr_sin)
     {
     int err;
     EXPRTYPE d1;
-
-    EXPR_REQUIRECOUNT(1); /* 1 arg */
 
     EXPR_EVALNODE(0, d1); /* Eval node */
 
@@ -321,8 +300,6 @@ EXPR_FUNCTIONSOLVER(__expr_sinh)
     int err;
     EXPRTYPE d1;
 
-    EXPR_REQUIRECOUNT(1); /* 1 arg */
-
     EXPR_EVALNODE(0, d1);
 
     EXPR_CLEARMATHERR();
@@ -339,8 +316,6 @@ EXPR_FUNCTIONSOLVER(__expr_asin)
     {
     int err;
     EXPRTYPE d1;
-
-    EXPR_REQUIRECOUNT(1); /* 1 arg */
 
     EXPR_EVALNODE(0, d1);
 
@@ -361,8 +336,6 @@ EXPR_FUNCTIONSOLVER(__expr_cos)
     int err;
     EXPRTYPE d1;
 
-    EXPR_REQUIRECOUNT(1);
-
     EXPR_EVALNODE(0, d1);
 
     EXPR_CLEARMATHERR();
@@ -380,8 +353,6 @@ EXPR_FUNCTIONSOLVER(__expr_cosh)
     int err;
     EXPRTYPE d1;
 
-    EXPR_REQUIRECOUNT(1);
-
     EXPR_EVALNODE(0, d1);
 
     EXPR_CLEARMATHERR();
@@ -398,8 +369,6 @@ EXPR_FUNCTIONSOLVER(__expr_acos)
     {
     int err;
     EXPRTYPE d1;
-
-    EXPR_REQUIRECOUNT(1);
 
     EXPR_EVALNODE(0, d1);
 
@@ -420,8 +389,6 @@ EXPR_FUNCTIONSOLVER(__expr_tan)
     int err;
     EXPRTYPE d1;
 
-    EXPR_REQUIRECOUNT(1);
-
     EXPR_EVALNODE(0, d1);
 
     EXPR_CLEARMATHERR();
@@ -438,8 +405,6 @@ EXPR_FUNCTIONSOLVER(__expr_tanh)
     {
     int err;
     EXPRTYPE d1;
-
-    EXPR_REQUIRECOUNT(1);
 
     EXPR_EVALNODE(0, d1);
 
@@ -458,8 +423,6 @@ EXPR_FUNCTIONSOLVER(__expr_atan)
     int err;
     EXPRTYPE d1;
 
-    EXPR_REQUIRECOUNT(1);
-
     EXPR_EVALNODE(0, d1);
 
     EXPR_CLEARMATHERR();
@@ -477,8 +440,6 @@ EXPR_FUNCTIONSOLVER(__expr_atan2)
     int err;
     EXPRTYPE x, y;
 
-    EXPR_REQUIRECOUNT(2);
-    
     EXPR_EVALNODE(0, y);
     EXPR_EVALNODE(1, x);
 
@@ -499,8 +460,6 @@ EXPR_FUNCTIONSOLVER(__expr_log)
     int err;
     EXPRTYPE d1;
 
-    EXPR_REQUIRECOUNT(1);
-
     EXPR_EVALNODE(0, d1);
 
     EXPR_CLEARMATHERR();
@@ -517,8 +476,6 @@ EXPR_FUNCTIONSOLVER(__expr_pow10)
     {
     int err;
     EXPRTYPE d1;
-
-    EXPR_REQUIRECOUNT(1);
 
     EXPR_EVALNODE(0, d1);
 
@@ -537,8 +494,6 @@ EXPR_FUNCTIONSOLVER(__expr_ln)
     int err;
     EXPRTYPE d1;
 
-    EXPR_REQUIRECOUNT(1);
-
     EXPR_EVALNODE(0, d1);
 
     EXPR_CLEARMATHERR();
@@ -555,8 +510,6 @@ EXPR_FUNCTIONSOLVER(__expr_exp)
     {
     int err;
     EXPRTYPE d1;
-
-    EXPR_REQUIRECOUNT(1);
 
     EXPR_EVALNODE(0, d1);
 
@@ -575,8 +528,6 @@ EXPR_FUNCTIONSOLVER(__expr_logn)
     int err;
     EXPRTYPE d1, base;
     EXPRTYPE l1, l2;
-
-    EXPR_REQUIRECOUNT(2);
 
     EXPR_EVALNODE(0, d1);
     EXPR_EVALNODE(1, base);
@@ -606,8 +557,6 @@ EXPR_FUNCTIONSOLVER(__expr_ceil)
     int err;
     EXPRTYPE d1;
 
-    EXPR_REQUIRECOUNT(1);
-
     EXPR_EVALNODE(0, d1);
 
     EXPR_CLEARMATHERR();
@@ -625,8 +574,6 @@ EXPR_FUNCTIONSOLVER(__expr_floor)
     int err;
     EXPRTYPE d1;
 
-    EXPR_REQUIRECOUNT(1);
-
     EXPR_EVALNODE(0, d1);
 
     EXPR_CLEARMATHERR();
@@ -640,15 +587,25 @@ EXPR_FUNCTIONSOLVER(__expr_floor)
 
 
 /* Random functions */
+#define EXPR_RAND_MAX 32767
+
+static int expr_our_rand(EXPRTYPE *cookie)
+    {
+    long a = (long)(*cookie);
+
+    a = a * 214013L + 2531011L;
+
+    *cookie = (EXPRTYPE)a;
+
+    return (a >> 16) & 0x7fff;
+    }
 
 /* rand */
 EXPR_FUNCTIONSOLVER(__expr_rand)
     {
-    EXPR_REQUIRECOUNT(0);
-
     EXPR_CLEARMATHERR();
 
-    *val = (EXPRTYPE)rand() / (EXPRTYPE)(RAND_MAX + 1);
+    *val = (EXPRTYPE)expr_our_rand(refitems[0]) / (EXPRTYPE)(EXPR_RAND_MAX + 1);
 
     EXPR_CHECKMATHERR();
 
@@ -662,16 +619,14 @@ EXPR_FUNCTIONSOLVER(__expr_random)
     EXPRTYPE d1, d2;
     EXPRTYPE diff, rval;
 
-    EXPR_REQUIRECOUNT(2);
-
     EXPR_EVALNODE(0, d1);
     EXPR_EVALNODE(1, d2);
 
     EXPR_CLEARMATHERR();
-    
+
     diff = d2 - d1;
 
-    rval = (EXPRTYPE)rand() / (EXPRTYPE)(RAND_MAX);
+    rval = (EXPRTYPE)expr_our_rand(refitems[0]) / (EXPRTYPE)(EXPR_RAND_MAX);
 
     *val = (rval * diff) + d1;
 
@@ -683,35 +638,11 @@ EXPR_FUNCTIONSOLVER(__expr_random)
 /* randomize */
 EXPR_FUNCTIONSOLVER(__expr_randomize)
     {
-    EXPR_REQUIRECOUNT(0);
-
-    EXPR_CLEARMATHERR();
-
-    srand((clock() + 1024) * time(NULL));
-
-    EXPR_CHECKMATHERR();
+    *refitems[0] = (EXPRTYPE)((clock() + 1024) * time(NULL));
 
     return EXPR_ERROR_NOERROR;
     }
 
-/* srand */
-EXPR_FUNCTIONSOLVER(__expr_srand)
-    {
-    int err;
-    EXPRTYPE d1;
-
-    EXPR_REQUIRECOUNT(1);
-
-    EXPR_EVALNODE(0, d1);
-
-    EXPR_CLEARMATHERR();
-
-    srand((unsigned int)(d1 * 32767.0));
-
-    EXPR_CHECKMATHERR();
-
-    return EXPR_ERROR_NOERROR;
-    }
 
 /* Conversion functions */
 
@@ -720,8 +651,6 @@ EXPR_FUNCTIONSOLVER(__expr_deg)
     {
     int err;
     EXPRTYPE d1;
-
-    EXPR_REQUIRECOUNT(1);
 
     EXPR_EVALNODE(0, d1);
 
@@ -736,8 +665,6 @@ EXPR_FUNCTIONSOLVER(__expr_rad)
     int err;
     EXPRTYPE d1;
 
-    EXPR_REQUIRECOUNT(1);
-
     EXPR_EVALNODE(0, d1);
 
     *val = (M_PI / 180.0) * d1;
@@ -750,8 +677,6 @@ EXPR_FUNCTIONSOLVER(__expr_recttopolr)
     {
     int err;
     EXPRTYPE dx, dy;
-
-    EXPR_REQUIRECOUNT(2);
 
     EXPR_EVALNODE(0, dx);
     EXPR_EVALNODE(1, dy);
@@ -771,8 +696,6 @@ EXPR_FUNCTIONSOLVER(__expr_recttopola)
     int err;
     EXPRTYPE dx, dy;
     EXPRTYPE tmp;
-
-    EXPR_REQUIRECOUNT(2);
 
     EXPR_EVALNODE(0, dx);
     EXPR_EVALNODE(1, dy);
@@ -800,8 +723,6 @@ EXPR_FUNCTIONSOLVER(__expr_poltorectx)
     int err;
     EXPRTYPE dr, da;
 
-    EXPR_REQUIRECOUNT(2);
-
     EXPR_EVALNODE(0, dr);
     EXPR_EVALNODE(1, da);
 
@@ -819,8 +740,6 @@ EXPR_FUNCTIONSOLVER(__expr_poltorecty)
     {
     int err;
     EXPRTYPE dr, da;
-
-    EXPR_REQUIRECOUNT(2);
 
     EXPR_EVALNODE(0, dr);
     EXPR_EVALNODE(1, da);
@@ -841,8 +760,6 @@ EXPR_FUNCTIONSOLVER(__expr_if)
     {
     int err;
     EXPRTYPE cond, res;
-
-    EXPR_REQUIRECOUNT(3);
 
     EXPR_EVALNODE(0, cond);
 
@@ -866,7 +783,6 @@ EXPR_FUNCTIONSOLVER(__expr_select)
     int err;
     EXPRTYPE cond, res;
 
-    EXPR_REQUIRECOUNTRANGE(3,4);
 
     EXPR_EVALNODE(0, cond);
 
@@ -901,8 +817,6 @@ EXPR_FUNCTIONSOLVER(__expr_equal)
     int err;
     EXPRTYPE d1, d2;
 
-    EXPR_REQUIRECOUNT(2);
-
     EXPR_EVALNODE(0, d1);
     EXPR_EVALNODE(1, d2);
 
@@ -917,8 +831,6 @@ EXPR_FUNCTIONSOLVER(__expr_above)
     int err;
     EXPRTYPE d1, d2;
 
-    EXPR_REQUIRECOUNT(2);
-
     EXPR_EVALNODE(0, d1);
     EXPR_EVALNODE(1, d2);
 
@@ -932,8 +844,6 @@ EXPR_FUNCTIONSOLVER(__expr_below)
     {
     int err;
     EXPRTYPE d1, d2;
-
-    EXPR_REQUIRECOUNT(2);
 
     EXPR_EVALNODE(0, d1);
     EXPR_EVALNODE(1, d2);
@@ -950,8 +860,6 @@ EXPR_FUNCTIONSOLVER(__expr_avg)
     {
     int err, pos;
     EXPRTYPE d1, total;
-
-    EXPR_REQUIRECOUNTMIN(1);
 
     total = 0.0;
 
@@ -974,8 +882,6 @@ EXPR_FUNCTIONSOLVER(__expr_clip)
     EXPRTYPE d1, dmin, dmax;
 
 
-    EXPR_REQUIRECOUNT(3);
-
     EXPR_EVALNODE(0, d1);
     EXPR_EVALNODE(1, dmin);
     EXPR_EVALNODE(2, dmax);
@@ -996,8 +902,6 @@ EXPR_FUNCTIONSOLVER(__expr_clamp)
     int err;
     EXPRTYPE d1, dmin, dmax;
     EXPRTYPE tmp;
-
-    EXPR_REQUIRECOUNT(3);
 
     EXPR_EVALNODE(0, d1);
     EXPR_EVALNODE(1, dmin);
@@ -1023,8 +927,6 @@ EXPR_FUNCTIONSOLVER(__expr_pntchange)
     int err;
     EXPRTYPE s1old, s2old, s1new, s2new, pnt;
     EXPRTYPE odiff, ndiff, perc;
-
-    EXPR_REQUIRECOUNT(5);
 
     EXPR_EVALNODE(0, s1old);
     EXPR_EVALNODE(1, s2old);
@@ -1056,8 +958,6 @@ EXPR_FUNCTIONSOLVER(__expr_poly)
     EXPRTYPE dx;
     EXPRTYPE d1;
     EXPRTYPE total, curpow;
-
-    EXPR_REQUIRECOUNTMIN(2);
 
     EXPR_EVALNODE(0, dx); /* The x value */
 
@@ -1091,8 +991,6 @@ EXPR_FUNCTIONSOLVER(__expr_and)
     int err;
     EXPRTYPE d1, d2;
 
-    EXPR_REQUIRECOUNT(2);
-
     EXPR_EVALNODE(0, d1);
     EXPR_EVALNODE(1, d2);
 
@@ -1110,8 +1008,6 @@ EXPR_FUNCTIONSOLVER(__expr_or)
     {
     int err;
     EXPRTYPE d1, d2;
-
-    EXPR_REQUIRECOUNT(2);
 
     EXPR_EVALNODE(0, d1);
     EXPR_EVALNODE(1, d2);
@@ -1131,8 +1027,6 @@ EXPR_FUNCTIONSOLVER(__expr_not)
     {
     int err;
     EXPRTYPE d1;
-
-    EXPR_REQUIRECOUNT(1);
 
     EXPR_EVALNODE(0, d1);
 
@@ -1155,8 +1049,6 @@ EXPR_FUNCTIONSOLVER(__expr_for)
     EXPRTYPE tmp;
     EXPRTYPE res;
 
-    /* Need at least 4 arguments */
-    EXPR_REQUIRECOUNTMIN(4);
 
     /* Evaluate initialization */
     EXPR_EVALNODE(0, tmp);
@@ -1183,7 +1075,6 @@ EXPR_FUNCTIONSOLVER(__expr_for)
             check for the break;
         */
         EXPR_CHECKBREAK();
-
         }
 
     /* Return result */
@@ -1198,8 +1089,6 @@ EXPR_FUNCTIONSOLVER(__expr_many)
     int err;
     int pos;
     EXPRTYPE tmp;
-
-    EXPR_REQUIRECOUNTMIN(1);
 
     for(pos = 0; pos < count; pos++)
         {

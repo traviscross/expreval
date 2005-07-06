@@ -1,4 +1,4 @@
-/* 
+/*
     File: ExprInit.h
     Auth: Brian Allen Vanderburg II
     Date: Thursday, May 1, 2003
@@ -59,7 +59,6 @@ EXPR_FUNCTIONSOLVER(__expr_floor);
 /* Random functions */
 EXPR_FUNCTIONSOLVER(__expr_rand);
 EXPR_FUNCTIONSOLVER(__expr_random);
-EXPR_FUNCTIONSOLVER(__expr_srand);
 EXPR_FUNCTIONSOLVER(__expr_randomize);
 
 /* Conversion routines */

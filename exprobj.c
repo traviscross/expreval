@@ -1,4 +1,4 @@
-/* 
+/*
     File: ExprObj.c
     Auth: Brian Allen Vanderburg II
     Date: Tuesday, April 29, 2003
@@ -166,7 +166,7 @@ void exprSetSoftErrors(exprObj *o, int softerr)
 static void exprFreeNodeData(exprNode *n)
     {
     int pos;
-    
+
     if(n == NULL)
         return;
 

@@ -1,4 +1,4 @@
-/* 
+/*
     File: ExprPars.c
     Auth: Brian Allen Vanderburg II
     Date: Wednesday, April 30, 2003
@@ -68,6 +68,9 @@ int exprParse(exprObj *o, char *expr)
         exprFreeMem(exprcopy);
         return err;
         }
+
+    if(exprcopy[0] == '\0') /* Empty expression */
+        return EXPR_ERROR_EMPTYEXPR;
 
     /* Validate the characters */
     err = exprValidChars(exprcopy);
@@ -447,7 +450,7 @@ int exprInternalParseAssign(exprObj *o, exprNode *n, char *expr, int start, int 
     if(addr == NULL) /* Variable not in the list, add it */
         {
         exprValListAdd(l, buf, 0.0);
-        
+
         /* Try to get address again */
         exprValListGetAddress(l, buf, &addr);
         if(addr == NULL) /* Could not add variable */
@@ -737,7 +740,7 @@ int exprInternalParseFunction(exprObj *o, exprNode *n, char *expr, int start, in
        number of ref arguments.  Get number of normal
        arguments */
     num = num - refnum;
-    
+
     /* Make sure number of arguments is correct */
     /* Here we make sure the limits are greater
        or equal to zero because any negative number
@@ -947,7 +950,7 @@ int exprInternalParseVarVal(exprObj *o, exprNode *n, char *expr, int start, int 
     /* Make sure positions are correct */
     if(end < start)
         return EXPR_ERROR_UNKNOWN;
-    
+
     /* Get length of the variable, value, or constant */
     len = end - start + 1;
 
@@ -959,7 +962,7 @@ int exprInternalParseVarVal(exprObj *o, exprNode *n, char *expr, int start, int 
     strncpy(buf, expr + start, len);
     buf[len] = '\0';
 
-    
+
     /* are we an identifier */
     if(exprValidIdent(buf) != 0)
         {
@@ -985,7 +988,7 @@ int exprInternalParseVarVal(exprObj *o, exprNode *n, char *expr, int start, int 
             }
 
         /* Not found in the constant list, so it must be a variable */
-        
+
         /* Set node type */
         n->type = EXPR_NODETYPE_VARIABLE;
 
@@ -1005,7 +1008,7 @@ int exprInternalParseVarVal(exprObj *o, exprNode *n, char *expr, int start, int 
         if(addr == NULL) /* Variable not in the list, add it */
             {
             exprValListAdd(l, buf, 0.0);
-        
+
             /* Try to get address again */
             exprValListGetAddress(l, buf, &addr);
             if(addr == NULL) /* Could not add variable */
