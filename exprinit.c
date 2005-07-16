@@ -1072,9 +1072,9 @@ EXPR_FUNCTIONSOLVER(__expr_for)
 
         /*
             We could be an infinite loop if test is never false, so
-            check for the break;
+            exprEvalNode automatically checks the breaker function
+            periodically
         */
-        EXPR_CHECKBREAK();
         }
 
     /* Return result */

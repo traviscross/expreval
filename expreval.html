@@ -1279,6 +1279,27 @@ if(d2 == 0.0)
                     <ul>
                         <li>Nothing</li>
                     </ul>
+                </li><br>
+                <li>void exprSetBreakerCount(exprObj *o, int count);<br>
+                    Comments:
+                    <ul>
+                        <li>Set how often the breaker function is tested.
+                            The default is 100000.  This means the breaker
+                            function is tested once every 100000 times the
+                            exprEvalNode function is called for an expression.
+                            A smaller value tests the breaker function more often
+                            and a larger value tests the breaker function less.</li>
+                    </ul>
+                    Parameters:
+                    <ul>
+                        <li>*o - expression object</li>
+                        <li>count - how many times exprEvalNode gets called before the
+                            breaker function is tested</li>
+                    </ul>
+                    Returns:
+                    <ul>
+                        <li>Nothing</li>
+                    </ul>
                 </li>
             </ul>
         </p>

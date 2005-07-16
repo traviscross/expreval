@@ -10,10 +10,17 @@
 /* Includes */
 #include "exprincl.h"
 
-/* Allocate memory */
+/* Allocate memory and zero it */
 void* exprAllocMem(unsigned long size)
     {
-    return malloc((size_t)size);
+    void *data = malloc((size_t)size);
+    
+    if(data)
+        {
+        memset(data, 0, (size_t)size);
+        }
+    
+    return data;
     }
 
 /* Free memory */

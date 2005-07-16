@@ -33,7 +33,7 @@ extern "C" {
     Version number
 */
 #define EXPR_VERSIONMAJOR 1
-#define EXPR_VERSIONMINOR 4
+#define EXPR_VERSIONMINOR 5
 
 
 /* Define type of data to use */
@@ -227,6 +227,8 @@ typedef struct _exprObj
     int parsedgood; /* non-zero if successfully parsed */
     int parsedbad; /* non-zero if parsed but unsuccessful */
     int softerrs; /* zero if we are not using soft errors */
+    int breakcount; /* how often to check the breaker function */
+    int breakcur; /* do we check the breaker function yet */
     } exprObj;
 
 /* Object for a function */
@@ -339,6 +341,7 @@ void* exprGetUserData(exprObj *o);
 int exprGetSoftErrors(exprObj *o);
 void exprSetUserData(exprObj *o, void *userdata);
 void exprSetSoftErrors(exprObj *o, int softerr);
+void exprSetBreakerCount(exprObj *o, int count);
 
 
 /* Other useful routines */

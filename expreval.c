@@ -36,6 +36,9 @@ int exprEval(exprObj *o, EXPRTYPE *val)
     if(o->headnode == NULL)
         return EXPR_ERROR_BADEXPR;
 
+    /* Reset break count position */
+    o->breakcur = o->breakcount;
+
     return exprEvalNode(o, o->headnode, val);
     }
 
@@ -46,6 +49,17 @@ int exprEvalNode(exprObj *o, exprNode *n, EXPRTYPE *val)
 
     if(o == NULL || n == NULL)
         return EXPR_ERROR_NULLPOINTER;
+
+    /* Check breaker count */
+    if(o->breakcur-- <= 0)
+        {
+        if(exprGetBreakResult(o))
+            {
+            return EXPR_ERROR_BREAK;
+            }
+
+        o->breakcur = o->breakcount;
+        }
 
     switch(n->type)
         {

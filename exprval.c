@@ -33,8 +33,7 @@ int exprValListCreate(exprValList **v)
     if(tmp == NULL)
         return EXPR_ERROR_MEMORY; /* Could not allocate memory */
 
-    /* Clear memory */
-    memset(tmp, 0, sizeof(exprValList));
+    /* Update pointer */
     *v = tmp;
 
     return EXPR_ERROR_NOERROR;
@@ -303,9 +302,6 @@ static exprVal *exprCreateVal(char *name, EXPRTYPE val)
         exprFreeMem(tmp);
         return NULL;
         }
-
-    /* Zero the data */
-    memset(tmp, 0, sizeof(exprVal));
 
     /* Copy the data over */
     strcpy(vtmp, name);

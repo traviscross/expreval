@@ -29,9 +29,6 @@ int exprCreate(exprObj **o, exprFuncList *f, exprValList *v, exprValList *c,
         return EXPR_ERROR_MEMORY;
 
 
-    /* Zero it's memory */
-    memset(tmp, 0, sizeof(exprObj));
-
     /* Assign data */
     tmp->funcs = f;
     tmp->vars = v;
@@ -39,6 +36,8 @@ int exprCreate(exprObj **o, exprFuncList *f, exprValList *v, exprValList *c,
     tmp->msgfunc = msg;
     tmp->breakerfunc = breaker;
     tmp->userdata = userdata;
+    tmp->breakcount = 100000; /* Default breaker count setting */
+    tmp->breakcur = 0;
 
     /* Update pointer */
     *o = tmp;
@@ -160,6 +159,19 @@ void exprSetSoftErrors(exprObj *o, int softerr)
     {
     if(o)
         o->softerrs = softerr;
+    }
+
+/* Set breaker count */
+void exprSetBreakerCount(exprObj *o, int count)
+    {
+    if(o)
+        {
+        /* If count is negative, make it positive */
+        if(count < 0)
+            count = -count;
+
+	o->breakcount = count;
+        }
     }
 
 /* This function will free a node's data */

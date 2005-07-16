@@ -90,9 +90,6 @@ int exprParse(exprObj *o, char *expr)
         return EXPR_ERROR_MEMORY;
         }
 
-    /* zero the memory */
-    memset(tmp, 0, sizeof(exprNode));
-
     o->headnode = tmp;
 
     /* Call the multiparse routine to parse subexpressions */
@@ -188,8 +185,6 @@ int exprMultiParse(exprObj *o, exprNode *n, char *expr)
     tmp = exprAllocMem(sizeof(exprNode) * num);
     if(tmp == NULL)
         return EXPR_ERROR_MEMORY;
-
-    memset(tmp, 0, sizeof(exprNode) * num);
 
     /* Set the current node's data */
     n->type = EXPR_NODETYPE_FUNCTION;
@@ -416,9 +411,6 @@ int exprInternalParseAssign(exprObj *o, exprNode *n, char *expr, int start, int 
         return EXPR_ERROR_MEMORY;
         }
 
-    /* Zero the memory */
-    memset(tmp, 0, sizeof(exprNode));
-
 
     /* Set the data */
     n->type = EXPR_NODETYPE_ASSIGN;
@@ -478,8 +470,6 @@ int exprInternalParseAdd(exprObj *o, exprNode *n, char *expr, int start, int end
     if(tmp == NULL)
         return EXPR_ERROR_MEMORY;
 
-    /* Zero out the subnodes */
-    memset(tmp, 0, sizeof(exprNode) * 2);
 
     /* Set the data */
     n->type = EXPR_NODETYPE_FUNCTION;
@@ -511,8 +501,6 @@ int exprInternalParseSub(exprObj *o, exprNode *n, char *expr, int start, int end
     if(tmp == NULL)
         return EXPR_ERROR_MEMORY;
 
-    /* Zero out the subnodes */
-    memset(tmp, 0, sizeof(exprNode) * 2);
 
     /* Set the data */
     n->type = EXPR_NODETYPE_FUNCTION;
@@ -544,8 +532,6 @@ int exprInternalParseMul(exprObj *o, exprNode *n, char *expr, int start, int end
     if(tmp == NULL)
         return EXPR_ERROR_MEMORY;
 
-    /* Zero out the subnodes */
-    memset(tmp, 0, sizeof(exprNode) * 2);
 
     /* Set the data */
     n->type = EXPR_NODETYPE_FUNCTION;
@@ -577,8 +563,6 @@ int exprInternalParseDiv(exprObj *o, exprNode *n, char *expr, int start, int end
     if(tmp == NULL)
         return EXPR_ERROR_MEMORY;
 
-    /* Zero out the subnodes */
-    memset(tmp, 0, sizeof(exprNode) * 2);
 
     /* Set the data */
     n->type = EXPR_NODETYPE_FUNCTION;
@@ -614,8 +598,6 @@ int exprInternalParsePosNeg(exprObj *o, exprNode *n, char *expr, int start, int 
         if(tmp == NULL)
             return EXPR_ERROR_NOERROR;
 
-        /* zero memory */
-        memset(tmp, 0, sizeof(exprNode));
 
         /* Set data */
         n->type = EXPR_NODETYPE_FUNCTION;
@@ -767,9 +749,6 @@ int exprInternalParseFunction(exprObj *o, exprNode *n, char *expr, int start, in
         tmp = exprAllocMem(sizeof(exprNode) * num);
         if(tmp == NULL)
             return EXPR_ERROR_MEMORY;
-
-        /* clear memory */
-        memset(tmp, 0, sizeof(exprNode) * num);
         }
 
     if(refnum > 0)
@@ -781,9 +760,6 @@ int exprInternalParseFunction(exprObj *o, exprNode *n, char *expr, int start, in
             exprFreeMem(tmp);
             return EXPR_ERROR_MEMORY;
             }
-
-        /* Clear memory */
-        memset(reftmp, 0, sizeof(EXPRTYPE*) * refnum);
         }
 
 

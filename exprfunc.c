@@ -34,8 +34,7 @@ int exprFuncListCreate(exprFuncList **f)
     if(tmp == NULL)
         return EXPR_ERROR_MEMORY; /* Could not allocate memory */
 
-    /* Clear memory */
-    memset(tmp, 0, sizeof(exprFuncList));
+    /* Update pointer */
     *f = tmp;
 
     return EXPR_ERROR_NOERROR;
@@ -279,9 +278,6 @@ exprFunc *exprCreateFunc(exprFuncType ptr, char *name, int min, int max, int ref
         exprFreeMem(tmp);
         return NULL;
         }
-
-    /* Set the memory to zero */
-    memset(tmp, 0, sizeof(exprFunc));
 
     /* Copy the data over */
     strcpy(vtmp, name);
