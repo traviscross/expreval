@@ -1,5 +1,5 @@
 /*
-    File: ExprInit.c
+    File: exprinit.c
     Auth: Brian Allen Vanderburg II
     Date: Thursday, May 1, 2003
     Desc: Extra functions and routines for ExprEval
@@ -8,8 +8,9 @@
 */
 
 /* Include files */
-#include "expreval.h"
 #include "exprincl.h"
+
+#include "expreval.h"
 #include "exprinit.h"
 
 
@@ -638,7 +639,12 @@ EXPR_FUNCTIONSOLVER(__expr_random)
 /* randomize */
 EXPR_FUNCTIONSOLVER(__expr_randomize)
     {
-    *refitems[0] = (EXPRTYPE)((clock() + 1024) * time(NULL));
+    /* Make sure calls close in time produce different seeds */
+    static int curcall = 0;
+    
+    curcall++;
+
+    *refitems[0] = (EXPRTYPE)((clock() + 1024 + curcall) * time(NULL));
 
     return EXPR_ERROR_NOERROR;
     }

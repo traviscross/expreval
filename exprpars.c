@@ -1,5 +1,5 @@
 /*
-    File: ExprPars.c
+    File: exprpars.c
     Auth: Brian Allen Vanderburg II
     Date: Wednesday, April 30, 2003
     Desc: Actual parsing routines for this library
@@ -8,8 +8,9 @@
 */
 
 /* Includes */
-#include "expreval.h"
 #include "exprincl.h"
+
+#include "expreval.h"
 #include "exprint.h"
 #include "exprmem.h"
 
@@ -137,6 +138,7 @@ int exprMultiParse(exprObj *o, exprNode *n, char *expr)
                 /* increase plevel */
                 plevel++;
                 break;
+
             case ')':
                 /* decrease plevel */
                 plevel--;

@@ -1,5 +1,5 @@
 /*
-    File: ExprMem.h
+    File: exprmem.h
     Auth: Brian Allen Vanderburg II
     Date: Wednesday, April 30, 2003
     Desc: Memory functions for ExprEval
@@ -10,8 +10,8 @@
 #ifndef __BAVII_EXPRMEM_H
 #define __BAVII_EXPRMEM_H
 
-void* exprAllocMem(unsigned long size);
+void* exprAllocMem(size_t size);
 void exprFreeMem(void *data);
 
 
-#endif /* __EXPR_MEM_H */
+#endif /* __BAVII_EXPRMEM_H */

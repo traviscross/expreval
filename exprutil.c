@@ -1,5 +1,5 @@
 /*
-    File: ExprUtil.c
+    File: exprutil.c
     Auth: Brian Allen Vanderburg II
     Date: Monday, April 28, 2003
     Desc: Utility functions for use by this library
@@ -8,8 +8,10 @@
 */
 
 /* Include files */
-#include "expreval.h"
 #include "exprincl.h"
+
+#include "expreval.h"
+
 
 /* Return the version number */
 void exprGetVersion(int *major, int *minor)

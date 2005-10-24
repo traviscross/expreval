@@ -1,5 +1,5 @@
 /*
-    File: ExprEval.h
+    File: expreval.h
     Auth: Brian Allen Vanderburg II
     Date: Thursday, April 24, 2003
     Desc: Main include file for ExprEval library
@@ -12,7 +12,8 @@
 #ifndef __BAVII_EXPREVAL_H
 #define __BAVII_EXPREVAL_H
 
-
+/* Need some definitions, NULL, etc */
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -33,7 +34,7 @@ extern "C" {
     Version number
 */
 #define EXPR_VERSIONMAJOR 1
-#define EXPR_VERSIONMINOR 5
+#define EXPR_VERSIONMINOR 6
 
 
 /* Define type of data to use */
@@ -90,7 +91,7 @@ typedef double EXPRTYPE;
    res is variable to store result in. should be type EXPRTYPE,
    not the adddress of the variable */
 #define EXPR_EVALNODE(num, res) \
-err = exprEvalNode(o, &(n[num]), &res); \
+err = exprEvalNode(o, &(n[num]), &(res)); \
 if(err != EXPR_ERROR_NOERROR) \
     return err;
 

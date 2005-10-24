@@ -1,5 +1,5 @@
 /*
-    File: ExprInt.c
+    File: exprint.c
     Auth: Brian Allen Vanderburg II
     Date: Thursday, May 1, 2003
     Desc: Functions for the internal workings of ExprEval
@@ -8,8 +8,9 @@
 */
 
 /* Includes */
-#include "expreval.h"
 #include "exprincl.h"
+
+#include "expreval.h"
 #include "exprint.h"
 
 /* This function evaluates each subnode.  The result
@@ -36,10 +37,7 @@ EXPR_FUNCTIONSOLVER(__exprAddFunc)
     EXPRTYPE val1, val2;
     int err;
 
-    EXPR_REQUIRECOUNT(2)
-
     EXPR_EVALNODE(0, val1);
-
     EXPR_EVALNODE(1, val2);
 
     *val = val1 + val2;
@@ -53,10 +51,7 @@ EXPR_FUNCTIONSOLVER(__exprSubFunc)
     EXPRTYPE val1, val2;
     int err;
 
-    EXPR_REQUIRECOUNT(2);
-
     EXPR_EVALNODE(0, val1);
-
     EXPR_EVALNODE(1, val2);
 
     *val = val1 - val2;
@@ -70,10 +65,7 @@ EXPR_FUNCTIONSOLVER(__exprMulFunc)
     EXPRTYPE val1, val2;
     int err;
 
-    EXPR_REQUIRECOUNT(2);
-
     EXPR_EVALNODE(0, val1);
-
     EXPR_EVALNODE(1, val2);
 
     *val = val1 * val2;
@@ -87,10 +79,7 @@ EXPR_FUNCTIONSOLVER(__exprDivFunc)
     EXPRTYPE val1, val2;
     int err;
 
-    EXPR_REQUIRECOUNT(2);
-
     EXPR_EVALNODE(0, val1);
-
     EXPR_EVALNODE(1, val2);
 
     /* dividing by zero? */
@@ -109,8 +98,6 @@ EXPR_FUNCTIONSOLVER(__exprNegFunc)
     {
     EXPRTYPE val1;
     int err;
-
-    EXPR_REQUIRECOUNT(1);
 
     EXPR_EVALNODE(0, val1);
 

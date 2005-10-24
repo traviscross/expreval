@@ -1,5 +1,5 @@
 /*
-    File: ExprMem.c
+    File: exprmem.c
     Auth: Brian Allen Vanderburg II
     Date: Wednesday, April 30, 2003
     Desc: Memory functions for ExprEval
@@ -10,14 +10,16 @@
 /* Includes */
 #include "exprincl.h"
 
+#include "exprmem.h"
+
 /* Allocate memory and zero it */
-void* exprAllocMem(unsigned long size)
+void* exprAllocMem(size_t size)
     {
-    void *data = malloc((size_t)size);
+    void *data = malloc(size);
     
     if(data)
         {
-        memset(data, 0, (size_t)size);
+        memset(data, 0, size);
         }
     
     return data;

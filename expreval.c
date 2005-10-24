@@ -1,5 +1,5 @@
 /*
-    File: ExprEval.c
+    File: expreval.c
     Auth: Brian Allen Vanderburg II
     Date: Wednesday, April 30, 2003
     Desc: Evaluation routines for the ExprEval library
@@ -8,8 +8,9 @@
 */
 
 /* Includes */
-#include "expreval.h"
 #include "exprincl.h"
+
+#include "expreval.h"
 
 
 /* This routine will evaluate an expression */
@@ -64,15 +65,17 @@ int exprEvalNode(exprObj *o, exprNode *n, EXPRTYPE *val)
     switch(n->type)
         {
         case EXPR_NODETYPE_VALUE:
+            /* Directly access the value */
             *val = n->data.value.value;
             break;
 
         case EXPR_NODETYPE_VARIABLE:
-            /* Directly access the variable */
+            /* Directly access the variable or constant */
             *val = *(n->data.variable.var_addr);
             break;
 
         case EXPR_NODETYPE_ASSIGN:
+            /* Evaluate assignment subnode */
             err = exprEvalNode(o, n->data.assign.node, val);
             if(err != EXPR_ERROR_NOERROR)
                 return err;
@@ -83,6 +86,7 @@ int exprEvalNode(exprObj *o, exprNode *n, EXPRTYPE *val)
 
 
         case EXPR_NODETYPE_FUNCTION:
+            /* Evaluate the function */
             if(n->data.function.fptr)
                 {
                 return (*(n->data.function.fptr))(o, n->data.function.nodes, n->data.function.nodecount, n->data.function.refitems, n->data.function.refcount, val);
@@ -100,3 +104,6 @@ int exprEvalNode(exprObj *o, exprNode *n, EXPRTYPE *val)
 
     return EXPR_ERROR_NOERROR;
     }
+
+
+

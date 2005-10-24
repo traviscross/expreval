@@ -18,13 +18,6 @@ string into a tree of actions to take.  After it has
 been parsed, an expression can be evaluated many times
 over an over.
 
-In order to increase evaluation speed, constants and
-functions are not stored in the parsed tree as names,
-but instead as values or pointers to the function
-routines.  Only variables are stored as names.  For
-this reason, constants and functions are used at parse
-time only, and variables are used at evaluation time.
-
 Functions, variables, and constants are stored in
 their own seperate lists.  This makes is where the
 lists can be shared among multiple expression objects.

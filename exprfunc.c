@@ -1,5 +1,5 @@
 /*
-    File: ExprFunc.c
+    File: exprfunc.c
     Auth: Brian Allen Vanderburg II
     Date: Thursday, April 24, 2003
     Desc: Expression function list routines
@@ -10,13 +10,14 @@
 
 
 /* Includes */
-#include "expreval.h"
 #include "exprincl.h"
+
+#include "expreval.h"
 #include "exprmem.h"
 
 /* Internal functions */
-exprFunc *exprCreateFunc(exprFuncType ptr, char *name, int min, int max, int refmin, int refmax);
-void exprFuncListFreeData(exprFunc *f);
+static exprFunc *exprCreateFunc(exprFuncType ptr, char *name, int min, int max, int refmin, int refmax);
+static void exprFuncListFreeData(exprFunc *f);
 
 
 /* This function creates the function list, */
@@ -49,6 +50,10 @@ int exprFuncListAdd(exprFuncList *f, exprFuncType ptr, char *name, int min, int 
 
     if(f == NULL)
         return EXPR_ERROR_NULLPOINTER;
+
+    /* Make sure the name is valid */
+    if(!exprValidIdent(name))
+        return EXPR_ERROR_BADIDENTIFIER;
 
     /* Fix values only if none are negative (negative values mean no limit) */
 
@@ -208,13 +213,10 @@ int exprFuncListFree(exprFuncList *f)
         return EXPR_ERROR_NOERROR;
 
     /* Free the nodes */
-    if(f->head)
-        {
-        exprFuncListFreeData(f->head);
+    exprFuncListFreeData(f->head);
 
-        /* Freethe container */
-        exprFreeMem(f);
-        }
+    /* Free the container */
+    exprFreeMem(f);
 
     return EXPR_ERROR_NOERROR;
     }
@@ -240,18 +242,16 @@ int exprFuncListClear(exprFuncList *f)
 void exprFuncListFreeData(exprFunc *f)
     {
     if(f == NULL)
-        return; /* nothing to do */
+        return; /* Nothing to do */
 
-    if(f->left) /* Is there a left node */
-        exprFuncListFreeData(f->left);
+    /* Free left and right sides */
+    exprFuncListFreeData(f->left);
+    exprFuncListFreeData(f->right);
 
-    if(f->right) /* Is there a right node */
-        exprFuncListFreeData(f->right);
+    /* Free name */
+    exprFreeMem(f->fname);
 
     /* Free ourself */
-    if(f->fname)
-        exprFreeMem(f->fname);
-
     exprFreeMem(f);
     }
 
@@ -261,9 +261,7 @@ exprFunc *exprCreateFunc(exprFuncType ptr, char *name, int min, int max, int ref
     exprFunc *tmp;
     char *vtmp;
 
-    /* Make sure the name is valid */
-    if(!exprValidIdent(name))
-        return NULL;
+    /* We already checked the name in exprFuncListAdd */
 
     /* Create it */
     tmp = exprAllocMem(sizeof(exprFunc));

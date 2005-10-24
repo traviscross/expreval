@@ -1,5 +1,5 @@
 /*
-    File: ExprVal.c
+    File: exprval.c
     Auth: Brian Allen Vanderburg II
     Date: Thursday, April 24, 2003
     Desc: Value lists for variables and constants
@@ -8,8 +8,9 @@
 */
 
 /* Includes */
-#include "expreval.h"
 #include "exprincl.h"
+
+#include "expreval.h"
 #include "exprmem.h"
 
 
@@ -49,6 +50,9 @@ int exprValListAdd(exprValList *v, char *name, EXPRTYPE val)
     if(v == NULL)
         return EXPR_ERROR_NULLPOINTER;
 
+    /* Make sure the name is valid */
+    if(!exprValidIdent(name))
+        return EXPR_ERROR_BADIDENTIFIER;
 
     if(v->head == NULL)
         {
@@ -219,13 +223,10 @@ int exprValListFree(exprValList *v)
         return EXPR_ERROR_NOERROR;
 
     /* Free the nodes */
-    if(v->head)
-        {
-        exprValListFreeData(v->head);
+    exprValListFreeData(v->head);
 
-        /* Freethe container */
-        exprFreeMem(v);
-        }
+    /* Freethe container */
+    exprFreeMem(v);
 
     return EXPR_ERROR_NOERROR;
     }
@@ -248,18 +249,16 @@ int exprValListClear(exprValList *v)
 static void exprValListFreeData(exprVal *v)
     {
     if(v == NULL)
-        return; /* nothing to do */
+        return; /* Nothing to do */
 
-    if(v->left) /* Is there a left node */
-        exprValListFreeData(v->left);
+    /* Free left and right items */
+    exprValListFreeData(v->left);
+    exprValListFreeData(v->right);
 
-    if(v->right) /* Is there a right node */
-        exprValListFreeData(v->right);
+    /* Free name */
+    exprFreeMem(v->vname);
 
     /* Free ourself */
-    if(v->vname)
-        exprFreeMem(v->vname);
-
     exprFreeMem(v);
     }
 
@@ -267,13 +266,11 @@ static void exprValListFreeData(exprVal *v)
 static void exprValListResetData(exprVal *v)
     {
     if(v == NULL)
-        return; /* nothing to do */
+        return; /* Nothing to do */
 
-    if(v->left) /* Is there a left node */
-        exprValListResetData(v->left);
-
-    if(v->right) /* Is there a right node */
-        exprValListResetData(v->right);
+    /* Reset left and right branches */
+    exprValListResetData(v->left);
+    exprValListResetData(v->right);
 
     /* Reset data */
     v->vval = 0.0;
@@ -285,9 +282,7 @@ static exprVal *exprCreateVal(char *name, EXPRTYPE val)
     exprVal *tmp;
     char *vtmp;
 
-    /* Make sure the name is valid */
-    if(!exprValidIdent(name))
-        return NULL;
+    /* Name already tested in exprValListAdd */
 
     /* Create it */
     tmp = exprAllocMem(sizeof(exprVal));

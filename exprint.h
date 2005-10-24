@@ -1,5 +1,5 @@
 /*
-    File: ExprInt.h
+    File: exprint.h
     Auth: Brian Allen Vanderburg II
     Date: Wednesday, April 30, 2003
     Desc: Some functions for the internal workings of ExprEval

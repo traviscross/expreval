@@ -1,5 +1,5 @@
 /*
-    File: ExprInit.h
+    File: exprinit.h
     Auth: Brian Allen Vanderburg II
     Date: Thursday, May 1, 2003
     Desc: Functions that can be initialized into a function list

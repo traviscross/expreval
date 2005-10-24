@@ -1,5 +1,5 @@
 /*
-    File: ExprObj.c
+    File: exprobj.c
     Auth: Brian Allen Vanderburg II
     Date: Tuesday, April 29, 2003
     Desc: Functions for the exprObj type
@@ -8,8 +8,9 @@
 */
 
 /* Includes */
-#include "expreval.h"
 #include "exprincl.h"
+
+#include "expreval.h"
 #include "exprmem.h"
 
 /* Internal functions */
@@ -53,15 +54,10 @@ int exprFree(exprObj *o)
         return EXPR_ERROR_NOERROR;
 
     /* First free the node data */
-    if(o->headnode)
-        {
-        exprFreeNodeData(o->headnode);
+    exprFreeNodeData(o->headnode);
+    exprFreeMem(o->headnode);
 
-        /* free the node */
-        exprFreeMem(o->headnode);
-        }
-
-    /* free ourself */
+    /* Free ourself */
     exprFreeMem(o);
 
     return EXPR_ERROR_NOERROR;
@@ -74,16 +70,12 @@ int exprClear(exprObj *o)
         return EXPR_ERROR_NOERROR;
 
     /* Free the node data only, keep function, variable, constant lists */
-    if(o->headnode)
-        {
-        exprFreeNodeData(o->headnode);
+    exprFreeNodeData(o->headnode);
+    exprFreeMem(o->headnode);
 
-        exprFreeMem(o->headnode);
-
-        o->headnode = NULL;
-        o->parsedbad = 0;
-        o->parsedgood = 0;
-        }
+    o->headnode = NULL;
+    o->parsedbad = 0;
+    o->parsedgood = 0;
 
     return EXPR_ERROR_NOERROR;
     }
@@ -170,7 +162,7 @@ void exprSetBreakerCount(exprObj *o, int count)
         if(count < 0)
             count = -count;
 
-	o->breakcount = count;
+        o->breakcount = count;
         }
     }
 
@@ -188,22 +180,28 @@ static void exprFreeNodeData(exprNode *n)
         case EXPR_NODETYPE_VALUE:
             /* Nothing to free for value */
             break;
+
         case EXPR_NODETYPE_VARIABLE:
             /* Nothing to free for variable */
             break;
+
         case EXPR_NODETYPE_FUNCTION:
             /* Free data of each subnode */
             if(n->data.function.nodes)
                 {
                 for(pos = 0; pos < n->data.function.nodecount; pos++)
                     exprFreeNodeData(&(n->data.function.nodes[pos]));
-                /* free the array */
+
+                /* Free the subnode array */
                 exprFreeMem(n->data.function.nodes);
                 }
+
             /* Free reference variable list */
             if(n->data.function.refitems)
                 exprFreeMem(n->data.function.refitems);
+
             break;
+
         case EXPR_NODETYPE_ASSIGN:
             /* Free subnode data */
             if(n->data.assign.node)
@@ -213,6 +211,7 @@ static void exprFreeNodeData(exprNode *n)
                 /* Free the subnode */
                 exprFreeMem(n->data.assign.node);
                 }
+
             break;
         }
     }

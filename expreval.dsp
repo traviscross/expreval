@@ -63,8 +63,8 @@ LIB32=link.exe -lib
 # PROP Output_Dir "Debug"
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ  /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ  /c
+# ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -90,10 +90,6 @@ SOURCE=.\expreval.c
 # Begin Source File
 
 SOURCE=.\exprfunc.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\exprincl.c
 # End Source File
 # Begin Source File
 
@@ -129,6 +125,10 @@ SOURCE=.\exprval.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
+SOURCE=.\exprconf.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\expreval.h
 # End Source File
 # Begin Source File
@@ -150,15 +150,15 @@ SOURCE=.\exprmem.h
 # End Group
 # Begin Source File
 
-SOURCE=.\license.txt
-# End Source File
-# Begin Source File
-
 SOURCE=.\expreval.htm
 # End Source File
 # Begin Source File
 
 SOURCE=.\exprtmpl.html
+# End Source File
+# Begin Source File
+
+SOURCE=.\license.txt
 # End Source File
 # Begin Source File
 
