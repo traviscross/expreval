@@ -52,6 +52,7 @@ void main(void)
     jmp_buf jumper;
     double diff;
     EXPRTYPE *e_pos, *e_res;
+    int start, end;
 
     /* Seed random number generator */
     srand((clock() + 1024) * time(NULL));
@@ -169,7 +170,8 @@ void main(void)
     err = exprParse(e, buf);
     if(err != EXPR_ERROR_NOERROR)
         {
-        printf("Parse Error\n");
+        exprGetErrorPosition(e, &start, &end);
+        printf("Parse Error (%d,%d)\n", start, end);
         longjmp(jumper, err);
         }
 

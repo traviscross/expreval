@@ -166,6 +166,19 @@ void exprSetBreakerCount(exprObj *o, int count)
         }
     }
 
+/* Get error position */
+void exprGetErrorPosition(exprObj *o, int *start, int *end)
+    {
+    if(o)
+        {
+        if(start)
+            *start = o->starterr;
+
+        if(end)
+            *end = o->enderr;
+        }
+    }
+
 /* This function will free a node's data */
 static void exprFreeNodeData(exprNode *n)
     {

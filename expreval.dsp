@@ -150,7 +150,7 @@ SOURCE=.\exprmem.h
 # End Group
 # Begin Source File
 
-SOURCE=.\expreval.htm
+SOURCE=.\expreval.html
 # End Source File
 # Begin Source File
 

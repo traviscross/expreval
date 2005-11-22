@@ -28,6 +28,15 @@ goes for constant lists.  Variable lists make it where
 one expression can depend on a variable set in another.
 
 
+Tuesday, November 22, 2005
+--------------------------
+I still haven't been keeping up with history much.
+
+* Removed < and > as comments.  Instead use # as a 
+  comment to the end of the line
+* Added function exprGetErrorPosition to get start and
+  end position of parse error.
+
 Monday, May 3, 2004:  Version 1.0
 ---------------------------------
 This is a pretty bad time to start the history part since

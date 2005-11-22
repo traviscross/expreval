@@ -34,7 +34,7 @@ extern "C" {
     Version number
 */
 #define EXPR_VERSIONMAJOR 1
-#define EXPR_VERSIONMINOR 6
+#define EXPR_VERSIONMINOR 7
 
 
 /* Define type of data to use */
@@ -230,6 +230,8 @@ typedef struct _exprObj
     int softerrs; /* zero if we are not using soft errors */
     int breakcount; /* how often to check the breaker function */
     int breakcur; /* do we check the breaker function yet */
+    int starterr; /* start position of an error */
+    int enderr; /* end position of an error */
     } exprObj;
 
 /* Object for a function */
@@ -343,14 +345,12 @@ int exprGetSoftErrors(exprObj *o);
 void exprSetUserData(exprObj *o, void *userdata);
 void exprSetSoftErrors(exprObj *o, int softerr);
 void exprSetBreakerCount(exprObj *o, int count);
+void exprGetErrorPosition(exprObj *o, int *start, int *end);
+
 
 
 /* Other useful routines */
 int exprValidIdent(char *name);
-int exprValidNumber(char *num);
-int exprStripChars(char *buf);
-int exprValidChars(char *buf);
-
 
 /* Name mangling */
 #ifdef __cplusplus

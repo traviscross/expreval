@@ -110,25 +110,15 @@ body {
         <p>Expressions may also have whitespace characters and comments.
             Whitespace characters such as newlines, linefeeds, carriage
             returns, spaces, and tabs are ignored.  Comments begin with
-            the less than-sign '&lt;' and end with the greater than-sign
-            '&gt;'.  Comments may be nested as well.<br>
+            the pound sign '#' and end at the end of the line.<br>
             <b>Example:</b>
             <ul>
                 <pre>
-&lt;Set the x value&gt;
+#Set the x value
 x = d * cos(r);
 
-&lt;Set the y value&gt;
+#Set the y value
 y = d * sin(r);
-
-&lt;Comment out this for now
-
-&lt;Flip the values&gt;
-t = x;
-x = y;
-y = x;
-
-Stop commenting out&gt;
                 </pre>
             </ul>
         </p>
