@@ -28,6 +28,16 @@ goes for constant lists.  Variable lists make it where
 one expression can depend on a variable set in another.
 
 
+Thursday, December 1, 2005
+--------------------------
+Version 1.8
+
+* Added support for the ^ operator to raise to a power.
+  The pow function can still be used.
+* Moved basic math code (add,subtract,multiply,divide,negate,exponent)
+  and multiple expression support from function solvers to the exprEvalNode
+  function.
+
 Tuesday, November 22, 2005
 --------------------------
 I still haven't been keeping up with history much.

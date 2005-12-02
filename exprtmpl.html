@@ -41,6 +41,7 @@ body {
     <h3>
         <u>
             <li><a href="#Syntax">Expression Syntax</a></li>
+            <li><a href="#Operators">Order of Operators</a></li>
             <li><a href="#InternalFunc">ExprEval Internal Functions</a></li>
             <li><a href="#InternalConst">ExprEval Internal Constants</a></li>
             <li><a href="#AppFunc">Application Internal Functions</a></li>
@@ -128,6 +129,55 @@ y = d * sin(r);
         <p><b>Notice:</b> An expression can <b>NOT</b> assign to a constant and an
             expression can <b>NOT</b> use a constant as a reference parameter.
         </p>
+    </blockquote>
+</div>
+
+<div align="left" class="container">
+    <h2><a name="Operators">Order of operators.</a></h2>
+    <blockquote>
+        <p>The order of operators are processed correctly in ExprEval.
+        The parameters to functions may be evaluated out of order, depending
+        on the function itself.</p>
+
+        The following illustrates the order of operators:
+        <table align="center" border="1" width="75%">
+            <tr>
+                <td align="center"><b>Operator</b></td>
+                <td align="center"><b>Direction</b></td>
+                <td align="center"><b>Example</b></td>
+            </tr>
+            <tr>
+                <td>Functions and Parenthesis</td>
+                <td>N/A</td>
+                <td>(x + 5) * sin(d);</td>
+            </tr>
+            <tr>
+                <td>Negation</td>
+                <td>Right to Left</td>
+                <td>y = -2;</td>
+            </tr>
+            <tr>
+                <td>Exponents</td>
+                <td>Left to Right</td>
+                <td>y = x ^ 2;</td>
+            </tr>
+            <tr>
+                <td>Multiplication and Division</td>
+                <td>Left to Right</td>
+                <td>x * 5 / y;</td>
+            </tr>
+            <tr>
+                <td>Addition and Subtraction</td>
+                <td>Left to Right</td>
+                <td>4 + 5 - 3;</td>
+            </tr>
+            <tr>
+                <td>Assignment</td>
+                <td>Right to Left</td>
+                <td>x = y = z = 0;</td>
+            </tr>
+        </table>
+
     </blockquote>
 </div>
 

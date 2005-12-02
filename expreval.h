@@ -26,15 +26,10 @@ extern "C" {
 
 
 /*
-    We always use fast variable access, this define does nothing
-*/
-#define EXPR_FAST_VAR_ACCESS
-
-/*
     Version number
 */
 #define EXPR_VERSIONMAJOR 1
-#define EXPR_VERSIONMINOR 7
+#define EXPR_VERSIONMINOR 8
 
 
 /* Define type of data to use */
@@ -49,6 +44,13 @@ typedef double EXPRTYPE;
 #define EXPR_NODETYPE_VARIABLE 2
 #define EXPR_NODETYPE_FUNCTION 3
 #define EXPR_NODETYPE_ASSIGN 4
+#define EXPR_NODETYPE_ADD 5
+#define EXPR_NODETYPE_SUBTRACT 6
+#define EXPR_NODETYPE_MULTIPLY 7
+#define EXPR_NODETYPE_DIVIDE 8
+#define EXPR_NODETYPE_NEGATE 9
+#define EXPR_NODETYPE_EXPONENT 10
+#define EXPR_NODETYPE_MULTI 11
 
 /* Max id size */
 #define EXPR_MAXIDENTSIZE 255
@@ -275,6 +277,12 @@ typedef struct _exprNode
 
     union _data /* Union of info for various types */
         {
+        struct _oper
+            {
+            struct _exprNode *nodes; /* Operation arguments */
+            int count; /* Number of arguments */
+            } oper;
+
         struct _variable
             {
             EXPRTYPE *var_addr; /* Used if EXPR_FAST_VAR_ACCESS defined */

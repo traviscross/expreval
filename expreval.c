@@ -47,6 +47,8 @@ int exprEval(exprObj *o, EXPRTYPE *val)
 int exprEvalNode(exprObj *o, exprNode *n, EXPRTYPE *val)
     {
     int err;
+    int pos;
+    EXPRTYPE d1, d2;
 
     if(o == NULL || n == NULL)
         return EXPR_ERROR_NULLPOINTER;
@@ -64,6 +66,127 @@ int exprEvalNode(exprObj *o, exprNode *n, EXPRTYPE *val)
 
     switch(n->type)
         {
+        case EXPR_NODETYPE_MULTI:
+            /* Multi for multiple expressions in one string */
+            for(pos = 0; pos < n->data.oper.count; pos++)
+                {
+                err = exprEvalNode(o, &(n->data.oper.nodes[pos]), val);
+                if(err != EXPR_ERROR_NOERROR)
+                    return err;
+                }
+
+            break;
+
+        case EXPR_NODETYPE_ADD:
+            /* Addition */
+            err = exprEvalNode(o, &(n->data.oper.nodes[0]), &d1);
+            if(err != EXPR_ERROR_NOERROR)
+                return err;
+
+            err = exprEvalNode(o, &(n->data.oper.nodes[1]), &d2);
+            if(err != EXPR_ERROR_NOERROR)
+                return err;
+
+            *val = d1 + d2;
+
+            break;
+
+        case EXPR_NODETYPE_SUBTRACT:
+            /* Subtraction */
+            err = exprEvalNode(o, &(n->data.oper.nodes[0]), &d1);
+            if(err != EXPR_ERROR_NOERROR)
+                return err;
+
+            err = exprEvalNode(o, &(n->data.oper.nodes[1]), &d2);
+            if(err != EXPR_ERROR_NOERROR)
+                return err;
+
+            *val = d1 - d2;
+
+            break;
+
+        case EXPR_NODETYPE_MULTIPLY:
+            /* Multiplication */
+            err = exprEvalNode(o, &(n->data.oper.nodes[0]), &d1);
+            if(err != EXPR_ERROR_NOERROR)
+                return err;
+
+            err = exprEvalNode(o, &(n->data.oper.nodes[1]), &d2);
+            if(err != EXPR_ERROR_NOERROR)
+                return err;
+
+            *val = d1 * d2;
+
+            break;
+
+        case EXPR_NODETYPE_DIVIDE:
+            /* Division */
+            err = exprEvalNode(o, &(n->data.oper.nodes[0]), &d1);
+            if(err != EXPR_ERROR_NOERROR)
+                return err;
+
+            err = exprEvalNode(o, &(n->data.oper.nodes[1]), &d2);
+            if(err != EXPR_ERROR_NOERROR)
+                return err;
+
+            if(d2 == 0.0)
+                {
+                if(exprGetSoftErrors(o))
+                    {
+                    *val = 0.0;
+                    return EXPR_ERROR_NOERROR;
+                    }
+                else
+                    {
+                    return EXPR_ERROR_DIVBYZERO;
+                    }
+                }
+
+            *val = d1 / d2;
+
+            break;
+
+        case EXPR_NODETYPE_EXPONENT:
+            /* Exponent */
+            err = exprEvalNode(o, &(n->data.oper.nodes[0]), &d1);
+            if(err != EXPR_ERROR_NOERROR)
+                return err;
+
+            err = exprEvalNode(o, &(n->data.oper.nodes[1]), &d2);
+            if(err != EXPR_ERROR_NOERROR)
+                return err;
+
+            errno = 0;
+            
+            *val = pow(d1, d2);
+
+            if(errno == ERANGE || errno == EDOM)
+                {
+                if(exprGetSoftErrors(o))
+                    {
+                    *val = 0.0;
+                    return EXPR_ERROR_NOERROR;
+                    }
+                else
+                    {
+                    return EXPR_ERROR_OUTOFRANGE;
+                    }
+                }
+            
+
+            break;
+
+        case EXPR_NODETYPE_NEGATE:
+            /* Negative value */
+            err = exprEvalNode(o, &(n->data.oper.nodes[0]), &d1);
+            if(err != EXPR_ERROR_NOERROR)
+                return err;
+
+            *val = -d1;
+
+            break;
+
+
         case EXPR_NODETYPE_VALUE:
             /* Directly access the value */
             *val = n->data.value.value;

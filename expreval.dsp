@@ -97,10 +97,6 @@ SOURCE=.\exprinit.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\exprint.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\exprmem.c
 # End Source File
 # Begin Source File
@@ -138,10 +134,6 @@ SOURCE=.\exprincl.h
 # Begin Source File
 
 SOURCE=.\exprinit.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\exprint.h
 # End Source File
 # Begin Source File
 

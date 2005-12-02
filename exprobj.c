@@ -190,6 +190,25 @@ static void exprFreeNodeData(exprNode *n)
     /* free data based on type */
     switch(n->type)
         {
+        case EXPR_NODETYPE_ADD:
+        case EXPR_NODETYPE_SUBTRACT:
+        case EXPR_NODETYPE_MULTIPLY:
+        case EXPR_NODETYPE_DIVIDE:
+        case EXPR_NODETYPE_EXPONENT:
+        case EXPR_NODETYPE_NEGATE:
+        case EXPR_NODETYPE_MULTI:
+            /* Free operation data */
+            if(n->data.oper.nodes)
+                {
+                for(pos = 0; pos < n->data.oper.count; pos++)
+                    exprFreeNodeData(&(n->data.oper.nodes[pos]));
+
+                exprFreeMem(n->data.oper.nodes);
+                }
+
+            break;
+
+
         case EXPR_NODETYPE_VALUE:
             /* Nothing to free for value */
             break;

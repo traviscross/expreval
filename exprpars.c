@@ -11,7 +11,6 @@
 #include "exprincl.h"
 
 #include "expreval.h"
-#include "exprint.h"
 #include "exprmem.h"
 
 /* Data structure used by parser */
@@ -29,7 +28,7 @@ typedef struct _exprToken
     } exprToken;
 
 /* Defines for token types */
-#define EXPR_TOKEN_UNKNOWN -1
+#define EXPR_TOKEN_UNKNOWN 0
 #define EXPR_TOKEN_OPAREN 1
 #define EXPR_TOKEN_CPAREN 2
 #define EXPR_TOKEN_IDENTIFIER 3
@@ -42,6 +41,7 @@ typedef struct _exprToken
 #define EXPR_TOKEN_SEMICOLON 10
 #define EXPR_TOKEN_COMMA 11
 #define EXPR_TOKEN_EQUAL 12
+#define EXPR_TOKEN_HAT 13
 
 /* Internal functions */
 int exprMultiParse(exprObj *o, exprNode *n, exprToken *tokens, int count);
@@ -52,6 +52,7 @@ int exprInternalParseSub(exprObj *o, exprNode *n, exprToken *tokens, int start, 
 int exprInternalParseMul(exprObj *o, exprNode *n, exprToken *tokens, int start, int end, int index);
 int exprInternalParseDiv(exprObj *o, exprNode *n, exprToken *tokens, int start, int end, int index);
 int exprInternalParsePosNeg(exprObj *o, exprNode *n, exprToken *tokens, int start, int end, int index);
+int exprInternalParseExp(exprObj *o, exprNode *n, exprToken *tokens, int start, int end, int index);
 int exprInternalParseFunction(exprObj *o, exprNode *n, exprToken *tokens, int start, int end, int p1, int p2);
 int exprInternalParseVarVal(exprObj *o, exprNode *n, exprToken *tokens, int start, int end);
 int exprStringToTokenList(exprObj *o, char *expr, exprToken **tokens, int *count);
@@ -117,7 +118,7 @@ int exprStringToTokenList(exprObj *o, char *expr, exprToken **tokens, int *count
                     break;
                     }
 
-                /* Newline characters */
+                /* Newline characters turn off comments */
                 case '\r':
                 case '\n':
                     {
@@ -233,6 +234,25 @@ int exprStringToTokenList(exprObj *o, char *expr, exprToken **tokens, int *count
                         else
                             {
                             list[tpos].type = EXPR_TOKEN_FSLASH;
+                            list[tpos].start = pos;
+                            list[tpos].end = pos;
+                            tpos++;
+                            }
+                        }
+
+                    break;
+                    }
+
+                /* Hat */
+                case '^':
+                    {
+                    if(!comment)
+                        {
+                        if(pass == 0)
+                            found++;
+                        else
+                            {
+                            list[tpos].type = EXPR_TOKEN_HAT;
                             list[tpos].start = pos;
                             list[tpos].end = pos;
                             tpos++;
@@ -601,10 +621,9 @@ int exprMultiParse(exprObj *o, exprNode *n, exprToken *tokens, int count)
         return EXPR_ERROR_MEMORY;
 
     /* Set the current node's data */
-    n->type = EXPR_NODETYPE_FUNCTION;
-    n->data.function.nodecount = num;
-    n->data.function.nodes = tmp;
-    n->data.function.fptr = __exprMultiFunc;
+    n->type = EXPR_NODETYPE_MULTI;
+    n->data.oper.nodes = tmp;
+    n->data.oper.count = num;
 
     /* now we parse each subexpression */
     last = 0; /* Not for last semicolon, but for first char of subexpr */
@@ -638,8 +657,8 @@ int exprInternalParse(exprObj *o, exprNode *n, exprToken *tokens, int start, int
     int assignindex = -1; /* First = at plevel 0 for assignment */
     int addsubindex = -1; /* Last + or - at plevel 0 for adding or subtracting */
     int muldivindex = -1; /* Last * or / at plevel 0 for multiplying or dividing */
+    int expindex = -1; /* Last ^ fount at plevel 0 for exponents */
     int posnegindex = -1; /* First +,- at plevel 0 for positive,negative */
-    int lastposnegindex = -1; /* Last +,- found at plevel for for positive,negative */
 
     /* Make sure some conditions are right */
     if(start > end)
@@ -675,8 +694,11 @@ int exprInternalParse(exprObj *o, exprNode *n, exprToken *tokens, int start, int
 
             case EXPR_TOKEN_EQUAL:
                 /* Assignment found */
-                if(plevel == 0 && assignindex == -1)
-                    assignindex = pos;
+                if(plevel == 0)
+                    {
+                    if(assignindex == -1)
+                        assignindex = pos;
+                    }
                 break;
 
             case EXPR_TOKEN_ASTERISK:
@@ -686,28 +708,47 @@ int exprInternalParse(exprObj *o, exprNode *n, exprToken *tokens, int start, int
                     muldivindex = pos;
                 break;
 
+            case EXPR_TOKEN_HAT:
+                /* Exponent */
+                if(plevel == 0)
+                    expindex = pos;
+                break;
+
 
             case EXPR_TOKEN_PLUS:
             case EXPR_TOKEN_HYPHEN:
                 /* Addition or positive or subtraction or negative*/
                 if(plevel == 0)
                     {
-                    /* After any of these, we are positive sign */
-                    if(pos == start || pos == assignindex + 1 ||
-                        pos == addsubindex + 1 || pos == muldivindex + 1 ||
-                        pos == lastposnegindex + 1)
+                    if(pos == start)
                         {
-                        /* We are a positive sign or negative sign */
-                        if(posnegindex == -1) /* First positive,negative sign? */
+                        /* At the start area, positive/negative */
+                        if(posnegindex == -1)
                             posnegindex = pos;
-
-                        /* Keep track of the last one */
-                        lastposnegindex = pos;
                         }
                     else
                         {
-                        /* We are an addition or subtraction sign */
-                        addsubindex = pos;
+                        /* Not at start, check item in front */
+                        switch(tokens[pos - 1].type)
+                            {
+                            case EXPR_TOKEN_EQUAL: /* Equal sign */
+                            case EXPR_TOKEN_PLUS: /* Add/positive sign */
+                            case EXPR_TOKEN_HYPHEN: /* Subtract/negative sign */
+                            case EXPR_TOKEN_ASTERISK: /* Multiply sign */
+                            case EXPR_TOKEN_FSLASH: /* Divide sign */
+                            case EXPR_TOKEN_HAT: /* Exponent sign */
+
+                                /* After theses, it is positive/negative */
+                                if(posnegindex == -1)
+                                    posnegindex = pos;
+
+                                break;
+
+                            default:
+                                /* Otherwise it is addition/subtraction */
+                                addsubindex = pos;
+                                break;
+                            }
                         }
                     }
                 break;
@@ -745,6 +786,9 @@ int exprInternalParse(exprObj *o, exprNode *n, exprToken *tokens, int start, int
             return exprInternalParseDiv(o, n, tokens, start, end, muldivindex);
         }
 
+    /* Exponent */
+    if(expindex != -1)
+        return exprInternalParseExp(o, n, tokens, start, end, expindex);
 
     /* Negation */
     if(posnegindex != -1)
@@ -868,7 +912,7 @@ int exprInternalParseAssign(exprObj *o, exprNode *n, exprToken *tokens, int star
     return exprInternalParse(o, tmp, tokens, index + 1, end);
     }
 
-/* Function to parse an addition function */
+/* Function to parse an addition operator */
 int exprInternalParseAdd(exprObj *o, exprNode *n, exprToken *tokens, int start, int end, int index)
     {
     exprNode *tmp;
@@ -889,10 +933,9 @@ int exprInternalParseAdd(exprObj *o, exprNode *n, exprToken *tokens, int start, 
 
 
     /* Set the data */
-    n->type = EXPR_NODETYPE_FUNCTION;
-    n->data.function.fptr = __exprAddFunc;
-    n->data.function.nodecount = 2;
-    n->data.function.nodes = tmp;
+    n->type = EXPR_NODETYPE_ADD;
+    n->data.oper.nodes = tmp;
+    n->data.oper.count = 2;
 
     /* parse the left side */
     err = exprInternalParse(o, &(tmp[0]), tokens, start, index - 1);
@@ -903,7 +946,7 @@ int exprInternalParseAdd(exprObj *o, exprNode *n, exprToken *tokens, int start, 
     return exprInternalParse(o, &(tmp[1]), tokens, index + 1, end);
     }
 
-/* Function to parse a subtraction function */
+/* Function to parse a subtraction operator */
 int exprInternalParseSub(exprObj *o, exprNode *n, exprToken *tokens, int start, int end, int index)
     {
     exprNode *tmp;
@@ -924,11 +967,10 @@ int exprInternalParseSub(exprObj *o, exprNode *n, exprToken *tokens, int start, 
 
 
     /* Set the data */
-    n->type = EXPR_NODETYPE_FUNCTION;
-    n->data.function.fptr = __exprSubFunc;
-    n->data.function.nodecount = 2;
-    n->data.function.nodes = tmp;
-
+    n->type = EXPR_NODETYPE_SUBTRACT;
+    n->data.oper.nodes = tmp;
+    n->data.oper.count = 2;
+    
     /* parse the left side */
     err = exprInternalParse(o, &(tmp[0]), tokens, start, index - 1);
     if(err != EXPR_ERROR_NOERROR)
@@ -938,7 +980,7 @@ int exprInternalParseSub(exprObj *o, exprNode *n, exprToken *tokens, int start, 
     return exprInternalParse(o, &(tmp[1]), tokens, index + 1, end);
     }
 
-/* Function to parse a multiplication function */
+/* Function to parse a multiplication operator */
 int exprInternalParseMul(exprObj *o, exprNode *n, exprToken *tokens, int start, int end, int index)
     {
     exprNode *tmp;
@@ -959,10 +1001,9 @@ int exprInternalParseMul(exprObj *o, exprNode *n, exprToken *tokens, int start, 
 
 
     /* Set the data */
-    n->type = EXPR_NODETYPE_FUNCTION;
-    n->data.function.fptr = __exprMulFunc;
-    n->data.function.nodecount = 2;
-    n->data.function.nodes = tmp;
+    n->type = EXPR_NODETYPE_MULTIPLY;
+    n->data.oper.nodes = tmp;
+    n->data.oper.count = 2;
 
     /* parse the left side */
     err = exprInternalParse(o, &(tmp[0]), tokens, start, index - 1);
@@ -973,7 +1014,7 @@ int exprInternalParseMul(exprObj *o, exprNode *n, exprToken *tokens, int start, 
     return exprInternalParse(o, &(tmp[1]), tokens, index + 1, end);
     }
 
-/* Function to parse a division function */
+/* Function to parse a division operator */
 int exprInternalParseDiv(exprObj *o, exprNode *n, exprToken *tokens, int start, int end, int index)
     {
     exprNode *tmp;
@@ -994,10 +1035,43 @@ int exprInternalParseDiv(exprObj *o, exprNode *n, exprToken *tokens, int start, 
 
 
     /* Set the data */
-    n->type = EXPR_NODETYPE_FUNCTION;
-    n->data.function.fptr = __exprDivFunc;
-    n->data.function.nodecount = 2;
-    n->data.function.nodes = tmp;
+    n->type = EXPR_NODETYPE_DIVIDE;
+    n->data.oper.nodes = tmp;
+    n->data.oper.count = 2;
+
+    /* parse the left side */
+    err = exprInternalParse(o, &(tmp[0]), tokens, start, index - 1);
+    if(err != EXPR_ERROR_NOERROR)
+        return err;
+
+    /* parse the right side */
+    return exprInternalParse(o, &(tmp[1]), tokens, index + 1, end);
+    }
+
+/* Function to parse an exponent operator */
+int exprInternalParseExp(exprObj *o, exprNode *n, exprToken *tokens, int start, int end, int index)
+    {
+    exprNode *tmp;
+    int err;
+
+    /* Make sure exponent sign is at a good place */
+    if(index <= start || index >= end)
+        {
+        o->starterr = tokens[index].start;
+        o->enderr = tokens[index].end;
+        return EXPR_ERROR_SYNTAX;
+        }
+
+    /* Allocate space for 2 subnodes */
+    tmp = exprAllocMem(sizeof(exprNode) * 2);
+    if(tmp == NULL)
+        return EXPR_ERROR_MEMORY;
+
+
+    /* Set the data */
+    n->type = EXPR_NODETYPE_EXPONENT;
+    n->data.oper.nodes = tmp;
+    n->data.oper.count = 2;
 
     /* parse the left side */
     err = exprInternalParse(o, &(tmp[0]), tokens, start, index - 1);
@@ -1026,17 +1100,16 @@ int exprInternalParsePosNeg(exprObj *o, exprNode *n, exprToken *tokens, int star
         return exprInternalParse(o, n, tokens, index + 1, end);
     else
         {
-        /* allocation subnode */
+        /* Allocate subnode */
         tmp = exprAllocMem(sizeof(exprNode));
         if(tmp == NULL)
             return EXPR_ERROR_NOERROR;
 
 
         /* Set data */
-        n->type = EXPR_NODETYPE_FUNCTION;
-        n->data.function.fptr = __exprNegFunc;
-        n->data.function.nodecount = 1;
-        n->data.function.nodes = tmp;
+        n->type = EXPR_NODETYPE_NEGATE;
+        n->data.oper.nodes = tmp;
+        n->data.oper.count = 1;
 
         /* Parse the subnode */
         return exprInternalParse(o, tmp, tokens, index + 1, end);
