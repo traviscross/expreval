@@ -10,7 +10,7 @@
 /* Includes */
 #include "exprincl.h"
 
-#include "expreval.h"
+#include "exprpriv.h"
 #include "exprmem.h"
 
 /* Data structure used by parser */
@@ -511,7 +511,7 @@ int exprParse(exprObj *o, char *expr)
         return err;
     
     /* Create head pointer */
-    tmp = exprAllocMem(sizeof(exprNode));
+    tmp = exprAllocNodes(1);
     if(tmp == NULL)
         {
         exprFreeTokenList(tokens, count);
@@ -616,7 +616,7 @@ int exprMultiParse(exprObj *o, exprNode *n, exprToken *tokens, int count)
     /* Now we know how many arguments there are */
 
     /* Allocate array of subnodes */
-    tmp = exprAllocMem(sizeof(exprNode) * num);
+    tmp = exprAllocNodes(num);
     if(tmp == NULL)
         return EXPR_ERROR_MEMORY;
 
@@ -856,9 +856,9 @@ int exprInternalParseAssign(exprObj *o, exprNode *n, exprToken *tokens, int star
         o->enderr = tokens[index].end;
         return EXPR_ERROR_SYNTAX;
         }
-    
+
     /* Create expression subnode */
-    tmp = exprAllocMem(sizeof(exprNode));
+    tmp = exprAllocNodes(1);
     if(tmp == NULL)
         {
         return EXPR_ERROR_MEMORY;
@@ -927,7 +927,7 @@ int exprInternalParseAdd(exprObj *o, exprNode *n, exprToken *tokens, int start, 
         }
 
     /* Allocate space for 2 subnodes */
-    tmp = exprAllocMem(sizeof(exprNode) * 2);
+    tmp = exprAllocNodes(2);
     if(tmp == NULL)
         return EXPR_ERROR_MEMORY;
 
@@ -961,7 +961,7 @@ int exprInternalParseSub(exprObj *o, exprNode *n, exprToken *tokens, int start, 
         }
 
     /* Allocate space for 2 subnodes */
-    tmp = exprAllocMem(sizeof(exprNode) * 2);
+    tmp = exprAllocNodes(2);
     if(tmp == NULL)
         return EXPR_ERROR_MEMORY;
 
@@ -994,8 +994,9 @@ int exprInternalParseMul(exprObj *o, exprNode *n, exprToken *tokens, int start, 
         return EXPR_ERROR_SYNTAX;
         }
 
+
     /* Allocate space for 2 subnodes */
-    tmp = exprAllocMem(sizeof(exprNode) * 2);
+    tmp = exprAllocNodes(2);
     if(tmp == NULL)
         return EXPR_ERROR_MEMORY;
 
@@ -1028,8 +1029,9 @@ int exprInternalParseDiv(exprObj *o, exprNode *n, exprToken *tokens, int start, 
         return EXPR_ERROR_SYNTAX;
         }
 
+
     /* Allocate space for 2 subnodes */
-    tmp = exprAllocMem(sizeof(exprNode) * 2);
+    tmp = exprAllocNodes(2);
     if(tmp == NULL)
         return EXPR_ERROR_MEMORY;
 
@@ -1062,8 +1064,9 @@ int exprInternalParseExp(exprObj *o, exprNode *n, exprToken *tokens, int start, 
         return EXPR_ERROR_SYNTAX;
         }
 
+
     /* Allocate space for 2 subnodes */
-    tmp = exprAllocMem(sizeof(exprNode) * 2);
+    tmp = exprAllocNodes(2);
     if(tmp == NULL)
         return EXPR_ERROR_MEMORY;
 
@@ -1101,7 +1104,7 @@ int exprInternalParsePosNeg(exprObj *o, exprNode *n, exprToken *tokens, int star
     else
         {
         /* Allocate subnode */
-        tmp = exprAllocMem(sizeof(exprNode));
+        tmp = exprAllocNodes(1);
         if(tmp == NULL)
             return EXPR_ERROR_NOERROR;
 
@@ -1128,6 +1131,7 @@ int exprInternalParseFunction(exprObj *o, exprNode *n, exprToken *tokens, int st
     exprFuncType fptr;
     int argmin, argmax;
     int refargmin, refargmax;
+    int type;
     exprFuncList *l;
     exprValList *vars;
     EXPRTYPE *addr;
@@ -1154,8 +1158,9 @@ int exprInternalParseFunction(exprObj *o, exprNode *n, exprToken *tokens, int st
         return EXPR_ERROR_SYNTAX;
         }
 
+
     /* Look up the function */
-    err = exprFuncListGet(l, &fptr, tokens[p1 - 1].data.str, &argmin, &argmax, &refargmin, &refargmax);
+    err = exprFuncListGet(l, tokens[p1 - 1].data.str, &fptr, &type, &argmin, &argmax, &refargmin, &refargmax);
     if(err != EXPR_ERROR_NOERROR)
         {
         if(err == EXPR_ERROR_NOTFOUND)
@@ -1169,7 +1174,7 @@ int exprInternalParseFunction(exprObj *o, exprNode *n, exprToken *tokens, int st
         }
 
     /* Make sure the function exists */
-    if(fptr == NULL)
+    if(fptr == NULL && type == 0)
         {
         o->starterr = tokens[p1 - 1].start;
         o->enderr = tokens[p1 - 1].end;
@@ -1276,7 +1281,7 @@ int exprInternalParseFunction(exprObj *o, exprNode *n, exprToken *tokens, int st
     if(num > 0)
         {
         /* Allocate subnodes */
-        tmp = exprAllocMem(sizeof(exprNode) * num);
+        tmp = exprAllocNodes(num);
         if(tmp == NULL)
             return EXPR_ERROR_MEMORY;
         }
@@ -1301,6 +1306,7 @@ int exprInternalParseFunction(exprObj *o, exprNode *n, exprToken *tokens, int st
     n->data.function.nodes = tmp;
     n->data.function.refcount = refnum;
     n->data.function.refitems = reftmp;
+    n->data.function.type = type;
 
     /* parse each subnode */
     if(num + refnum > 0)
@@ -1478,6 +1484,7 @@ int exprInternalParseVarVal(exprObj *o, exprNode *n, exprToken *tokens, int star
         {
         return EXPR_ERROR_UNKNOWN;
         }
+    
     
     /* Are we an identifier */
     if(tokens[start].type == EXPR_TOKEN_IDENTIFIER)

@@ -10,7 +10,7 @@
 /* Include files */
 #include "exprincl.h"
 
-#include "expreval.h"
+#include "exprpriv.h"
 
 
 /* Return the version number */

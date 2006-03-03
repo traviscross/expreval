@@ -12,11 +12,11 @@
 /* Includes */
 #include "exprincl.h"
 
-#include "expreval.h"
+#include "exprpriv.h"
 #include "exprmem.h"
 
 /* Internal functions */
-static exprFunc *exprCreateFunc(exprFuncType ptr, char *name, int min, int max, int refmin, int refmax);
+static exprFunc *exprCreateFunc(char *name, exprFuncType ptr, int type, int min, int max, int refmin, int refmax);
 static void exprFuncListFreeData(exprFunc *f);
 
 
@@ -42,7 +42,7 @@ int exprFuncListCreate(exprFuncList **f)
     }
 
 /* Add a function to the list */
-int exprFuncListAdd(exprFuncList *f, exprFuncType ptr, char *name, int min, int max, int refmin, int refmax)
+int exprFuncListAdd(exprFuncList *f, char *name, exprFuncType ptr, int min, int max, int refmin, int refmax)
     {
     exprFunc *tmp;
     exprFunc *cur;
@@ -85,7 +85,7 @@ int exprFuncListAdd(exprFuncList *f, exprFuncType ptr, char *name, int min, int 
     if(f->head == NULL)
         {
         /* Create the node right here */
-        tmp = exprCreateFunc(ptr, name, min, max, refmin, refmax);
+        tmp = exprCreateFunc(name, ptr, EXPR_NODETYPE_FUNCTION, min, max, refmin, refmax);
 
         if(tmp == NULL)
             return EXPR_ERROR_MEMORY;
@@ -109,6 +109,7 @@ int exprFuncListAdd(exprFuncList *f, exprFuncType ptr, char *name, int min, int 
             cur->max = max;
             cur->refmin = refmin;
             cur->refmax = refmax;
+            cur->type = EXPR_NODETYPE_FUNCTION;
 
             break;
             }
@@ -117,7 +118,7 @@ int exprFuncListAdd(exprFuncList *f, exprFuncType ptr, char *name, int min, int 
             if(cur->right == NULL)
                 {
                 /* It goes here */
-                tmp = exprCreateFunc(ptr, name, min, max, refmin, refmax);
+                tmp = exprCreateFunc(name, ptr, EXPR_NODETYPE_FUNCTION, min, max, refmin, refmax);
 
                 if(tmp == NULL)
                     return EXPR_ERROR_MEMORY;
@@ -136,7 +137,7 @@ int exprFuncListAdd(exprFuncList *f, exprFuncType ptr, char *name, int min, int 
             if(cur->left == NULL)
                 {
                 /* It goes right here */
-                tmp = exprCreateFunc(ptr, name, min, max, refmin, refmax);
+                tmp = exprCreateFunc(name, ptr, EXPR_NODETYPE_FUNCTION, min, max, refmin, refmax);
 
                 if(tmp == NULL)
                     return EXPR_ERROR_MEMORY;
@@ -157,8 +158,131 @@ int exprFuncListAdd(exprFuncList *f, exprFuncType ptr, char *name, int min, int 
     return EXPR_ERROR_NOERROR;
     }
 
+/* Add a function node type to the list
+   This works pretty much the same way, except the function
+   pointer is NULL and the node type specifies the function
+   to do.  exprEvalNode handles this, instead of calling
+   a function solver. */
+int exprFuncListAddType(exprFuncList *f, char *name, int type, int min, int max, int refmin, int refmax)
+    {
+    exprFunc *tmp;
+    exprFunc *cur;
+    int result;
+
+    if(f == NULL)
+        return EXPR_ERROR_NULLPOINTER;
+
+    /* Make sure the name is valid */
+    if(!exprValidIdent(name))
+        return EXPR_ERROR_BADIDENTIFIER;
+
+    /* Fix values only if none are negative (negative values mean no limit) */
+
+    /* if both are neg, no min or max number of args */
+    /* if min is neg, max pos, no min number of args but a maximum */
+    /* if min is pos, max neg, there is a min number of args, but no max */
+    /* if both pos, then a min and max limit.  We swap to make sure it works
+       right. I.E.  Min of 3 and max of 2 would make function unusable */
+    if(min >= 0 && max >= 0)
+        {
+        if(min > max)
+            {
+            result = min;
+            min = max;
+            max = result;
+            }
+        }
+
+    if(refmin >= 0 && refmax >= 0)
+        {
+        if(refmin > refmax)
+            {
+            result = refmin;
+            refmin = max;
+            refmax = result;
+            }
+        }
+
+    if(f->head == NULL)
+        {
+        /* Create the node right here */
+        tmp = exprCreateFunc(name, NULL, type, min, max, refmin, refmax);
+
+        if(tmp == NULL)
+            return EXPR_ERROR_MEMORY;
+
+        f->head = tmp;
+        return EXPR_ERROR_NOERROR;
+        }
+
+    /* See if we can find where it goes */
+    cur = f->head;
+
+    do
+        {
+        result = strcmp(name, cur->fname);
+
+        if(result == 0)
+            {
+            /* This is it, just assign */
+            cur->fptr = NULL;
+            cur->min = min;
+            cur->max = max;
+            cur->refmin = refmin;
+            cur->refmax = refmax;
+            cur->type = type;
+
+            break;
+            }
+        else if(result > 0) /* To the right */
+            {
+            if(cur->right == NULL)
+                {
+                /* It goes here */
+                tmp = exprCreateFunc(name, NULL, type, min, max, refmin, refmax);
+
+                if(tmp == NULL)
+                    return EXPR_ERROR_MEMORY;
+
+
+                cur->right = tmp;
+                break;
+                }
+            else
+                {
+                /* Loop into the right node */
+                cur = cur->right;
+                }
+            }
+        else if(result < 0) /* To the left */
+            {
+            if(cur->left == NULL)
+                {
+                /* It goes right here */
+                tmp = exprCreateFunc(name, NULL, type, min, max, refmin, refmax);
+
+                if(tmp == NULL)
+                    return EXPR_ERROR_MEMORY;
+
+                cur->left = tmp;
+                break;
+                }
+            else
+                {
+                /* Loop into the left node */
+                cur = cur->left;
+                }
+            }
+        }
+    while(1); /* Loop until we find where it goes */
+
+    /* We made it out of the loop, so it was successful */
+    return EXPR_ERROR_NOERROR;
+    }
+
+
 /* Get the function from a list along with it's min an max data */
-int exprFuncListGet(exprFuncList *f, exprFuncType *ptr, char *name, int *min, int *max, int *refmin, int *refmax)
+int exprFuncListGet(exprFuncList *f, char *name, exprFuncType *ptr, int *type, int *min, int *max, int *refmin, int *refmax)
     {
     exprFunc *cur;
     int result;
@@ -184,6 +308,7 @@ int exprFuncListGet(exprFuncList *f, exprFuncType *ptr, char *name, int *min, in
             *max = cur->max;
             *refmin = cur->refmin;
             *refmax = cur->refmax;
+            *type = cur->type;
 
             /* return now */
             return EXPR_ERROR_NOERROR;
@@ -256,7 +381,7 @@ void exprFuncListFreeData(exprFunc *f)
     }
 
 /* This routine will create the function object */
-exprFunc *exprCreateFunc(exprFuncType ptr, char *name, int min, int max, int refmin, int refmax)
+exprFunc *exprCreateFunc(char *name, exprFuncType ptr, int type, int min, int max, int refmin, int refmax)
     {
     exprFunc *tmp;
     char *vtmp;
@@ -285,6 +410,7 @@ exprFunc *exprCreateFunc(exprFuncType ptr, char *name, int min, int max, int ref
     tmp->max = max;
     tmp->refmin = refmin;
     tmp->refmax = refmax;
+    tmp->type = type;
 
     return tmp;
     }

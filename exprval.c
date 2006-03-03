@@ -10,7 +10,7 @@
 /* Includes */
 #include "exprincl.h"
 
-#include "expreval.h"
+#include "exprpriv.h"
 #include "exprmem.h"
 
 

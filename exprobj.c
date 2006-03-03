@@ -10,7 +10,7 @@
 /* Includes */
 #include "exprincl.h"
 
-#include "expreval.h"
+#include "exprpriv.h"
 #include "exprmem.h"
 
 /* Internal functions */
@@ -131,11 +131,6 @@ void *exprGetUserData(exprObj *o)
     return (o == NULL) ? NULL : o->userdata;
     }
 
-/* Get the soft errors */
-int exprGetSoftErrors(exprObj *o)
-    {
-    return (o == NULL) ? 0 : o->softerrs;
-    }
 
 /* Set functions to set certain data */
 
@@ -146,12 +141,6 @@ void exprSetUserData(exprObj *o, void *userdata)
         o->userdata = userdata;
     }
 
-/* Set soft errors */
-void exprSetSoftErrors(exprObj *o, int softerr)
-    {
-    if(o)
-        o->softerrs = softerr;
-    }
 
 /* Set breaker count */
 void exprSetBreakerCount(exprObj *o, int count)
@@ -163,6 +152,10 @@ void exprSetBreakerCount(exprObj *o, int count)
             count = -count;
 
         o->breakcount = count;
+
+        /* Make sure the current value is not bigger than count */
+        if(o->breakcur > count)
+            o->breakcur = count;
         }
     }
 

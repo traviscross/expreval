@@ -38,9 +38,6 @@
 /* Time */
 #include <time.h>
 
-/* Error stuff for some of the math routines */
-#include <errno.h>
-
 
 /* Math constants.  VC++ does not seem to have these */
 #ifndef M_E

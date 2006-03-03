@@ -98,7 +98,7 @@ void main(void)
         }
 
     /* Add a function */
-    exprFuncListAdd(f, my_func, "myfunc", 1, 1, 1, 1);
+    exprFuncListAdd(f, "myfunc", my_func, 1, 1, 1, 1);
 
 
     /* Init funclist */
@@ -176,8 +176,6 @@ void main(void)
         }
 
     /* Eval expression */
-    exprSetSoftErrors(e, 0);
-
     t1 = time(NULL);
 
     for(pos = 0; pos < count; pos++)
@@ -202,12 +200,7 @@ void main(void)
     if(diff != 0.0)
         printf("Average Evaluations/Second: %f\n", (double)count / diff);
 
-#ifdef EXPR_FAST_VAR_ACCESS
     printf("res=: %f\n", *e_res);
-#else
-    if(exprValListGet(v, "res", &val) == EXPR_ERROR_NOERROR)
-        printf("res=: %f\n", val);
-#endif
 
     /* We are done */
     longjmp(jumper, -1);

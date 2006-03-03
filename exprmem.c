@@ -31,3 +31,9 @@ void exprFreeMem(void *data)
     if(data)
         free(data);
     }
+
+/* Allocate a list of nodes */
+exprNode *exprAllocNodes(size_t count)
+    {
+    return exprAllocMem(count * sizeof(exprNode));
+    }

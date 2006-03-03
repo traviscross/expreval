@@ -60,11 +60,11 @@ body {
         <p>ExprEval Help document.  This document is probably full of
             bugs and mispellings.  I may get around to proofreading
             it later.</p>
-        <p>ExprEval is a C/C++ based expression evaluation library.
-            It is entirely C based, but it comes with a C++ wrapper
-            class that simplifies it's use.  The source code is
-            provided for the library so that it can be recompiled
-            for the specific system or compiler.</p>
+        <p>ExprEval is a C based expression evaluation library.
+            It is entirely C based, but can be used in C++ programs
+            as well..  The source code is provided for the library
+            so that it can be recompiled for the specific system
+            or compiler.</p>
         <p>ExprEval makes adding mathematical expression support to
             an application easy.  It takes an expression string and
             parses it, and then it can evaluate it over and over.
@@ -73,12 +73,7 @@ body {
             seperate lists so they can be shared among expressions or
             they can be private to a single expression or any mix and
             match.  It is up to the developer how to link them together.
-            You can also create your own custom functions.  However,
-            there is no C++ wrapper for custom functions, you must
-            use the C routines for the function itself.  You can
-            still use the C++ routines to add the functions to the
-            lists and work with the expression, just the function
-            code must use the C routines.</p>
+            You can also create your own custom functions.</p>
     </blockquote>
 </div>
 
@@ -185,9 +180,9 @@ y = d * sin(r);
             You can manipulate the lists in any order after their creation.
             However, functions are translated during the parse, so after
             parsing an expression, manipulating the function list will make
-                        no change to an expression.  Variables and constants can be
+            no change to an expression.  Variables and constants can be
             manipulated after a parse to change the result of an expression.
-                        However, you must add any constants to be used by an expression
+            However, you must add any constants to be used by an expression
             to the constant list <b>BEFORE</b> parsing the expression,
             otherwise it will be seen as a variable.  Applications can change
             both variables and constants, however the expression can only
@@ -324,19 +319,15 @@ exprFreeFuncList(f);
         <p>A new feature in ExprEval is fast variable access.  This
             is simply a technique of quickly accessing variables
             by directly accessing their memory locations instead
-            of using the value list functions.  If you choose to
-            enable fast variable access within ExprEval, you must
+            of using the value list functions.  Fast variable access
+            is always used internally in ExprEval.  You must
             NOT clear a variable list until after all expressions
             using it are completely finished evaluating.  Then you
             must reparse the expressions before using them again.
-            The reason is simple.  When fast variable access is not
-            used, the value list functions are used and they make
-            sure to access the correct memory or add a variable if
-            needed.  However, when fast variable access is used,
-            the variable memory location is directly accessed, and
-            the value list functions are not used.  If you clear a
-            variable list and then evaluate an expression, it will
-            access invalid memory.</p>
+            The reason is simple. When fast variable access is used,
+            the variable memory location is directly accessed If you
+            clear a variable list and then evaluate an expression,
+            it will access invalid memory.</p>
         <p>You can also use fast variable access in you application
             to dramatically speed up loops.  This is accomplished as
             follows:
@@ -368,10 +359,10 @@ exprFreeFuncList(f);
 <div align="left" class="container">
     <h2><a name="CustomFunc">Creating Custom Functions</a></h2>
     <blockquote>
-        <p>Custom functions must use the C routines, not the C++
-            wrapper classes.  There are several macros that make
-            creating custom functions easy.  They require that the
-            variables passed to these functions be the same though.
+        <p>Custom functions must use the C routines.  There are
+            several macros that make creating custom functions
+            easy.  They require that the variables passed to
+            these functions be the same though.
             This is how a custom function should normally look:
             <ul>
                 <pre>
@@ -417,51 +408,25 @@ int custom_func(struct _exprObj *o, struct _exprNode *n, int count, EXPRTYPE **r
         return EXPR_ERROR_BADNUMBERARGUMENTS;
 
     /* Eval arg 1 */
-    err = exprEvalNode(o, &(n[0]), &d1);
+    err = exprEvalNode(o, n, 0, &d1);
     if(err != EXPR_ERROR_NOERROR)
         return err;
 
     /* Eval arg 2 */
-    err = exprEvalNode(o, &(n[1]), &d2);
+    err = exprEvalNode(o, n, 1, &d2);
     if(err != EXPR_ERROR_NOERROR)
         return err;
 
     /* Make sure arg 2 is not 0.0 */
     if(d2 == 0.0)
         {
-        /* Soft errors on */
-        if(exprGetSoftErrors(o))
-            {
-            /* Yes */
-            *val = 0.0;
-            return EXPR_ERROR_NOERROR;
-            }
-        else
-            {
-            /* No */
-            return EXPR_ERROR_OUTOFRANGE; /* Bad argument */
-            }
+        *val = 0.0;
+        return EXPR_ERROR_NOERROR;
         }
-
-    /* Clear any math routine errors */
-    errno = 0;
 
     /* Do math */
     *val = atan(d1 / d2); /* No need to worry about divide by zero */
 
-    /* Check for math errors */
-    if(errno == EDOM || errno == ERANGE)
-        {
-        if(exprGetSoftErrors(o))
-            {
-            *val = 0.0;
-            return EXPR_ERROR_NOERROR;
-            }
-        else
-            {
-            return EXPR_ERROR_OUTOFRANGE;
-            }
-        }
 
     return EXPR_ERROR_NOERROR;
     }
@@ -486,17 +451,12 @@ EXPR_FUNCTIONSOLVER(custom_func)
     /* Make sure d2 is not 0.0 */
     if(d2 == 0.0)
         {
-        EXPR_RETURNSOFTERR(EXPR_ERROR_OUTOFRANGE);
+        *val = 0.0;
+        return EXPR_ERROR_NOERROR;
         }
-
-    /* Clear math routine errors */
-    EXPR_CLEARMATHERR();
 
     /* Do math */
     *val = atan(d1 / d2) /* No need to worry about division by zero */
-
-    /* Check for math routine errors */
-    EXPR_CHECKMATHERR();
 
     /* Return */
     return EXPR_ERROR_NOERROR;
@@ -525,7 +485,7 @@ EXPR_FUNCTIONSOLVER(custom_func)
                     in.</td>
                 <td>
                     <pre>
-err = exprEvalNode(o, &(n[num]), &res);
+err = exprEvalNode(o, n, num, &res);
 if(err != EXPR_ERROR_NOERROR)
     return err;
                     </pre>
@@ -613,54 +573,6 @@ if(refcount < c1 || refcount > c2)
                     </pre>
                 </td>
             </tr>
-
-            <tr>
-                <td>EXPR_CHECKMATHERR()</td>
-                <td>Check for EDOM or ERANGE math error.</td>
-                <td>
-                    <pre>
-if(errno == ERANGE || errno == EDOM)
-    {
-    if(exprGetSoftErrors(o))
-        {
-        *val = 0.0;
-        return EXPR_ERROR_NOERROR;
-        }
-    else
-        {
-        return EXPR_ERROR_OUTOFRANGE;
-        }
-    }
-                    </pre>
-                </td>
-            </tr>
-            <tr>
-                <td>EXPR_CLEARMATHERR()</td>
-                <td>Clear errno.</td>
-                <td>
-                    <pre>
-errno = 0;
-                    </pre>
-                </td>
-            </tr>
-            <tr>
-                <td>EXPR_RETURNSOFTERR(s_err)</td>
-                <td>If soft errors are on, set *val to 0.0 and
-                    return EXPR_ERROR_NOERROR.  Else return e.</td>
-                <td>
-                    <pre>
-if(exprGetSoftErrors(o))
-    {
-    *val = 0.0;
-    return EXPR_ERROR_NOERROR;
-    }
-else
-    {
-    return s_err;
-    }
-                    </pre>
-                </td>
-            </tr>
             <tr>
                 <td>EXPR_CHECKBREAK()</td>
                 <td>If breaker function returns nonzero, stop</td>
@@ -685,25 +597,6 @@ int func_name##(struct _exprObj *o, struct _exprNode *n, int count, EXPRTYPE **r
         </table>
         <p>If you use any of these macros inside any conditional or
             loop, make sure you put them in braces so it will work right.<p>
-        <p><b>Correct example:</b>
-            <ul>
-                <pre>
-if(d2 == 0.0)
-    {
-    EXPR_RETURNSOFTERR(EXPR_ERROR_OUTOFRANGE);
-    }
-                </pre>
-            </ul>
-        </p>
-        <p><b>Incorrect example:</b>
-            <ul>
-                <pre>
-if(d2 == 0.0)
-    EXPR_RETURNSOFTERR(EXPR_ERROR_OUTOFRANGE);
-    /* This might not work correctly */
-                </pre>
-            </ul>
-        </p>
     </blockquote>
 </div>
 
@@ -713,18 +606,10 @@ if(d2 == 0.0)
         <p><b>Headers:</b>
             <ul>
                 <li>expreval.h - Include file for C usage</li>
-                <li>expreval.hpp - Include file for C++ wrappers.
-                    No reference is provided for the C++ wrappers.
-                    Read this file to understand how they work.
-                    It is recommended that you make you own
-                    wrapper classes that are better suited
-                    to your purpose.</li>
             </ul>
         <p>
         <p><b>Defines:</b>
             <ul>
-                <li>EXPR_VERSIONMAJOR - Major version number of the ExprEval interface (header)</li>
-                <li>EXPR_VERSIONMINOR - Minor version number of the ExprEval interface (header)</li>
                 <li>EXPR_MAXIDENTSIZE - Maximum identifier, constant,
                     or function name size</li>
                 <li>EXPR_ERROR_NOERROR - No error has occurred</li>
@@ -766,8 +651,6 @@ if(d2 == 0.0)
                     it does not exist or has not been parsed successfully.</li>
                 <li>EXPR_ERROR_UNABLETOASSIGN - Unable to do an assignment because
                     a variable list has not been associated with the expression object</li>
-                <li>EXPR_ERROR_OUTOFRANGE - A parameter to an expression function was
-                    invalid for that function, or the function caused an overflow to occur</li>
                 <li>EXPR_ERROR_DIVBYZERO - An attemp to divide by zero has occured</li>
                 <li>EXPR_ERROR_NOVARLIST - No variable list for the expression</li>
                 <li>EXPR_ERROR_BREAK - The expression was broken by the break function</li>
@@ -847,26 +730,6 @@ if(d2 == 0.0)
                         <li>max - Maximum number of arguments for the function, negative for no maximum</li>
                         <li>refmin - Minimum number of ref arguments</li>
                         <li>refmax - Maxmimum number of ref arguments</li>
-                    </ul>
-                    Returns:
-                    <ul>
-                        <li>Error code of the function</li>
-                    </ul>
-                </li><br>
-                <li>int exprFuncListGet(exprFuncList *f, exprFuncType *ptr, char *name, int *min, int *max, int *refmin, int *refmax);<br>
-                    Comments:
-                    <ul>
-                        <li>Get function information from the function list</li>
-                    </ul>
-                    Parameters:
-                    <ul>
-                        <li>*f - Pointer to the function list</li>
-                        <li>*ptr - Pointer to a pointer to a custom function</li>
-                        <li>*name - Name of the function to get</li>
-                        <li>*min - Pointer to variable to get min data</li>
-                        <li>*max - Pointer to variable to get max data</li>
-                        <li>*refmin - Pointer to variable to get min ref data</li>
-                        <li>*refmax - Pointer to variable to get max ref data</li>
                     </ul>
                     Returns:
                     <ul>
@@ -1097,19 +960,23 @@ if(d2 == 0.0)
                 <li>int exprEval(exprObj *o, EXPRTYPE *val);<br>
                     Comments:
                     <ul>
-                        <li>Evaluate a parsed expression</li>
+                        <li>Evaluate a parsed expression.  This function does not
+                        reset the breaker count at each call, but instead accumulates
+                        the count until the breaker function is called.  Then the count
+                        is reset to the value specified in exprSetBreakerCount.</li>
                     </ul>
                     Paramters:
                     <ul>
                         <li>*o - Expression object to evaluate</li>
-                        <li>*val = Pointer to variable to get result of evaluation</li>
+                        <li>*val = Pointer to variable to get result of evaluation.
+                            This can be NULL if the result is not needed.</li>
                     </ul>
                     Returns:
                     <ul>
                         <li>Error code of the function</li>
                     </ul>
                 </li><br>
-                <li>int exprEvalNode(exprObj *o, exprNode *n, EXPRTYPE *val);<br>
+                <li>int exprEvalNode(exprObj *o, exprNode *n, int p, EXPRTYPE *val);<br>
                     Comments:
                     <ul>
                         <li>Evaluate a node of an expression.
@@ -1118,7 +985,8 @@ if(d2 == 0.0)
                     Parameters:
                     <ul>
                         <li>*o - Expression object being used</li>
-                        <li>*n - Pointer to node to evaluate</li>
+                        <li>*n - Pointer to a single node or list of nodes to evaluate</li>
+                        <li>p - Index to the node to evaluate</li>
                         <li>*val - Pointer to variable to get evaluation result</li>
                     </ul>
                     Returns:
@@ -1224,21 +1092,6 @@ if(d2 == 0.0)
                         <li>User data</li>
                     </ul>
                 </li><br>
-                <li>int exprGetSoftErrors(exprObj *o);<br>
-                    Comments:
-                    <ul>
-                        <li>Gets the soft error status.  0 means
-                            off, anything else means on</li>
-                    </ul>
-                    Parameters:
-                    <ul>
-                        <li>*o - expression object</li>
-                    </ul>
-                    Returns:
-                    <ul>
-                        <li>Soft error status of the expression</li>
-                    </ul>
-                </li><br>
                 <li>void exprSetUserData(exprObj *o, void *userdata);<br>
                     Comments:
                     <ul>
@@ -1254,22 +1107,6 @@ if(d2 == 0.0)
                         <li>Nothing</li>
                     </ul>
                 </li><br>
-                <li>void exprSetSoftErrors(exprObj *o, int softerr);<br>
-                    Comments:
-                    <ul>
-                        <li>Set soft error on or off. 0 means off, anything
-                            else means on</li>
-                    </ul>
-                    Parameters:
-                    <ul>
-                        <li>*o - expresion object</li>
-                        <li>softerr - value to set the soft errors to</li>
-                    </ul>
-                    Returns:
-                    <ul>
-                        <li>Nothing</li>
-                    </ul>
-                </li><br>
                 <li>void exprSetBreakerCount(exprObj *o, int count);<br>
                     Comments:
                     <ul>
@@ -1278,7 +1115,10 @@ if(d2 == 0.0)
                             function is tested once every 100000 times the
                             exprEvalNode function is called for an expression.
                             A smaller value tests the breaker function more often
-                            and a larger value tests the breaker function less.</li>
+                            and a larger value tests the breaker function less. The
+                            breaker value is NOT reset during each call to exprEval,
+                            but is accumulated across calles to exprEval
+                            until the breaker function is finally called.</li>
                     </ul>
                     Parameters:
                     <ul>
@@ -1327,25 +1167,6 @@ if(d2 == 0.0)
                         <li>0 on invalid. anything else on valid</li>
                     </ul>
                 </li><br>
-                <li>int exprValidNumber(char *num);<br>
-                    Comments:
-                    <ul>
-                        <li>Determines if a number is valid.  A
-                            valid number may contain digits
-                            and a decimal point.  It must contain
-                            digits somewhere for it to be valid.
-                            A + or - sign is invalid because
-                            this is handled elsewhere by the libray.</li>
-                    </ul>
-                    Parameters:
-                    <ul>
-                        <li>*num - number to check</li>
-                    </ul>
-                    Returns:
-                    <ul>
-                        <li>0 on invalid. anything else on valid</li>
-                    </ul>
-                </li>
             </ul>
         </p>
     </blockquote>
@@ -1355,8 +1176,7 @@ if(d2 == 0.0)
     <h2><a name="Compiling">Compiling the ExprEval library</a></h2>
     <p>Compiling the ExprEval library is pretty simple.  Just
         compile all of the source files (*.c) and link them into
-        a library.  You need to keep "expreval.h" and "expreval.hpp"
-        for the header files.</p>
+        a library.  You need to keep "expreval.h" for the header file.</p>
     <p>The library used to have an option of fast variable access or
         slow variable access by using EXPR_FAST_VAR_ACCES.  Now,
         fast variable access is used whether EXPR_FAST_VAR_ACCESS
@@ -1367,37 +1187,12 @@ if(d2 == 0.0)
         edit the file "exprincl.h"  This file includes any other files
         needed.  For example, on Borland compilers you will
         need to change the include of "memory.h" to "mem.h".
-        If some functions are not provided for your system, Edit the
+        If some functions are not provided for your system, add the
         file "exprincl.c".  You will need to add the functions as
         they are used by the library, and make them call the correct
         function for your system and return the value as the library
         expects.  You should not have to change to much.  I have
         tried to stick as close to ANSI/ISO C as I can.</p>
-    <p><b>Example:</b>
-        <blockquote>
-            <pre>
-/* This example assumes that your compiler does not have
-   the malloc or free functions. */
-void *malloc(int size)
-    {
-    /* Assume that you must request pages of memory instead */
-    int pages_needed;
-
-    /* Figure out how many pages are needed */
-    pages_needed = (size + (PAGE_SIZE - 1)) / PAGE_SIZE;
-
-    /* Assume alloc_pages allocates a number of pages and
-        returns a pointer to them or NULL */
-    return alloc_pages(pages_needed);
-    }
-
-void free(void *ptr)
-    {
-    dealloc_pages(ptr);
-    }
-            </pre>
-        </blockquote>
-    </p>
 </div>
 
 <div align="left" class="container">
@@ -1426,6 +1221,15 @@ void free(void *ptr)
                 There are are also no decent reasons to delete
                 variables from a variable list until you are completely
                 done and delete all of them.</li>
+            <li>There used to be a lot of math error checking.  In order
+                to increase evaluation speed, much of the checking has
+                been removed, except for divide by zero.  An attempt
+                to divide by zero will cause that part of the expresion
+                to be zero. '4+1/0' is equal to 4, for example.  Math
+                routine error checking has also been removed to favor
+                speed.  It is advised to, if error checking is needed,
+                use exception handling or some other means of capturing
+                errors.</li>
         </ul>
     </p>
 </div>
