@@ -16,8 +16,8 @@
 #include <stddef.h>
 
 /* Include config and main expreval header */
-#include "exprconf.h"
 #include "expreval.h"
+#include "exprconf.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -101,8 +101,6 @@ enum
     EXPR_NODEFUNC_FOR,
     EXPR_NODEFUNC_MANY
     };
-
-
 
 /* Expression object */
 struct _exprObj
@@ -199,6 +197,8 @@ struct _exprNode
             } function;
         } data;
     };
+
+
 
 /* Functions for function lists */
 int exprFuncListAddType(exprFuncList *f, char *name, int type, int min, int max, int refmin, int refmax);

@@ -13,6 +13,8 @@
 #include "exprpriv.h"
 
 /* Defines for error checking */
+#include <errno.h>
+
 #if(EXPR_ERROR_LEVEL >= EXPR_ERROR_LEVEL_CHECK)
 #define EXPR_RESET_ERR() errno = 0
 #define EXPR_CHECK_ERR() if(errno) return EXPR_ERROR_OUTOFRANGE

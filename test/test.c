@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <setjmp.h>
 
-#include "expreval.h"
+#include "../expreval.h"
 
 /* Test function */
 EXPR_FUNCTIONSOLVER(my_func)

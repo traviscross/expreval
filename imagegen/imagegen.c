@@ -26,7 +26,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <setjmp.h>
-#include "expreval.h"
+#include "../expreval.h"
 
 
 /* Prompt user for input */
