@@ -28,6 +28,20 @@ goes for constant lists.  Variable lists make it where
 one expression can depend on a variable set in another.
 
 
+
+Thursday, May 4, 2006
+---------------------
+Version 2.0
+
+* All internal functions are evaluated directly in the exprEvalNode call.
+  This gives some speed increase.
+* Removed parameter and reference count macros as well as functin creation
+  macro.  Parameter and reference count information can be set when adding
+  a function solver.
+* Removed exprMsgFuncType, since it is unused by the library.
+* Changed much of the internal names from one-letter variable names to
+  more meaningful names.
+
 Thursday, December 1, 2005
 --------------------------
 Version 1.8

@@ -44,18 +44,18 @@ typedef struct _exprToken
 #define EXPR_TOKEN_HAT 13
 
 /* Internal functions */
-int exprMultiParse(exprObj *o, exprNode *n, exprToken *tokens, int count);
-int exprInternalParse(exprObj *o, exprNode *n, exprToken *tokens, int start, int end);
-int exprInternalParseAssign(exprObj *o, exprNode *n, exprToken *tokens, int start, int end, int index);
-int exprInternalParseAdd(exprObj *o, exprNode *n, exprToken *tokens, int start, int end, int index);
-int exprInternalParseSub(exprObj *o, exprNode *n, exprToken *tokens, int start, int end, int index);
-int exprInternalParseMul(exprObj *o, exprNode *n, exprToken *tokens, int start, int end, int index);
-int exprInternalParseDiv(exprObj *o, exprNode *n, exprToken *tokens, int start, int end, int index);
-int exprInternalParsePosNeg(exprObj *o, exprNode *n, exprToken *tokens, int start, int end, int index);
-int exprInternalParseExp(exprObj *o, exprNode *n, exprToken *tokens, int start, int end, int index);
-int exprInternalParseFunction(exprObj *o, exprNode *n, exprToken *tokens, int start, int end, int p1, int p2);
-int exprInternalParseVarVal(exprObj *o, exprNode *n, exprToken *tokens, int start, int end);
-int exprStringToTokenList(exprObj *o, char *expr, exprToken **tokens, int *count);
+int exprMultiParse(exprObj *obj, exprNode *node, exprToken *tokens, int count);
+int exprInternalParse(exprObj *obj, exprNode *node, exprToken *tokens, int start, int end);
+int exprInternalParseAssign(exprObj *obj, exprNode *node, exprToken *tokens, int start, int end, int index);
+int exprInternalParseAdd(exprObj *obj, exprNode *node, exprToken *tokens, int start, int end, int index);
+int exprInternalParseSub(exprObj *obj, exprNode *node, exprToken *tokens, int start, int end, int index);
+int exprInternalParseMul(exprObj *obj, exprNode *node, exprToken *tokens, int start, int end, int index);
+int exprInternalParseDiv(exprObj *obj, exprNode *node, exprToken *tokens, int start, int end, int index);
+int exprInternalParsePosNeg(exprObj *obj, exprNode *node, exprToken *tokens, int start, int end, int index);
+int exprInternalParseExp(exprObj *obj, exprNode *node, exprToken *tokens, int start, int end, int index);
+int exprInternalParseFunction(exprObj *obj, exprNode *node, exprToken *tokens, int start, int end, int p1, int p2);
+int exprInternalParseVarVal(exprObj *obj, exprNode *node, exprToken *tokens, int start, int end);
+int exprStringToTokenList(exprObj *obj, char *expr, exprToken **tokens, int *count);
 void exprFreeTokenList(exprToken *tokens, int count);
 
 /* This frees a token list */
@@ -76,7 +76,7 @@ void exprFreeTokenList(exprToken *tokens, int count)
     }
 
 /* This converts an expression string to a token list */
-int exprStringToTokenList(exprObj *o, char *expr, exprToken **tokens, int *count)
+int exprStringToTokenList(exprObj *obj, char *expr, exprToken **tokens, int *count)
     {
     int found;
     exprToken *list;
@@ -372,8 +372,8 @@ int exprStringToTokenList(exprObj *o, char *expr, exprToken **tokens, int *count
                                 /* Is the value to large */
                                 if(ilen > EXPR_MAXIDENTSIZE)
                                     {
-                                    o->starterr = start;
-                                    o->enderr = pos;
+                                    obj->starterr = start;
+                                    obj->enderr = pos;
                                     exprFreeTokenList(list, found);
                                     return EXPR_ERROR_BADIDENTIFIER;
                                     }
@@ -410,8 +410,8 @@ int exprStringToTokenList(exprObj *o, char *expr, exprToken **tokens, int *count
                                 /* Is the value to large */
                                 if(ilen > EXPR_MAXIDENTSIZE)
                                     {
-                                    o->starterr = start;
-                                    o->enderr = pos;
+                                    obj->starterr = start;
+                                    obj->enderr = pos;
                                     exprFreeTokenList(list, found);
                                     return EXPR_ERROR_BADIDENTIFIER;
                                     }
@@ -442,7 +442,7 @@ int exprStringToTokenList(exprObj *o, char *expr, exprToken **tokens, int *count
                         else
                             {
                             /* Unknown */
-                            o->starterr = o->enderr = pos;
+                            obj->starterr = obj->enderr = pos;
                             exprFreeTokenList(list, found);
                             return EXPR_ERROR_INVALIDCHAR;
                             }
@@ -480,7 +480,7 @@ int exprStringToTokenList(exprObj *o, char *expr, exprToken **tokens, int *count
 
 
 /* This is the main parsing routine */
-int exprParse(exprObj *o, char *expr)
+int exprParse(exprObj *obj, char *expr)
     {
     exprToken *tokens;
     int count;
@@ -488,17 +488,17 @@ int exprParse(exprObj *o, char *expr)
     exprNode *tmp;
 
     /* Make sure an object was passed */
-    if(o == NULL)
+    if(obj == NULL)
         return EXPR_ERROR_NULLPOINTER;
 
     /* Clear expression error position */
-    o->starterr = o->enderr = -1;
+    obj->starterr = obj->enderr = -1;
 
     /* Have we already been parsed? */
-    if(o->parsedbad != 0)
+    if(obj->parsedbad != 0)
         return EXPR_ERROR_ALREADYPARSEDBAD;
 
-    if(o->parsedgood != 0)
+    if(obj->parsedgood != 0)
         return EXPR_ERROR_ALREADYPARSEDGOOD;
 
     /* Make sure an expression was passed */
@@ -506,7 +506,7 @@ int exprParse(exprObj *o, char *expr)
         return EXPR_ERROR_NULLPOINTER;
 
     /* Create token list */
-    err = exprStringToTokenList(o, expr, &tokens, &count);
+    err = exprStringToTokenList(obj, expr, &tokens, &count);
     if(err != EXPR_ERROR_NOERROR)
         return err;
     
@@ -518,10 +518,10 @@ int exprParse(exprObj *o, char *expr)
         return EXPR_ERROR_MEMORY;
         }
 
-    o->headnode = tmp;
+    obj->headnode = tmp;
 
     /* Call the multiparse routine to parse subexpressions */
-    err = exprMultiParse(o, tmp, tokens, count);
+    err = exprMultiParse(obj, tmp, tokens, count);
 
     /* Free the token list */
     exprFreeTokenList(tokens, count);
@@ -529,13 +529,13 @@ int exprParse(exprObj *o, char *expr)
     /* successful parse? */
     if(err == EXPR_ERROR_NOERROR)
         {
-        o->parsedgood = 1;
-        o->parsedbad = 0;
+        obj->parsedgood = 1;
+        obj->parsedbad = 0;
         }
     else
         {
-        o->parsedbad = 1;
-        o->parsedgood = 0;
+        obj->parsedbad = 1;
+        obj->parsedgood = 0;
         }
 
     return err;
@@ -543,7 +543,7 @@ int exprParse(exprObj *o, char *expr)
 
 
 /* Parse the subexpressions, each ending with semicolons */
-int exprMultiParse(exprObj *o, exprNode *n, exprToken *tokens, int count)
+int exprMultiParse(exprObj *obj, exprNode *node, exprToken *tokens, int count)
     {
     int pos, plevel, last;
     int num, cur, err;
@@ -569,8 +569,8 @@ int exprMultiParse(exprObj *o, exprNode *n, exprToken *tokens, int count)
 
                 if(plevel < 0)
                     {
-                    o->starterr = tokens[pos].start;
-                    o->enderr = tokens[pos].end;
+                    obj->starterr = tokens[pos].start;
+                    obj->enderr = tokens[pos].end;
                     return EXPR_ERROR_UNMATCHEDPAREN;
                     }
 
@@ -582,8 +582,8 @@ int exprMultiParse(exprObj *o, exprNode *n, exprToken *tokens, int count)
                     if(last == pos - 1 || pos == 0)
                         {
                         /* last semicolon is before us or we are at the start */
-                        o->starterr = tokens[pos].start;
-                        o->enderr = tokens[pos].end;
+                        obj->starterr = tokens[pos].start;
+                        obj->enderr = tokens[pos].end;
                         return EXPR_ERROR_SYNTAX;
                         }
                     else
@@ -595,8 +595,8 @@ int exprMultiParse(exprObj *o, exprNode *n, exprToken *tokens, int count)
                 else
                     {
                     /* Semicolon should not be in a parenthesis */
-                    o->starterr = tokens[pos].start;
-                    o->enderr = tokens[pos].end;
+                    obj->starterr = tokens[pos].start;
+                    obj->enderr = tokens[pos].end;
                     return EXPR_ERROR_SYNTAX;
                     }
 
@@ -621,9 +621,9 @@ int exprMultiParse(exprObj *o, exprNode *n, exprToken *tokens, int count)
         return EXPR_ERROR_MEMORY;
 
     /* Set the current node's data */
-    n->type = EXPR_NODETYPE_MULTI;
-    n->data.oper.nodes = tmp;
-    n->data.oper.count = num;
+    node->type = EXPR_NODETYPE_MULTI;
+    node->data.oper.nodes = tmp;
+    node->data.oper.nodecount = num;
 
     /* now we parse each subexpression */
     last = 0; /* Not for last semicolon, but for first char of subexpr */
@@ -634,7 +634,7 @@ int exprMultiParse(exprObj *o, exprNode *n, exprToken *tokens, int count)
         if(tokens[pos].type == EXPR_TOKEN_SEMICOLON)
             {
             /* Everything from last up to pos - 1 is a parameter */
-            err = exprInternalParse(o, &(tmp[cur]), tokens, last, pos - 1);
+            err = exprInternalParse(obj, &(tmp[cur]), tokens, last, pos - 1);
             if(err != EXPR_ERROR_NOERROR)
                 return err;
 
@@ -648,7 +648,7 @@ int exprMultiParse(exprObj *o, exprNode *n, exprToken *tokens, int count)
     }
 
 /* This function parses each subnode and recurses if needed */
-int exprInternalParse(exprObj *o, exprNode *n, exprToken *tokens, int start, int end)
+int exprInternalParse(exprObj *obj, exprNode *node, exprToken *tokens, int start, int end)
     {
     int pos;
     int plevel = 0; /* Paren level */
@@ -686,8 +686,8 @@ int exprInternalParse(exprObj *o, exprNode *n, exprToken *tokens, int start, int
 
                 if(plevel < 0)
                     {
-                    o->starterr = tokens[pos].start;
-                    o->enderr = tokens[pos].end;
+                    obj->starterr = tokens[pos].start;
+                    obj->enderr = tokens[pos].end;
                     return EXPR_ERROR_UNMATCHEDPAREN;
                     }
                 break;
@@ -765,15 +765,15 @@ int exprInternalParse(exprObj *o, exprNode *n, exprToken *tokens, int start, int
 
     /* First, take care of assignment */
     if(assignindex != -1)
-        return exprInternalParseAssign(o, n, tokens, start, end, assignindex);
+        return exprInternalParseAssign(obj, node, tokens, start, end, assignindex);
 
     /* Addition or subtraction is next */
     if(addsubindex != -1)
         {
         if(tokens[addsubindex].type == EXPR_TOKEN_PLUS)
-            return exprInternalParseAdd(o, n, tokens, start, end, addsubindex);
+            return exprInternalParseAdd(obj, node, tokens, start, end, addsubindex);
         else
-            return exprInternalParseSub(o, n, tokens, start, end, addsubindex);
+            return exprInternalParseSub(obj, node, tokens, start, end, addsubindex);
         }
 
 
@@ -781,18 +781,18 @@ int exprInternalParse(exprObj *o, exprNode *n, exprToken *tokens, int start, int
     if(muldivindex != -1)
         {
         if(tokens[muldivindex].type == EXPR_TOKEN_ASTERISK)
-            return exprInternalParseMul(o, n, tokens, start, end, muldivindex);
+            return exprInternalParseMul(obj, node, tokens, start, end, muldivindex);
         else
-            return exprInternalParseDiv(o, n, tokens, start, end, muldivindex);
+            return exprInternalParseDiv(obj, node, tokens, start, end, muldivindex);
         }
 
     /* Exponent */
     if(expindex != -1)
-        return exprInternalParseExp(o, n, tokens, start, end, expindex);
+        return exprInternalParseExp(obj, node, tokens, start, end, expindex);
 
     /* Negation */
     if(posnegindex != -1)
-        return exprInternalParsePosNeg(o, n, tokens, start, end, posnegindex);
+        return exprInternalParsePosNeg(obj, node, tokens, start, end, posnegindex);
 
 
     /* Grouped parenthesis */
@@ -804,13 +804,13 @@ int exprInternalParse(exprObj *o, exprNode *n, exprToken *tokens, int start, int
             /* Anything between them */
             if(fgclose > fgopen + 1)
                 {
-                return exprInternalParse(o, n, tokens, fgopen + 1, fgclose - 1);
+                return exprInternalParse(obj, node, tokens, fgopen + 1, fgclose - 1);
                 }
             else
                 {
                 /* Nothing between them */
-                o->starterr = tokens[fgopen].start;
-                o->enderr = tokens[fgclose].end;
+                obj->starterr = tokens[fgopen].start;
+                obj->enderr = tokens[fgclose].end;
                 return EXPR_ERROR_SYNTAX;
                 }
             }
@@ -824,18 +824,18 @@ int exprInternalParse(exprObj *o, exprNode *n, exprToken *tokens, int start, int
         /* Closing paren should be at end */
         if(fgclose == end)
             {
-            return exprInternalParseFunction(o, n, tokens, start, end, fgopen, fgclose);
+            return exprInternalParseFunction(obj, node, tokens, start, end, fgopen, fgclose);
             }
         else /* Closing paren not at end */
             return EXPR_ERROR_SYNTAX;
         }
 
     /* If it was none of the above, it must be a variable or value */
-    return exprInternalParseVarVal(o, n, tokens, start, end);
+    return exprInternalParseVarVal(obj, node, tokens, start, end);
     }
 
 /* Function to parse an assignment node */
-int exprInternalParseAssign(exprObj *o, exprNode *n, exprToken *tokens, int start, int end, int index)
+int exprInternalParseAssign(exprObj *obj, exprNode *node, exprToken *tokens, int start, int end, int index)
     {
     exprNode *tmp;
     exprValList *l;
@@ -844,16 +844,16 @@ int exprInternalParseAssign(exprObj *o, exprNode *n, exprToken *tokens, int star
     /* Make sure the equal sign is not at the start or end */
     if(index != start + 1 || index >= end)
         {
-        o->starterr = tokens[index].start;
-        o->enderr = tokens[index].end;
+        obj->starterr = tokens[index].start;
+        obj->enderr = tokens[index].end;
         return EXPR_ERROR_SYNTAX;
         }
 
     /* Make sure item before equal sign is an identifier */
     if(tokens[index - 1].type != EXPR_TOKEN_IDENTIFIER)
         {
-        o->starterr = tokens[index - 1].start;
-        o->enderr = tokens[index].end;
+        obj->starterr = tokens[index - 1].start;
+        obj->enderr = tokens[index].end;
         return EXPR_ERROR_SYNTAX;
         }
 
@@ -866,8 +866,8 @@ int exprInternalParseAssign(exprObj *o, exprNode *n, exprToken *tokens, int star
 
 
     /* Set the data */
-    n->type = EXPR_NODETYPE_ASSIGN;
-    n->data.assign.node = tmp;
+    node->type = EXPR_NODETYPE_ASSIGN;
+    node->data.assign.node = tmp;
 
 
     /*
@@ -877,20 +877,20 @@ int exprInternalParseAssign(exprObj *o, exprNode *n, exprToken *tokens, int star
     */
 
     /* Make sure name is not a constant name */
-    l = exprGetConstList(o);
+    l = exprGetConstList(obj);
     if(l)
         {
         exprValListGetAddress(l, tokens[index - 1].data.str, &addr);
         if(addr)
             {
-            o->starterr = tokens[index - 1].start;
-            o->enderr = tokens[index].end;
+            obj->starterr = tokens[index - 1].start;
+            obj->enderr = tokens[index].end;
             return EXPR_ERROR_CONSTANTASSIGN;
             }
         }
 
     /* Get the variable list */
-    l = exprGetVarList(o);
+    l = exprGetVarList(obj);
     if(l == NULL)
         return EXPR_ERROR_NOVARLIST;
 
@@ -906,14 +906,14 @@ int exprInternalParseAssign(exprObj *o, exprNode *n, exprToken *tokens, int star
             return EXPR_ERROR_MEMORY; /* Could not add variable to list */
         }
 
-    n->data.assign.var_addr = addr;
+    node->data.assign.vaddr = addr;
 
     /* Parse the subnode */
-    return exprInternalParse(o, tmp, tokens, index + 1, end);
+    return exprInternalParse(obj, tmp, tokens, index + 1, end);
     }
 
 /* Function to parse an addition operator */
-int exprInternalParseAdd(exprObj *o, exprNode *n, exprToken *tokens, int start, int end, int index)
+int exprInternalParseAdd(exprObj *obj, exprNode *node, exprToken *tokens, int start, int end, int index)
     {
     exprNode *tmp;
     int err;
@@ -921,8 +921,8 @@ int exprInternalParseAdd(exprObj *o, exprNode *n, exprToken *tokens, int start, 
     /* Make sure plus sign is at a good place */
     if(index <= start || index >= end)
         {
-        o->starterr = tokens[index].start;
-        o->enderr = tokens[index].end;
+        obj->starterr = tokens[index].start;
+        obj->enderr = tokens[index].end;
         return EXPR_ERROR_SYNTAX;
         }
 
@@ -933,21 +933,21 @@ int exprInternalParseAdd(exprObj *o, exprNode *n, exprToken *tokens, int start, 
 
 
     /* Set the data */
-    n->type = EXPR_NODETYPE_ADD;
-    n->data.oper.nodes = tmp;
-    n->data.oper.count = 2;
+    node->type = EXPR_NODETYPE_ADD;
+    node->data.oper.nodes = tmp;
+    node->data.oper.nodecount = 2;
 
     /* parse the left side */
-    err = exprInternalParse(o, &(tmp[0]), tokens, start, index - 1);
+    err = exprInternalParse(obj, &(tmp[0]), tokens, start, index - 1);
     if(err != EXPR_ERROR_NOERROR)
         return err;
 
     /* parse the right side */
-    return exprInternalParse(o, &(tmp[1]), tokens, index + 1, end);
+    return exprInternalParse(obj, &(tmp[1]), tokens, index + 1, end);
     }
 
 /* Function to parse a subtraction operator */
-int exprInternalParseSub(exprObj *o, exprNode *n, exprToken *tokens, int start, int end, int index)
+int exprInternalParseSub(exprObj *obj, exprNode *node, exprToken *tokens, int start, int end, int index)
     {
     exprNode *tmp;
     int err;
@@ -955,8 +955,8 @@ int exprInternalParseSub(exprObj *o, exprNode *n, exprToken *tokens, int start, 
     /* Make sure minus sign is at a good place */
     if(index <= start || index >= end)
         {
-        o->starterr = tokens[index].start;
-        o->enderr = tokens[index].end;
+        obj->starterr = tokens[index].start;
+        obj->enderr = tokens[index].end;
         return EXPR_ERROR_SYNTAX;
         }
 
@@ -967,21 +967,21 @@ int exprInternalParseSub(exprObj *o, exprNode *n, exprToken *tokens, int start, 
 
 
     /* Set the data */
-    n->type = EXPR_NODETYPE_SUBTRACT;
-    n->data.oper.nodes = tmp;
-    n->data.oper.count = 2;
+    node->type = EXPR_NODETYPE_SUBTRACT;
+    node->data.oper.nodes = tmp;
+    node->data.oper.nodecount = 2;
     
     /* parse the left side */
-    err = exprInternalParse(o, &(tmp[0]), tokens, start, index - 1);
+    err = exprInternalParse(obj, &(tmp[0]), tokens, start, index - 1);
     if(err != EXPR_ERROR_NOERROR)
         return err;
 
     /* parse the right side */
-    return exprInternalParse(o, &(tmp[1]), tokens, index + 1, end);
+    return exprInternalParse(obj, &(tmp[1]), tokens, index + 1, end);
     }
 
 /* Function to parse a multiplication operator */
-int exprInternalParseMul(exprObj *o, exprNode *n, exprToken *tokens, int start, int end, int index)
+int exprInternalParseMul(exprObj *obj, exprNode *node, exprToken *tokens, int start, int end, int index)
     {
     exprNode *tmp;
     int err;
@@ -989,8 +989,8 @@ int exprInternalParseMul(exprObj *o, exprNode *n, exprToken *tokens, int start, 
     /* Make sure times sign is at a good place */
     if(index <= start || index >= end)
         {
-        o->starterr = tokens[index].start;
-        o->enderr = tokens[index].end;
+        obj->starterr = tokens[index].start;
+        obj->enderr = tokens[index].end;
         return EXPR_ERROR_SYNTAX;
         }
 
@@ -1002,21 +1002,21 @@ int exprInternalParseMul(exprObj *o, exprNode *n, exprToken *tokens, int start, 
 
 
     /* Set the data */
-    n->type = EXPR_NODETYPE_MULTIPLY;
-    n->data.oper.nodes = tmp;
-    n->data.oper.count = 2;
+    node->type = EXPR_NODETYPE_MULTIPLY;
+    node->data.oper.nodes = tmp;
+    node->data.oper.nodecount = 2;
 
     /* parse the left side */
-    err = exprInternalParse(o, &(tmp[0]), tokens, start, index - 1);
+    err = exprInternalParse(obj, &(tmp[0]), tokens, start, index - 1);
     if(err != EXPR_ERROR_NOERROR)
         return err;
 
     /* parse the right side */
-    return exprInternalParse(o, &(tmp[1]), tokens, index + 1, end);
+    return exprInternalParse(obj, &(tmp[1]), tokens, index + 1, end);
     }
 
 /* Function to parse a division operator */
-int exprInternalParseDiv(exprObj *o, exprNode *n, exprToken *tokens, int start, int end, int index)
+int exprInternalParseDiv(exprObj *obj, exprNode *node, exprToken *tokens, int start, int end, int index)
     {
     exprNode *tmp;
     int err;
@@ -1024,8 +1024,8 @@ int exprInternalParseDiv(exprObj *o, exprNode *n, exprToken *tokens, int start, 
     /* Make sure slash sign is at a good place */
     if(index <= start || index >= end)
         {
-        o->starterr = tokens[index].start;
-        o->enderr = tokens[index].end;
+        obj->starterr = tokens[index].start;
+        obj->enderr = tokens[index].end;
         return EXPR_ERROR_SYNTAX;
         }
 
@@ -1037,21 +1037,21 @@ int exprInternalParseDiv(exprObj *o, exprNode *n, exprToken *tokens, int start, 
 
 
     /* Set the data */
-    n->type = EXPR_NODETYPE_DIVIDE;
-    n->data.oper.nodes = tmp;
-    n->data.oper.count = 2;
+    node->type = EXPR_NODETYPE_DIVIDE;
+    node->data.oper.nodes = tmp;
+    node->data.oper.nodecount = 2;
 
     /* parse the left side */
-    err = exprInternalParse(o, &(tmp[0]), tokens, start, index - 1);
+    err = exprInternalParse(obj, &(tmp[0]), tokens, start, index - 1);
     if(err != EXPR_ERROR_NOERROR)
         return err;
 
     /* parse the right side */
-    return exprInternalParse(o, &(tmp[1]), tokens, index + 1, end);
+    return exprInternalParse(obj, &(tmp[1]), tokens, index + 1, end);
     }
 
 /* Function to parse an exponent operator */
-int exprInternalParseExp(exprObj *o, exprNode *n, exprToken *tokens, int start, int end, int index)
+int exprInternalParseExp(exprObj *obj, exprNode *node, exprToken *tokens, int start, int end, int index)
     {
     exprNode *tmp;
     int err;
@@ -1059,8 +1059,8 @@ int exprInternalParseExp(exprObj *o, exprNode *n, exprToken *tokens, int start, 
     /* Make sure exponent sign is at a good place */
     if(index <= start || index >= end)
         {
-        o->starterr = tokens[index].start;
-        o->enderr = tokens[index].end;
+        obj->starterr = tokens[index].start;
+        obj->enderr = tokens[index].end;
         return EXPR_ERROR_SYNTAX;
         }
 
@@ -1072,35 +1072,35 @@ int exprInternalParseExp(exprObj *o, exprNode *n, exprToken *tokens, int start, 
 
 
     /* Set the data */
-    n->type = EXPR_NODETYPE_EXPONENT;
-    n->data.oper.nodes = tmp;
-    n->data.oper.count = 2;
+    node->type = EXPR_NODETYPE_EXPONENT;
+    node->data.oper.nodes = tmp;
+    node->data.oper.nodecount = 2;
 
     /* parse the left side */
-    err = exprInternalParse(o, &(tmp[0]), tokens, start, index - 1);
+    err = exprInternalParse(obj, &(tmp[0]), tokens, start, index - 1);
     if(err != EXPR_ERROR_NOERROR)
         return err;
 
     /* parse the right side */
-    return exprInternalParse(o, &(tmp[1]), tokens, index + 1, end);
+    return exprInternalParse(obj, &(tmp[1]), tokens, index + 1, end);
     }
 
 /* Function to parse for positive and negative */
-int exprInternalParsePosNeg(exprObj *o, exprNode *n, exprToken *tokens, int start, int end, int index)
+int exprInternalParsePosNeg(exprObj *obj, exprNode *node, exprToken *tokens, int start, int end, int index)
     {
     exprNode *tmp;
 
     /* Position should be the same as start */
     if(index != start)
         {
-        o->starterr = tokens[index].start;
-        o->enderr = tokens[index].end;
+        obj->starterr = tokens[index].start;
+        obj->enderr = tokens[index].end;
         return EXPR_ERROR_UNKNOWN;
         }
 
     /* If it is a positive, just parse the internal of it */
     if(tokens[index].type == EXPR_TOKEN_PLUS)
-        return exprInternalParse(o, n, tokens, index + 1, end);
+        return exprInternalParse(obj, node, tokens, index + 1, end);
     else
         {
         /* Allocate subnode */
@@ -1110,17 +1110,17 @@ int exprInternalParsePosNeg(exprObj *o, exprNode *n, exprToken *tokens, int star
 
 
         /* Set data */
-        n->type = EXPR_NODETYPE_NEGATE;
-        n->data.oper.nodes = tmp;
-        n->data.oper.count = 1;
+        node->type = EXPR_NODETYPE_NEGATE;
+        node->data.oper.nodes = tmp;
+        node->data.oper.nodecount = 1;
 
         /* Parse the subnode */
-        return exprInternalParse(o, tmp, tokens, index + 1, end);
+        return exprInternalParse(obj, tmp, tokens, index + 1, end);
         }
     }
 
 /* Function will parse a call to a function */
-int exprInternalParseFunction(exprObj *o, exprNode *n, exprToken *tokens, int start, int end, int p1, int p2)
+int exprInternalParseFunction(exprObj *obj, exprNode *node, exprToken *tokens, int start, int end, int p1, int p2)
     {
     int pos;
     int num, cur;
@@ -1138,7 +1138,7 @@ int exprInternalParseFunction(exprObj *o, exprNode *n, exprToken *tokens, int st
     EXPRTYPE **reftmp;
 
     /* We should have a function list */
-    l = exprGetFuncList(o);
+    l = exprGetFuncList(obj);
     if(l == NULL)
         return EXPR_ERROR_NOSUCHFUNCTION;
 
@@ -1153,8 +1153,8 @@ int exprInternalParseFunction(exprObj *o, exprNode *n, exprToken *tokens, int st
     /* Item before parenthesis should be an identifier */
     if(tokens[p1 - 1].type != EXPR_TOKEN_IDENTIFIER)
         {
-        o->starterr = tokens[p1 - 1].start;
-        o->enderr = tokens[p1].end;
+        obj->starterr = tokens[p1 - 1].start;
+        obj->enderr = tokens[p1].end;
         return EXPR_ERROR_SYNTAX;
         }
 
@@ -1165,8 +1165,8 @@ int exprInternalParseFunction(exprObj *o, exprNode *n, exprToken *tokens, int st
         {
         if(err == EXPR_ERROR_NOTFOUND)
             {
-            o->starterr = tokens[p1 - 1].start;
-            o->enderr = tokens[p1 - 1].end;
+            obj->starterr = tokens[p1 - 1].start;
+            obj->enderr = tokens[p1 - 1].end;
             return EXPR_ERROR_NOSUCHFUNCTION;
             }
         else
@@ -1176,8 +1176,8 @@ int exprInternalParseFunction(exprObj *o, exprNode *n, exprToken *tokens, int st
     /* Make sure the function exists */
     if(fptr == NULL && type == 0)
         {
-        o->starterr = tokens[p1 - 1].start;
-        o->enderr = tokens[p1 - 1].end;
+        obj->starterr = tokens[p1 - 1].start;
+        obj->enderr = tokens[p1 - 1].end;
         return EXPR_ERROR_NOSUCHFUNCTION;
         }
 
@@ -1206,8 +1206,8 @@ int exprInternalParseFunction(exprObj *o, exprNode *n, exprToken *tokens, int st
                     plevel--;
                     if(plevel < 0)
                         {
-                        o->starterr = tokens[pos].start;
-                        o->enderr = tokens[pos].end;
+                        obj->starterr = tokens[pos].start;
+                        obj->enderr = tokens[pos].end;
                         return EXPR_ERROR_UNMATCHEDPAREN;
                         }
                     break;
@@ -1248,29 +1248,29 @@ int exprInternalParseFunction(exprObj *o, exprNode *n, exprToken *tokens, int st
        could be used to specify no limit */
     if(argmin >= 0 && num < argmin)
         {
-        o->starterr = tokens[p1 - 1].start;
-        o->enderr = tokens[p2].end;
+        obj->starterr = tokens[p1 - 1].start;
+        obj->enderr = tokens[p2].end;
         return EXPR_ERROR_BADNUMBERARGUMENTS;
         }
 
     if(argmax >= 0 && num > argmax)
         {
-        o->starterr = tokens[p1 - 1].start;
-        o->enderr = tokens[p2].end;
+        obj->starterr = tokens[p1 - 1].start;
+        obj->enderr = tokens[p2].end;
         return EXPR_ERROR_BADNUMBERARGUMENTS;
         }
 
     if(refargmin >= 0 && refnum < refargmin)
         {
-        o->starterr = tokens[p1 - 1].start;
-        o->enderr = tokens[p2].end;
+        obj->starterr = tokens[p1 - 1].start;
+        obj->enderr = tokens[p2].end;
         return EXPR_ERROR_BADNUMBERARGUMENTS;
         }
 
     if(refargmax >= 0 && refnum > refargmax)
         {
-        o->starterr = tokens[p1 - 1].start;
-        o->enderr = tokens[p2].end;
+        obj->starterr = tokens[p1 - 1].start;
+        obj->enderr = tokens[p2].end;
         return EXPR_ERROR_BADNUMBERARGUMENTS;
         }
 
@@ -1300,13 +1300,13 @@ int exprInternalParseFunction(exprObj *o, exprNode *n, exprToken *tokens, int st
 
 
     /* Set this node's data */
-    n->type = EXPR_NODETYPE_FUNCTION;
-    n->data.function.fptr = fptr;
-    n->data.function.nodecount = num;
-    n->data.function.nodes = tmp;
-    n->data.function.refcount = refnum;
-    n->data.function.refitems = reftmp;
-    n->data.function.type = type;
+    node->type = EXPR_NODETYPE_FUNCTION;
+    node->data.function.fptr = fptr;
+    node->data.function.nodecount = num;
+    node->data.function.nodes = tmp;
+    node->data.function.refcount = refnum;
+    node->data.function.refs = reftmp;
+    node->data.function.type = type;
 
     /* parse each subnode */
     if(num + refnum > 0)
@@ -1340,35 +1340,35 @@ int exprInternalParseFunction(exprObj *o, exprNode *n, exprToken *tokens, int st
                                 {
                                 if(lv != pos - 2)
                                     {
-                                    o->starterr = tokens[lv].start;
-                                    o->enderr = tokens[pos].end;
+                                    obj->starterr = tokens[lv].start;
+                                    obj->enderr = tokens[pos].end;
                                     return EXPR_ERROR_SYNTAX;
                                     }
 
                                 /* It is a reference */
                                 if(tokens[lv + 1].type != EXPR_TOKEN_IDENTIFIER)
                                     {
-                                    o->starterr = tokens[lv].start;
-                                    o->enderr = tokens[lv + 1].end;
+                                    obj->starterr = tokens[lv].start;
+                                    obj->enderr = tokens[lv + 1].end;
                                     return EXPR_ERROR_SYNTAX;
                                     }
 
                                 
                                 /* Make sure it is not a constant */
-                                vars = exprGetConstList(o);
+                                vars = exprGetConstList(obj);
                                 if(vars)
                                     {
                                     exprValListGetAddress(vars, tokens[lv + 1].data.str, &addr);
                                     if(addr)
                                         {
-                                        o->starterr = tokens[lv].start;
-                                        o->enderr = tokens[lv + 1].start;
+                                        obj->starterr = tokens[lv].start;
+                                        obj->enderr = tokens[lv + 1].start;
                                         return EXPR_ERROR_REFCONSTANT;
                                         }
                                     }
 
                                 /* Get variable list */
-                                vars = exprGetVarList(o);
+                                vars = exprGetVarList(obj);
                                 if(vars == NULL)
                                     return EXPR_ERROR_NOVARLIST;
 
@@ -1394,7 +1394,7 @@ int exprInternalParseFunction(exprObj *o, exprNode *n, exprToken *tokens, int st
                                 }
                             else
                                 {
-                                err = exprInternalParse(o, &(tmp[cur]), tokens, lv, pos - 1);
+                                err = exprInternalParse(obj, &(tmp[cur]), tokens, lv, pos - 1);
                                 if(err != EXPR_ERROR_NOERROR)
                                     return err;
 
@@ -1413,34 +1413,34 @@ int exprInternalParseFunction(exprObj *o, exprNode *n, exprToken *tokens, int st
             {
             if(lv != p2 - 2)
                 {
-                o->starterr = tokens[lv].start;
-                o->enderr = tokens[p2].end; 
+                obj->starterr = tokens[lv].start;
+                obj->enderr = tokens[p2].end; 
                 return EXPR_ERROR_SYNTAX;
                 }
 
             /* It is a reference */
             if(tokens[lv + 1].type != EXPR_TOKEN_IDENTIFIER)
                 {
-                o->starterr = tokens[lv].start;
-                o->enderr = tokens[lv + 1].end;
+                obj->starterr = tokens[lv].start;
+                obj->enderr = tokens[lv + 1].end;
                 return EXPR_ERROR_SYNTAX;
                 }
             
             /* Make sure it is not a constant */
-            vars = exprGetConstList(o);
+            vars = exprGetConstList(obj);
             if(vars)
                 {
                 exprValListGetAddress(vars, tokens[lv + 1].data.str, &addr);
                 if(addr)
                     {
-                    o->starterr = tokens[lv].start;
-                    o->enderr = tokens[lv + 1].start;
+                    obj->starterr = tokens[lv].start;
+                    obj->enderr = tokens[lv + 1].start;
                     return EXPR_ERROR_REFCONSTANT;
                     }
                 }
 
             /* Get variable list */
-            vars = exprGetVarList(o);
+            vars = exprGetVarList(obj);
             if(vars == NULL)
                 return EXPR_ERROR_NOVARLIST;
 
@@ -1462,7 +1462,7 @@ int exprInternalParseFunction(exprObj *o, exprNode *n, exprToken *tokens, int st
             }
         else
             {
-            err = exprInternalParse(o, &(tmp[cur]), tokens, lv, p2 - 1);
+            err = exprInternalParse(obj, &(tmp[cur]), tokens, lv, p2 - 1);
             if(err != EXPR_ERROR_NOERROR)
                 return err;
             }
@@ -1473,7 +1473,7 @@ int exprInternalParseFunction(exprObj *o, exprNode *n, exprToken *tokens, int st
     }
 
 /* Parse a variable or value */
-int exprInternalParseVarVal(exprObj *o, exprNode *n, exprToken *tokens, int start, int end)
+int exprInternalParseVarVal(exprObj *obj, exprNode *node, exprToken *tokens, int start, int end)
     {
     exprValList *l;
     EXPRTYPE *addr;
@@ -1492,7 +1492,7 @@ int exprInternalParseVarVal(exprObj *o, exprNode *n, exprToken *tokens, int star
         /* we are an identifier */
 
         /* check to see if it is a constant */
-        l = exprGetConstList(o);
+        l = exprGetConstList(obj);
         if(l != NULL)
             {
             if(exprValListGetAddress(l, tokens[start].data.str, &addr) == EXPR_ERROR_NOERROR)
@@ -1504,8 +1504,8 @@ int exprInternalParseVarVal(exprObj *o, exprNode *n, exprToken *tokens, int star
                     constant value and it will reflect in expression
                 */
 
-                n->type = EXPR_NODETYPE_VARIABLE;
-                n->data.variable.var_addr = addr;
+                node->type = EXPR_NODETYPE_VARIABLE;
+                node->data.variable.vaddr = addr;
                 return EXPR_ERROR_NOERROR;
                 }
             }
@@ -1513,7 +1513,7 @@ int exprInternalParseVarVal(exprObj *o, exprNode *n, exprToken *tokens, int star
         /* Not found in the constant list, so it must be a variable */
 
         /* Set node type */
-        n->type = EXPR_NODETYPE_VARIABLE;
+        node->type = EXPR_NODETYPE_VARIABLE;
 
         /*
             The fast access method directly accesses the memory address
@@ -1522,7 +1522,7 @@ int exprInternalParseVarVal(exprObj *o, exprNode *n, exprToken *tokens, int star
         */
 
         /* Get the variable list */
-        l = exprGetVarList(o);
+        l = exprGetVarList(obj);
         if(l == NULL)
             return EXPR_ERROR_NOVARLIST;
 
@@ -1538,21 +1538,21 @@ int exprInternalParseVarVal(exprObj *o, exprNode *n, exprToken *tokens, int star
                 return EXPR_ERROR_MEMORY; /* Could not add variable to list */
             }
 
-        n->data.variable.var_addr = addr;
+        node->data.variable.vaddr = addr;
 
         return EXPR_ERROR_NOERROR;
         }
     else if(tokens[start].type == EXPR_TOKEN_VALUE)
         {
         /* we are a value */
-        n->type = EXPR_NODETYPE_VALUE;
-        n->data.value.value = tokens[start].data.val;
+        node->type = EXPR_NODETYPE_VALUE;
+        node->data.value.value = tokens[start].data.val;
         return EXPR_ERROR_NOERROR;
         }
     else
         {
-        o->starterr = tokens[start].start;
-        o->enderr = tokens[end].end;
+        obj->starterr = tokens[start].start;
+        obj->enderr = tokens[end].end;
         return EXPR_ERROR_UNKNOWN;
         }
     }

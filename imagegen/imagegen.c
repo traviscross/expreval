@@ -189,13 +189,13 @@ void main(void)
         longjmp(jumper, 1);
 
     /* Create expressions.  They share the same function/variable/constant lists */
-    if(exprCreate(&e_pix, f, v, c, NULL, NULL, NULL) != EXPR_ERROR_NOERROR)
+    if(exprCreate(&e_pix, f, v, c, NULL, NULL) != EXPR_ERROR_NOERROR)
         longjmp(jumper, 1);
 
-    if(exprCreate(&e_line, f, v, c, NULL, NULL, NULL) != EXPR_ERROR_NOERROR)
+    if(exprCreate(&e_line, f, v, c, NULL, NULL) != EXPR_ERROR_NOERROR)
         longjmp(jumper, 1);
 
-    if(exprCreate(&e_init, f, v, c, NULL, NULL, NULL) != EXPR_ERROR_NOERROR)
+    if(exprCreate(&e_init, f, v, c, NULL, NULL) != EXPR_ERROR_NOERROR)
         longjmp(jumper, 1);
 
 

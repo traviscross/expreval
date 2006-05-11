@@ -49,7 +49,6 @@ body {
             <a href="#Compiling">Compiling the ExprEval Library</a><br>
             <a href="#Drawbacks">Drawbacks/Problems</a><br>
             <a href="#Example">Example Use</a><br>
-            <a href="#ExampleFast">Example Use with Fast Variable Access</a><br>
         </ul>
     </h3>
 </div>
@@ -191,54 +190,46 @@ y = d * sin(r);
         <p><b>Function, variable, and constant list example:</b>
             <ul>
                 <pre>
-exprFuncList *f;
-exprValList *v;
-exprValList *c;
-exprObj *o;
+exprFuncList *flist;
+exprValList *vlist;
+exprValList *clist;
+exprObj *obj;
 EXPRTYPE result;
 int err;
 
 /* Create function list */
-err = exprFuncListCreate(&amp;f);
+err = exprFuncListCreate(&amp;flist);
 if(err != EXPR_ERROR_NOERROR)
     {
-    printf("Function List Creation Error %d\n", err);
-    return;
+    ...
     }
 
 /* Initialize internal functions */
-err = exprFuncListInit(f);
+err = exprFuncListInit(flist);
 if(err != EXPR_ERROR_NOERROR)
     {
-    printf("Function List Initialization Error %d\n", err);
-    printf("Some internal functions may not be usable\n");
+    ...
     }
 
 /* Create variable list */
-err = exprValListCreate(&amp;v);
+err = exprValListCreate(&amp;vlist);
 if(err != EXPR_ERROR_NOERROR)
     {
-    printf("Variable List Creation Error %d\n", err);
-    exprFuncListFree(f);
-    return;
+    ...
     }
 
 /* Create the constant list */
-err = exprValListCreate(&amp;c);
+err = exprValListCreate(&amp;clist);
 if(err != EXPR_ERROR_NOERROR)
     {
-    printf("Constant List Creation Error %d\n", err);
-    exprFuncListFree(f);
-    exprValListFree(v);
-    return;
+    ...
     }
 
 /* Initialize internal constants */
-err = exprValListInit(c);
+err = exprValListInit(clist);
 if(err != EXPR_ERROR_NOERROR)
     {
-    printf("Constant List Initialization Error %d\n", err);
-    printf("Some internal constants may not be usable\n");
+    ...
     }
 
 /* Add any application defined functions, constants, or variables to the lists here or down below */
@@ -248,14 +239,10 @@ if(err != EXPR_ERROR_NOERROR)
         <p><b>Expression object example:</b>
             <ul>
                 <pre>
-err = exprCreate(&o, f, v, c, NULL, 0);
+err = exprCreate(&obj, flist, vlist, clist, NULL, 0);
 if(err != EXPR_ERROR_NOERROR)
     {
-    printf("Expression Object Creation Error %d\n", err);
-    exprFuncListFree(f);
-    exprValListFree(c);
-    exprValListFree(v);
-    return;
+    ...
     }
 
 /* Add any application defined functions, constants, or variables to the lists here or down below.
@@ -268,15 +255,10 @@ if(err != EXPR_ERROR_NOERROR)
                 <pre>
 /* Functions and constants may be added or changed here */
 
-err = exprParse(o, "2+sin(M_PI)+3*x;");
+err = exprParse(obj, "2+sin(M_PI)+3*x;");
 if(err != EXPR_ERROR_NOERROR)
     {
-    printf("Expression Parse Error %d\n", err);
-
-    /* Free objects and return */
-    exprFree(o);
-
-    /* Free lists */
+    ...
     }
 
 /* Changes to the function or constant lists do not change the expression now */
@@ -288,10 +270,10 @@ if(err != EXPR_ERROR_NOERROR)
                 <pre>
 /* Add or change any variables */
 
-err = exprEval(o, &result);
+err = exprEval(obj, &result);
 if(err != EXPR_ERROR_NOERRO)
     {
-    printf("Expression Evaluation Error %d\n", err);
+    ...
     }
 else
     {
@@ -303,10 +285,10 @@ else
         <p><b>Free the expression object and lists example:</b>
             <ul>
                 <pre>
-exprFree(o);
-exprFreeValList(v);
-exprFreeValList(c);
-exprFreeFuncList(f);
+exprFree(obj);
+exprValListFree(vlist);
+exprValListFree(clist);
+exprFuncListFree(flist);
                 </pre>
             </ul>
         </p>
@@ -359,33 +341,29 @@ exprFreeFuncList(f);
 <div align="left" class="container">
     <h2><a name="CustomFunc">Creating Custom Functions</a></h2>
     <blockquote>
-        <p>Custom functions must use the C routines.  There are
-            several macros that make creating custom functions
-            easy.  They require that the variables passed to
-            these functions be the same though.
-            This is how a custom function should normally look:
+        <p>Custom functions can be created for use by the library.
+            This is how a function should look
             <ul>
                 <pre>
-int custom_func(struct _exprObj *o, struct _exprNode *n, int count, EXPRTYPE **refitems, int refcount, EXPRTYPE *val)
+int custom_func(exprObj *obj, exprNode *nodes, int nodecount, EXPRTYPE **refs, int refcount, EXPRTYPE *val)
     {
     }
                 </pre>
             </ul>
-            o is a pointer to the expression object that called
-            the function, n is a pointer to an array of nodes
-            that are the parameters of this function, count is
+
+            obj is a pointer to the expression object that called
+            the function, nodes is a pointer to an array of nodes
+            that are the parameters of this function, nodecount is
             the number of items in the array (the number of parameters),
-            refitems is an array of pointers to referenced variables,
+            refs is an array of pointers to referenced variables,
             refcount is the number of referenced variables,
             and val is a pointer to a variable to recieve the result
             of the function.  The function should return an error value
             indicating the error status of the function.
         </p>
-        <p>If the variables to the function are as above, the macros
-            will make working with them easier.  Solving a function
-            typically goes as follows:
+        <p>Solving a function typically goes as follows:
             <ul>
-                <li>Verifiy the number of arguments</li>
+                <li>Verifiy the number of arguments, if needed</li>
                 <li>Evaluate the subnodes that you need.  You do not have to
                     evaluate every subnode if you do not need it</li>
                 <li>Check for possible error conditions (division by zero)</li>
@@ -395,25 +373,25 @@ int custom_func(struct _exprObj *o, struct _exprNode *n, int count, EXPRTYPE **r
                 <li>return EXPR_ERROR_NOERROR</li>
             </ul>
         </p>
-        <p><b>Example without the macros:</b>
+        <p><b>Example:</b>
             <ul>
                 <pre>
-int custom_func(struct _exprObj *o, struct _exprNode *n, int count, EXPRTYPE **refitems, int refcount, EXPRTYPE *val)
+int custom_func(exprObj *obj, exprNode *nodes, int count, EXPRTYPE **refs, int refcount, EXPRTYPE *val)
     {
     int err;
     EXPRTYPE d1, d2;
 
     /* Need 2 arguments */
-    if(count != 2)
+    if(nodecount != 2)
         return EXPR_ERROR_BADNUMBERARGUMENTS;
 
     /* Eval arg 1 */
-    err = exprEvalNode(o, n, 0, &d1);
+    err = exprEvalNode(obj, nodes, 0, &d1);
     if(err != EXPR_ERROR_NOERROR)
         return err;
 
     /* Eval arg 2 */
-    err = exprEvalNode(o, n, 1, &d2);
+    err = exprEvalNode(obj, nodes, 1, &d2);
     if(err != EXPR_ERROR_NOERROR)
         return err;
 
@@ -433,170 +411,9 @@ int custom_func(struct _exprObj *o, struct _exprNode *n, int count, EXPRTYPE **r
                 </pre>
             </ul>
         </p>
-        <p><b>Same example with the macros:</b>
-            <ul>
-                <pre>
-EXPR_FUNCTIONSOLVER(custom_func)
-    {
-    int err;
-    EXPRTYPE d1, d2;
-
-    /* Require 2 arguments */
-    EXPR_REQUIRECOUNT(2);
-
-    /* Evaluate the nodes */
-    EXPR_EVALNODE(0, d1);
-    EXPR_EVALNODE(1, d2);
-
-    /* Make sure d2 is not 0.0 */
-    if(d2 == 0.0)
-        {
-        *val = 0.0;
-        return EXPR_ERROR_NOERROR;
-        }
-
-    /* Do math */
-    *val = atan(d1 / d2) /* No need to worry about division by zero */
-
-    /* Return */
-    return EXPR_ERROR_NOERROR;
-    }
-                </pre>
-            </ul>
-        </p>
         <p>In order to use a custom function, it must be added to
             a function list before the expression is parsed by using
             exprFuncListAdd</p>
-        <p>The following is a list of the macros, their uses, and
-            their definitions. They require the custom function
-            arguments to have the same names as above
-            (struct _exprObj *o, struct _exprNode *n, int count, EXPRTYPE **refitems, int refcount, EXPRTYPE *val)</p>
-
-        <table align="center" border="1" width="75%">
-            <tr>
-                <td align="center"><b>Macro</b></td>
-                <td align="center"><b>Usage</b></td>
-                <td align="center"><b>Definition</b></td>
-            </tr>
-            <tr>
-                <td>EXPR_EVALNODE(num, res)</td>
-                <td>Evaluate a node. num is the zero based node number
-                    to evaluate.  res is the variable to store the result
-                    in.</td>
-                <td>
-                    <pre>
-err = exprEvalNode(o, n, num, &res);
-if(err != EXPR_ERROR_NOERROR)
-    return err;
-                    </pre>
-                </td>
-            </tr>
-            <tr>
-                <td>EXPR_REQUIRECOUNT(c)</td>
-                <td>Require exactly c arguments.</td>
-                <td>
-                    <pre>
-if(count != c)
-    return EXPR_ERROR_BADNUMBERARGUMENTS;
-                    </pre>
-                </td>
-            </tr>
-            <tr>
-                <td>EXPR_REQUIRECOUNTMIN(c)</td>
-                <td>Require at least c arguments.</td>
-                <td>
-                    <pre>
-if(count < c)
-    return EXPR_ERROR_BADNUMBERARGUMENTS;
-                    </pre>
-                </td>
-            </tr>
-            <tr>
-                <td>EXPR_REQUIRECOUNTMAX(c)</td>
-                <td>Require at most c arguments.</td>
-                <td>
-                    <pre>
-if(count > c)
-    return EXPR_ERROR_BADNUMBERARGUMENTS;
-                    </pre>
-                </td>
-            </tr>
-            <tr>
-                <td>EXPR_REQUIRECOUNTRANGE(c1, c2)</td>
-                <td>Require at least c1 arguments and at
-                    most c2 arguments.</td>
-                <td>
-                    <pre>
-if(count < c1 || count > c2)
-    return EXPR_ERROR_BADNUMBERARGUMENTS;
-                    </pre>
-                </td>
-            </tr>
-            <tr>
-                <td>EXPR_REQUIREREFCOUNT(c)</td>
-                <td>Require exactly c ref arguments.</td>
-                <td>
-                    <pre>
-if(refcount != c)
-    return EXPR_ERROR_BADNUMBERARGUMENTS;
-                    </pre>
-                </td>
-            </tr>
-            <tr>
-                <td>EXPR_REQUIREREFCOUNTMIN(c)</td>
-                <td>Require at least c ref arguments.</td>
-                <td>
-                    <pre>
-if(refcount < c)
-    return EXPR_ERROR_BADNUMBERARGUMENTS;
-                    </pre>
-                </td>
-            </tr>
-            <tr>
-                <td>EXPR_REQUIREREFCOUNTMAX(c)</td>
-                <td>Require at most c ref arguments.</td>
-                <td>
-                    <pre>
-if(refcount > c)
-    return EXPR_ERROR_BADNUMBERARGUMENTS;
-                    </pre>
-                </td>
-            </tr>
-            <tr>
-                <td>EXPR_REQUIREREFCOUNTRANGE(c1, c2)</td>
-                <td>Require at least c1 ref arguments and at
-                    most c2 ref arguments.</td>
-                <td>
-                    <pre>
-if(refcount < c1 || refcount > c2)
-    return EXPR_ERROR_BADNUMBERARGUMENTS;
-                    </pre>
-                </td>
-            </tr>
-            <tr>
-                <td>EXPR_CHECKBREAK()</td>
-                <td>If breaker function returns nonzero, stop</td>
-                <td>
-                    <pre>
-if(exprGetBreakResult(o))
-    {
-    return EXPR_ERROR_BREAK;
-    }
-                    </pre>
-                </td>
-            </tr>
-            <tr>
-                <td>EXPR_FUNCTIONSOLVER(name)</td>
-                <td>Make creating function solvers easier</td>
-                <td>
-                    <pre>
-int func_name##(struct _exprObj *o, struct _exprNode *n, int count, EXPRTYPE **refitems, int refcount, EXPRTYPE *val)
-                    </pre>
-                </td>
-            </tr>
-        </table>
-        <p>If you use any of these macros inside any conditional or
-            loop, make sure you put them in braces so it will work right.<p>
     </blockquote>
 </div>
 
@@ -605,7 +422,7 @@ int func_name##(struct _exprObj *o, struct _exprNode *n, int count, EXPRTYPE **r
     <blockquote>
         <p><b>Headers:</b>
             <ul>
-                <li>expreval.h - Include file for C usage</li>
+                <li>expreval.h - Include file</li>
             </ul>
         <p>
         <p><b>Defines:</b>
@@ -657,6 +474,8 @@ int func_name##(struct _exprObj *o, struct _exprNode *n, int count, EXPRTYPE **r
                 <li>EXPR_ERROR_CONSTANTASSIGN - The expresion attempted to assign to a constant.</li>
                 <li>EXPR_ERROR_REFCONSTANT - The expression attempted to pass a constant as a
                     reference parameter.</li>
+                <li>EXPR_ERROR_OUTOFRANGE - A bad value was passed to a function.</li>
+                <li>EXPR_ERROR_USER - Custom error values need to be larger than this.</li>
             </ul>
         </p>
         <p><b>Objects:</b>
@@ -670,14 +489,11 @@ int func_name##(struct _exprObj *o, struct _exprNode *n, int count, EXPRTYPE **r
         <p><b>Types:</b>
             <ul>
                 <li>EXPRTYPE - Type for the value of an expression (double)</li>
-                <li>exprMsgFuncType - Message function pointer that can be used in custom functions
-                    to send messages to the application. Defined as:<br>
-                    typedef void (*exprMsgFuncType)(int type, int code, char *msg);</li>
                 <li>exprFuncType - Custom function type. Defined as:<br>
-                typedef int (*exprFuncType)(struct _exprObj *o, struct _exprNode *n, int count, EXPRTYPE **refitems, int refcount, EXPRTYPE *val);</li>
+                typedef int (*exprFuncType)(exprObj *obj, exprNode *nodes, int nodecount, EXPRTYPE **refs, int refcount, EXPRTYPE *val);</li>
                 <li>exprBreakFuncType  - Breaker function pointer to stop evaluation if the result is nonzero.
                     Defined as:<br>
-                    typedef int (*exprBreakFuncType)(struct _exprObj *o);</li>
+                    typedef int (*exprBreakFuncType)(exprObj *o);</li>
             </ul>
         </p>
         <p><b>Version information functions:</b>
@@ -701,14 +517,14 @@ int func_name##(struct _exprObj *o, struct _exprNode *n, int count, EXPRTYPE **r
         </p>
         <p><b>Function list functions:</b>
             <ul>
-                <li>int exprFuncListCreate(exprFuncList **f);<br>
+                <li>int exprFuncListCreate(exprFuncList **flist);<br>
                     Comments:
                     <ul>
                         <li>Creates a function lists and updates a pointer to point to it</li>
                     </ul>
                     Parameters:
                     <ul>
-                        <li>**f - Pointer to a pointer to the function list</li>
+                        <li>**flist - Pointer to a pointer to the function list</li>
                     </ul>
                     Returns
                     <ul>
@@ -716,14 +532,14 @@ int func_name##(struct _exprObj *o, struct _exprNode *n, int count, EXPRTYPE **r
                             passed by address will point to the new function list</li>
                     </ul>
                 </li><br>
-                <li>int exprFuncListAdd(exprFuncList *f, exprFuncType ptr, char *name, int min, int max, int refmin, int refmax);<br>
+                <li>int exprFuncListAdd(exprFuncList *flist, exprFuncType ptr, char *name, int min, int max, int refmin, int refmax);<br>
                     Comments:
                     <ul>
                         <li>Adds a function to the function list</li>
                     </ul>
                     Parameters:
                     <ul>
-                        <li>*f - Pointer to an already created function list</li>
+                        <li>*flist - Pointer to an already created function list</li>
                         <li>ptr - Pointer to a custom function</li>
                         <li>*name - Name of the custom function</li>
                         <li>min - Minimum number of arguments for the function, negative for no minimum</li>
@@ -736,42 +552,42 @@ int func_name##(struct _exprObj *o, struct _exprNode *n, int count, EXPRTYPE **r
                         <li>Error code of the function</li>
                     </ul>
                 </li><br>
-                <li>int exprFuncListFree(exprFuncList *f);<br>
+                <li>int exprFuncListFree(exprFuncList *flist);<br>
                     Comments:
                     <ul>
                         <li>Free the function list entirely</li>
                     </ul>
                     Parameters:
                     <ul>
-                        <li>*f - Pointer to the function list to free</li>
+                        <li>*flist - Pointer to the function list to free</li>
                     </ul>
                     Returns:
                     <ul>
                         <li>Error code of the function</li>
                     </ul>
                 </li><br>
-                <li>int exprFuncListClear(exprFuncList *f);<br>
+                <li>int exprFuncListClear(exprFuncList *flist);<br>
                     Comments:
                     <ul>
                         <li>Clear the functions from the function list</li>
                     </ul>
                     Parameters:
                     <ul>
-                        <li>*f - Pointer to the function list to clear</li>
+                        <li>*flist - Pointer to the function list to clear</li>
                     </ul>
                     Returns:
                     <ul>
                         <li>Error code of the function</li>
                     </ul>
                 </li><br>
-                <li>int exprFuncListInit(exprFuncList *f);<br>
+                <li>int exprFuncListInit(exprFuncList *flist);<br>
                     Comments:
                     <ul>
                         <li>Initializes internal functions into the funtion list</li>
                     </ul>
                     Parameters:
                     <ul>
-                        <li>*f - Function list to initialize</li>
+                        <li>*flist - Function list to initialize</li>
                     </ul>
                     Returns:
                     <ul>
@@ -782,14 +598,14 @@ int func_name##(struct _exprObj *o, struct _exprNode *n, int count, EXPRTYPE **r
         </p>
         <p><b>Value list functions:</b>
             <ul>
-                <li>int exprValListCreate(exprValList **v);<br>
+                <li>int exprValListCreate(exprValList **vlist);<br>
                     Comments:
                     <ul>
                         <li>Creates a value list for variables or constants</li>
                     </ul>
                     Parameters:
                     <ul>
-                        <li>**v - Pointer to a pointer to the value list.</li>
+                        <li>**vlist - Pointer to a pointer to the value list.</li>
                     </ul>
                     Returns:
                     <ul>
@@ -797,14 +613,14 @@ int func_name##(struct _exprObj *o, struct _exprNode *n, int count, EXPRTYPE **r
                             be updated to point to the value list</li>
                     </ul>
                 </li><br>
-                <li>int exprValListAdd(exprValList *v, char *name, EXPRTYPE val);<br>
+                <li>int exprValListAdd(exprValList *vlist, char *name, EXPRTYPE val);<br>
                     Comments:
                     <ul>
                         <li>Add or update a value in a value list</li>
                     </ul>
                     Parameters:
                     <ul>
-                        <li>*v - Value list to add a value to</li>
+                        <li>*vlist - Value list to add a value to</li>
                         <li>*name - Name of the value to add</li>
                         <li>val - Value of the value to add</li>
                     </ul>
@@ -813,14 +629,14 @@ int func_name##(struct _exprObj *o, struct _exprNode *n, int count, EXPRTYPE **r
                         <li>Error code of the function</li>
                     </ul>
                 </li><br>
-                <li>int exprValListGet(exprValList *v, char *name, EXPRTYPE *val)<br>
+                <li>int exprValListGet(exprValList *vlist, char *name, EXPRTYPE *val)<br>
                     Comment:
                     <ul>
                         <li>Get the value of a variable or constant in a value list</li>
                     </ul>
                     Parameters:
                     <ul>
-                        <li>*v - Value list to use</li>
+                        <li>*vlist - Value list to use</li>
                         <li>*name - Name of the value to get</li>
                         <li>*val - Pointer to variable to get the value</li>
                     </ul>
@@ -829,14 +645,14 @@ int func_name##(struct _exprObj *o, struct _exprNode *n, int count, EXPRTYPE **r
                         <li>Error code of the function</li>
                     </ul>
                 </li><br>
-                <li>int exprValListGetAddress(exprValList *v, char *name, EXPRTYPE **addr)<br>
+                <li>int exprValListGetAddress(exprValList *vlist, char *name, EXPRTYPE **addr)<br>
                     Comment:
                     <ul>
                         <li>Get the memory address of a variable in a value list</li>
                     </ul>
                     Parameters:
                     <ul>
-                        <li>*v - Value list to use</li>
+                        <li>*vlist - Value list to use</li>
                         <li>*name - Name of the value to get</li>
                         <li>** - Pointer to a pointer to store the address of the value
                             This will be NULL if the name is not in the list.</li>
@@ -846,42 +662,42 @@ int func_name##(struct _exprObj *o, struct _exprNode *n, int count, EXPRTYPE **r
                         <li>Error code of the function</li>
                     </ul>
                 </li><br>
-                <li>int exprValListFree(exprValList *v);<br>
+                <li>int exprValListFree(exprValList *vlist);<br>
                     Comments:
                     <ul>
                         <li>Completely free the value list</li>
                     </ul>
                     Parameters:
                     <ul>
-                        <li>*v - Value list to free</li>
+                        <li>*vlist - Value list to free</li>
                     </ul>
                     Returns:
                     <ul>
                         <li>Error code of the function</li>
                     </ul>
                 </li><br>
-                <li>int exprValListClear(exprValList *v);<br>
+                <li>int exprValListClear(exprValList *vlist);<br>
                     Comments:
                     <ul>
                         <li>Set the values in the list to 0.0</li>
                     </ul>
                     Parameters:
                     <ul>
-                        <li>*v - Value list to reset</li>
+                        <li>*vlist - Value list to reset</li>
                     </ul>
                     Returns:
                     <ul>
                         <li>Error code of the function</li>
                     </ul>
                 </li><br>
-                <li>int exprValListInit(exprValList *v);<br>
+                <li>int exprValListInit(exprValList *vlist);<br>
                     Comments:
                     <ul>
                         <li>Initialize internal constants into a value list</li>
                     </ul>
                     Paramters:
                     <ul>
-                        <li>*v - Value list to initialize</li>
+                        <li>*vlist - Value list to initialize</li>
                     </ul>
                     Returns:
                     <ul>
@@ -892,18 +708,17 @@ int func_name##(struct _exprObj *o, struct _exprNode *n, int count, EXPRTYPE **r
         </p>
         <p><b>Expression functions:</b>
             <ul>
-                <li>int exprCreate(exprObj **o, exprFuncList *f, exprValList *v, exprValList *c, exprMsgFuncType msg, exprBreakFuncType breaker, void *userdata);<br>
+                <li>int exprCreate(exprObj **obj, exprFuncList *flist, exprValList *vlist, exprValList *clist, exprBreakFuncType breaker, void *userdata);<br>
                     Comments:
                     <ul>
                         <li>Create an expression object to use</li>
                     </ul>
                     Parameters:
                     <ul>
-                        <li>**o - Pointer to a pointer to an expression object</li>
-                        <li>*f - Function list to associate with the expression</li>
-                        <li>*v - Variable value list to associate with the expression</li>
-                        <li>*c - Constant value list to associate with the expression</li>
-                        <li>msg - Message function callback to associate with the expression</li>
+                        <li>**obj - Pointer to a pointer to an expression object</li>
+                        <li>*flist - Function list to associate with the expression</li>
+                        <li>*vlist - Variable value list to associate with the expression</li>
+                        <li>*clist - Constant value list to associate with the expression</li>
                         <li>breaker - Breaker function callback to associate with the expression.
                             Used by functions that may be infinite loops (such as the for function)</li>
                         <li>userdata - User data to associate with the expression</li>
@@ -913,21 +728,21 @@ int func_name##(struct _exprObj *o, struct _exprNode *n, int count, EXPRTYPE **r
                         <li>Error code of the function</li>
                     </ul>
                 </li><br>
-                <li>int exprFree(exprObj *o);<br>
+                <li>int exprFree(exprObj *obj);<br>
                     Comments:
                     <ul>
                         <li>Completely free the expression object</li>
                     </ul>
                     Paramters:
                     <ul>
-                        <li>*o - Expression object to free</li>
+                        <li>*obj - Expression object to free</li>
                     </ul>
                     Returns:
                     <ul>
                         <li>Error code of the function</li>
                     </ul>
                 </li><br>
-                <li>int exprClear(exprObj *o);<br>
+                <li>int exprClear(exprObj *obj);<br>
                     Comments:
                     <ul>
                         <li>Clear an expression, but keep list and callback associations.
@@ -935,21 +750,21 @@ int func_name##(struct _exprObj *o, struct _exprNode *n, int count, EXPRTYPE **r
                     </ul>
                     Parameters:
                     <ul>
-                        <li>*o - Expression object to clear</li>
+                        <li>*obj - Expression object to clear</li>
                     </ul>
                     Returns:
                     <ul>
                         <li>Error code of the function</li>
                     </ul>
                 </li><br>
-                <li>int exprParse(exprObj *o, char *expr);<br>
+                <li>int exprParse(exprObj *obj, char *expr);<br>
                     Comments:
                     <ul>
                         <li>Parse an expression string into an expression object</li>
                     </ul>
                     Paramters:
                     <ul>
-                        <li>*o - Expression object to use</li>
+                        <li>*obj - Expression object to use</li>
                         <li>*expr - Expression string to parse</li>
                     </ul>
                     Returns:
@@ -957,7 +772,7 @@ int func_name##(struct _exprObj *o, struct _exprNode *n, int count, EXPRTYPE **r
                         <li>Error code of the function</li>
                     </ul>
                 </li><br>
-                <li>int exprEval(exprObj *o, EXPRTYPE *val);<br>
+                <li>int exprEval(exprObj *obj, EXPRTYPE *val);<br>
                     Comments:
                     <ul>
                         <li>Evaluate a parsed expression.  This function does not
@@ -967,7 +782,7 @@ int func_name##(struct _exprObj *o, struct _exprNode *n, int count, EXPRTYPE **r
                     </ul>
                     Paramters:
                     <ul>
-                        <li>*o - Expression object to evaluate</li>
+                        <li>*obj - Expression object to evaluate</li>
                         <li>*val = Pointer to variable to get result of evaluation.
                             This can be NULL if the result is not needed.</li>
                     </ul>
@@ -976,7 +791,7 @@ int func_name##(struct _exprObj *o, struct _exprNode *n, int count, EXPRTYPE **r
                         <li>Error code of the function</li>
                     </ul>
                 </li><br>
-                <li>int exprEvalNode(exprObj *o, exprNode *n, int p, EXPRTYPE *val);<br>
+                <li>int exprEvalNode(exprObj *obj, exprNode *nodes, int curnode, EXPRTYPE *val);<br>
                     Comments:
                     <ul>
                         <li>Evaluate a node of an expression.
@@ -984,9 +799,9 @@ int func_name##(struct _exprObj *o, struct _exprNode *n, int count, EXPRTYPE **r
                     </ul>
                     Parameters:
                     <ul>
-                        <li>*o - Expression object being used</li>
-                        <li>*n - Pointer to a single node or list of nodes to evaluate</li>
-                        <li>p - Index to the node to evaluate</li>
+                        <li>*obj - Expression object being used</li>
+                        <li>*nodes - Pointer to a node or list of nodes</li>
+                        <li>curnode - Index to the node to evaluate</li>
                         <li>*val - Pointer to variable to get evaluation result</li>
                     </ul>
                     Returns:
@@ -994,112 +809,98 @@ int func_name##(struct _exprObj *o, struct _exprNode *n, int count, EXPRTYPE **r
                         <li>Error code of the function</li>
                     </ul>
                 </li><br>
-                <li>exprFuncList *exprGetFuncList(exprObj *o);<br>
+                <li>exprFuncList *exprGetFuncList(exprObj *obj);<br>
                     Comments:
                     <ul>
                         <li>Gets the function list associated with an expression</li>
                     </ul>
                     Parameters:
                     <ul>
-                        <li>*o - expression object</li>
+                        <li>*obj - expression object</li>
                     </ul>
                     Returns:
                     <ul>
                         <li>Pointer fo an exprFuncList object or NULL</li>
                     </ul>
                 </li><br>
-                <li>exprValList *exprGetVarList(exprObj *o);<br>
+                <li>exprValList *exprGetVarList(exprObj *obj);<br>
                     Comments:
                     <ul>
                         <li>Gets the variable list associated with an expression</li>
                     </ul>
                     Parameters:
                     <ul>
-                        <li>*o - expression object</li>
+                        <li>*obj - expression object</li>
                     </ul>
                     Returns:
                     <ul>
                         <li>Pointer to an exprValList object or NULL</li>
                     </ul>
                 </li><br>
-                <li>exprValList *exprGetConstList(exprObj *o);<br>
+                <li>exprValList *exprGetConstList(exprObj *obj);<br>
                     Comments:
                     <ul>
                         <li>Gets the constant list associated with an expression</li>
                     </ul>
                     Parameters:
                     <ul>
-                        <li>*o - expression object</li>
+                        <li>*obj - expression object</li>
                     </ul>
                     Returns:
                     <ul>
                         <li>Pointer to an exprValList object or NULL</li>
                     </ul>
                 </li><br>
-                <li>exprMsgFuncType exprGetMsgFunc(exprObj *o);<br>
-                    Comments:
-                    <ul>
-                        <li>Gets the message callback of the expression</li>
-                    </ul>
-                    Parameters:
-                    <ul>
-                        <li>*o - expression object</li>
-                    </ul>
-                    Returns:
-                    <ul>
-                        <li>Pointer to the callback function or NULL</li>
-                    </ul>
-                </li><br>
-                <li>exprBreakFuncType exprGetBreakFunc(exprObj *o);<br>
+                <li>exprBreakFuncType exprGetBreakFunc(exprObj *obj);<br>
                     Comments:
                     <ul>
                         <li>Gets the breaker callback of the expression</li>
                     </ul>
                     Parameters:
                     <ul>
-                        <li>*o - expression object</li>
+                        <li>*obj - expression object</li>
                     </ul>
                     Returns:
                     <ul>
                         <li>Pointer to the callback function or NULL</li>
                     </ul>
                 </li><br>
-                <li>int exprGetBreakResult(exprObj *o);<br>
+                <li>int exprGetBreakResult(exprObj *obj);<br>
                     Comments:
                     <ul>
                         <li>Get the result of the breaker function</li>
                     </ul>
                     Parameters:
                     <ul>
-                        <li>*o - expression object</li>
+                        <li>*obj - expression object</li>
                     </ul>
                     Returns:
                     <ul>
                         <li>zero to continue, nonzero to break</li>
                     </ul>
                 </li><br>
-                <li>void* exprGetUserData(exprObj *o);<br>
+                <li>void* exprGetUserData(exprObj *obj);<br>
                     Comments:
                     <ul>
                         <li>Gets the user data associated with an expression</li>
                     </ul>
                     Parameters:
                     <ul>
-                        <li>*o - expression object</li>
+                        <li>*obj - expression object</li>
                     </ul>
                     Returns:
                     <ul>
                         <li>User data</li>
                     </ul>
                 </li><br>
-                <li>void exprSetUserData(exprObj *o, void *userdata);<br>
+                <li>void exprSetUserData(exprObj *obj, void *userdata);<br>
                     Comments:
                     <ul>
                         <li>Sets the user data of an expression</li>
                     </ul>
                     Parameters:
                     <ul>
-                        <li>*o - expresion object</li>
+                        <li>*obj - expresion object</li>
                         <li>userdata - user data to set</li>
                     </ul>
                     Returns:
@@ -1107,7 +908,7 @@ int func_name##(struct _exprObj *o, struct _exprNode *n, int count, EXPRTYPE **r
                         <li>Nothing</li>
                     </ul>
                 </li><br>
-                <li>void exprSetBreakerCount(exprObj *o, int count);<br>
+                <li>void exprSetBreakerCount(exprObj *obj, int count);<br>
                     Comments:
                     <ul>
                         <li>Set how often the breaker function is tested.
@@ -1122,7 +923,7 @@ int func_name##(struct _exprObj *o, struct _exprNode *n, int count, EXPRTYPE **r
                     </ul>
                     Parameters:
                     <ul>
-                        <li>*o - expression object</li>
+                        <li>*obj - expression object</li>
                         <li>count - how many times exprEvalNode gets called before the
                             breaker function is tested</li>
                     </ul>
@@ -1131,7 +932,7 @@ int func_name##(struct _exprObj *o, struct _exprNode *n, int count, EXPRTYPE **r
                         <li>Nothing</li>
                     </ul>
                 </li><br>
-                <li>void exprGetErrorPosition(exprObj *o, int *start, int *end);<br>
+                <li>void exprGetErrorPosition(exprObj *obj, int *start, int *end);<br>
                     Comments:
                     <ul>
                         <li>Gets the start and ending positions in the expression string
@@ -1140,6 +941,7 @@ int func_name##(struct _exprObj *o, struct _exprNode *n, int count, EXPRTYPE **r
                     </ul>
                     Parameters:
                     <ul>
+                        <li>*obj - expression object</li>
                         <li>*start - pointer to an integer to get the start error position,
                             -1 if unknown</li>
                         <li>*end - pointer to an integer to get the end error position,
@@ -1177,21 +979,11 @@ int func_name##(struct _exprObj *o, struct _exprNode *n, int count, EXPRTYPE **r
     <p>Compiling the ExprEval library is pretty simple.  Just
         compile all of the source files (*.c) and link them into
         a library.  You need to keep "expreval.h" for the header file.</p>
-    <p>The library used to have an option of fast variable access or
-        slow variable access by using EXPR_FAST_VAR_ACCES.  Now,
-        fast variable access is used whether EXPR_FAST_VAR_ACCESS
-        is defined or not.</p>
     <p>You may have to make some changes to the library.  I've
         tried to make doing so as simple as possible.  If you
         need to change the include files or some macros or whatnot,
         edit the file "exprincl.h"  This file includes any other files
-        needed.  For example, on Borland compilers you will
-        need to change the include of "memory.h" to "mem.h".
-        If some functions are not provided for your system, add the
-        file "exprincl.c".  You will need to add the functions as
-        they are used by the library, and make them call the correct
-        function for your system and return the value as the library
-        expects.  You should not have to change to much.  I have
+        needed.  You should not have to change to much.  I have
         tried to stick as close to ANSI/ISO C as I can.</p>
 </div>
 
@@ -1221,187 +1013,20 @@ int func_name##(struct _exprObj *o, struct _exprNode *n, int count, EXPRTYPE **r
                 There are are also no decent reasons to delete
                 variables from a variable list until you are completely
                 done and delete all of them.</li>
-            <li>There used to be a lot of math error checking.  In order
-                to increase evaluation speed, much of the checking has
-                been removed, except for divide by zero.  An attempt
-                to divide by zero will cause that part of the expresion
-                to be zero. '4+1/0' is equal to 4, for example.  Math
-                routine error checking has also been removed to favor
-                speed.  It is advised to, if error checking is needed,
-                use exception handling or some other means of capturing
-                errors.</li>
         </ul>
     </p>
 </div>
 
 <div align="left" class="container">
-    <h2><a name="Example">Example Use</a></h2>
-
-    <p>This is an example application of this library.  It is a
-        graphics program that calculates the color value of a
-        pixel based on it's X,Y co-ordinate.  It uses a made-up
-        image library called graphic-lib</p>
-
-    <blockquote>
-        <pre>
-/* Include files */
-#include &lt;stdio.h&gt;
-#include &lt;stdlib.h&gt;
-#include &lt;setjmp.h&gt;
-#include "graphiclib.h"
-#include "expreval.h"
-
-char *transerr(int err)
-    {
-    /* Translate error code into message */
-    }
-
-void gen_image(char *name, int w, int h, char *expr);
-    {
-    exprFuncList *f = NULL;
-    exprValList *v = NULL;
-    exprValList *c = NULL;
-    exprObj *o = NULL;
-    int x, y, err;
-    jmp_buf jumper;
-    int image;
-    EXPRTYPE r, g, b;
-
-    /* Error handling */
-    err = setjmp(jumper);
-    if(err)
-        {
-        if(err != ID_IMAGENOERROR)
-            printf("Error %d occurred: %s\n", err, transerr(err));
-
-        exprFree(o);
-        exprFreeFuncList(f);
-        exprFreeValList(v);
-        exprFreeValList(c);
-
-        image_free(image);
-        return;
-        }
-
-    /* Set up lists */
-
-    /* Function list */
-    err = exprFuncListCreate(&f);
-    if(err != EXPR_ERROR_NOERROR)
-        longjmp(jumper, err);
-
-    err = exprFuncListInit(f);
-    if(err != EXPR_ERROR_NOERROR)
-        {
-        printf("Function list init error. Functions may not be available.\n");
-        }
-
-    /* Variable list */
-    err = exprValListCreate(&v);
-    if(err != EXPR_ERROR_NOERROR)
-        longjmp(jumper, err);
-
-    /* Constant list */
-    err = exprValListCreate(&c);
-    if(err != EXPR_ERROR_NOERROR)
-        {
-        printf("Constants not available\n");
-        }
-    else
-        {
-        err = exprValListInit(c);
-        if(err != EXPR_ERROR_NOERROR)
-            printf("Constant list init error. Constants may not be available.\n");
-        }
-
-    /* Create and parse the expression */
-
-    /* Create */
-    err = exprCreate(&o, f, v, c, NULL, 0);
-    if(err != EXPR_ERROR_NOERROR)
-        longjmp(jumper, err);
-
-    /* Parse expression */
-    err = exprParse(o, expr);
-    if(err != EXPR_ERROR_NOERROR)
-        longjmp(jumper, err);
-
-
-    /* Create the image */
-    image = image_create(w, h);
-    if(image == 0)
-        {
-        longjmp(jumper, ID_IMAGECREATEERROR);
-        }
-
-    /* Add width and height to variable list */
-    exprValListAdd(v, "w", (EXPRTYPE)w);
-    exprValListAdd(v, "h", (EXPRTYPE)h);
-
-    for(y = 0; y < h; y++)
-        {
-        for(x = 0; x < w; x++)
-            {
-            /* Add x and y */
-            exprValListAdd(v, "x", (EXPRTYPE)x);
-            exprValListAdd(v, "y", (EXPRTYPE)y);
-
-            /* Eval expression, ignoring errors */
-            exprEval(o);
-
-            /* Get colors */
-            exprValListGet(v, "r", &r);
-            exprValListGet(v, "g", &g);
-            exprValListGet(v, "b", &b);
-
-            /* Set pixel */
-            image_setpixel(image, x, y, (int)r, (int)g, (int)b);
-            }
-        }
-
-    /* Save image */
-    image_save(image, name);
-
-    /* Done */
-    longjmp(jumper, ID_IMAGENOERROR);
-    }
-
-void main(void)
-    {
-    char name[MAXPATH]
-    char tmp[10];
-    char expr[4096];
-    int sx, sy;
-
-    printf("Image name to save: ");
-    gets(name);
-
-    printf("Image width: ");
-    gets(tmp);
-    sx = atoi(tmp);
-
-    printf("Image height: ");
-    gets(tmp);
-    sy = atoi(tmp);
-
-    printf("Color Expression (Use x, y, w, h Set r, g, b): ");
-    gets(expr);
-
-    gen_image(name, sx, sy, expr);
-    }
-
-        </pre>
-    </blockquote>
-</div>
-
-<div align="left" class="container">
-    <h2><a name="ExampleFast">Example Use with Fast Variable Access</a></h2>
+    <h2><a name="Example">Example Use with Fast Variable Access</a></h2>
 
     <p>This is an example application of this library.  It is a
         graphics program that calculates the color value of a
         pixel based on it's X,Y co-ordinate.  It uses a made-up
         image library called graphic-lib.  It uses faster variable
         access by using the exprValListGetAddress function.</p>
+    <p>Note that this codes has not actually been tested.  See the
+        test applications (test and imagegen) for other examples.</p>
 
     <blockquote>
         <pre>

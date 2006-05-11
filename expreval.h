@@ -54,105 +54,22 @@ enum
     EXPR_ERROR_BREAK, /* Expression was broken by break function */
     EXPR_ERROR_CONSTANTASSIGN, /* Assignment to a constant */
     EXPR_ERROR_REFCONSTANT, /* Constant used as a reference parameter */
-    EXPR_ERROR_OUTOFRANGE /* A bad value was passed to a function */
+    EXPR_ERROR_OUTOFRANGE, /* A bad value was passed to a function */
+
+    EXPR_ERROR_USER /* Custom errors should be larger than this */
     };
 
 /* Macros */
 
-/* Macro to make solving subnodes easier.
-   For use inside custom functions.
-   Assumes exprObj *o, exprNode *n, int err.
-   num is argument number to get starting at zero. can be a variable
-   res is variable to store result in. should be type EXPRTYPE,
-   not the adddress of the variable */
-#define EXPR_EVALNODE(num, res) \
-err = exprEvalNode(o, n, num, &(res)); \
-if(err != EXPR_ERROR_NOERROR) \
-    return err;
-
-/* Require a specific number of arguments.
-   For use in custom functions
-   Assumes int count for count of subnodes */
-#define EXPR_REQUIRECOUNT(c) \
-if(count != c) \
-    return EXPR_ERROR_BADNUMBERARGUMENTS;
-
-/* Require a min number of arguments
-   For use in custom functions
-   Assumes int count for count of subnodes */
-#define EXPR_REQUIRECOUNTMIN(c) \
-if(count < c) \
-    return EXPR_ERROR_BADNUMBERARGUMENTS;
-
-/* Require a max number of arguments
-   For use in custom functions
-   Assumes int count for count of subnodes */
-#define EXPR_REQUIRECOUNTMAX(c) \
-if(count > c) \
-    return EXPR_ERROR_BADNUMBERARGUMENTS;
-
-/* Require a min and max number of arguments
-   For use in custom functions
-   Assumes int count for count of subnodes */
-#define EXPR_REQUIRECOUNTRANGE(c1, c2) \
-if(count < c1 || count > c2) \
-    return EXPR_ERROR_BADNUMBERARGUMENTS;
-
-/* Require a specific number of ref arguments.
-   For use in custom functions
-   Assumes int refcount for count of ref arguments */
-#define EXPR_REQUIREREFCOUNT(c) \
-if(refcount != c) \
-    return EXPR_ERROR_BADNUMBERARGUMENTS;
-
-/* Require a min number of ref arguments
-   For use in custom functions
-   Assumes int refcount for count of ref arguments */
-#define EXPR_REQUIREREFCOUNTMIN(c) \
-if(refcount < c) \
-    return EXPR_ERROR_BADNUMBERARGUMENTS;
-
-/* Require a max number of ref arguments
-   For use in custom functions
-   Assumes int refcount for count of ref arguments */
-#define EXPR_REQUIREREFCOUNTMAX(c) \
-if(refcount > c) \
-    return EXPR_ERROR_BADNUMBERARGUMENTS;
-
-/* Require a min and max number of ref arguments
-   For use in custom functions
-   Assumes int refcount for count of ref arguments */
-#define EXPR_REQUIREREFCOUNTRANGE(c1, c2) \
-if(refcount < c1 || refcount > c2) \
-    return EXPR_ERROR_BADNUMBERARGUMENTS;
-
-
-/* Check for break */
-#define EXPR_CHECKBREAK()\
-if(exprGetBreakResult(o))\
-    {\
-    return EXPR_ERROR_BREAK;\
-    }
-
-/* Declare a function solver */
-#define EXPR_FUNCTIONSOLVER(func_name)\
-int func_name(struct _exprObj *o, struct _exprNode *n, int count, EXPRTYPE **refitems, int refcount, EXPRTYPE *val)
-
-
 /* Forward declarations */
 typedef struct _exprNode exprNode;
-typedef struct _exprFunc exprFunc;
 typedef struct _exprFuncList exprFuncList;
-typedef struct _exprVal exprVal;
 typedef struct _exprValList exprValList;
 typedef struct _exprObj exprObj;
 
 /* Function types */
-typedef void (*exprMsgFuncType)(int type, int code, char *msg);
-typedef int (*exprFuncType)(struct _exprObj *o, struct _exprNode *n, int count, EXPRTYPE **refitems, int refcount, EXPRTYPE *val);
-typedef int (*exprBreakFuncType)(struct _exprObj *o);
-
-
+typedef int (*exprFuncType)(exprObj *obj, exprNode *nodes, int nodecount, EXPRTYPE **refs, int refcount, EXPRTYPE *val);
+typedef int (*exprBreakFuncType)(exprObj *obj);
 
 
 
@@ -162,39 +79,38 @@ typedef int (*exprBreakFuncType)(struct _exprObj *o);
 void exprGetVersion(int *major, int *minor);
 
 /* Functions for function lists */
-int exprFuncListCreate(exprFuncList **f);
-int exprFuncListAdd(exprFuncList *f, char *name, exprFuncType ptr, int min, int max, int refmin, int refmax);
-int exprFuncListFree(exprFuncList *f);
-int exprFuncListClear(exprFuncList *f);
-int exprFuncListInit(exprFuncList *f);
+int exprFuncListCreate(exprFuncList **flist);
+int exprFuncListAdd(exprFuncList *flist, char *name, exprFuncType ptr, int min, int max, int refmin, int refmax);
+int exprFuncListFree(exprFuncList *flist);
+int exprFuncListClear(exprFuncList *flist);
+int exprFuncListInit(exprFuncList *flist);
 
 /* Functions for value lists */
-int exprValListCreate(exprValList **v);
-int exprValListAdd(exprValList *v, char *name, EXPRTYPE val);
-int exprValListGet(exprValList *v, char *name, EXPRTYPE *val);
-int exprValListGetAddress(exprValList *v, char *name, EXPRTYPE **addr);
-int exprValListFree(exprValList *v);
-int exprValListClear(exprValList *v);
-int exprValListInit(exprValList *v);
+int exprValListCreate(exprValList **vlist);
+int exprValListAdd(exprValList *vlist, char *name, EXPRTYPE val);
+int exprValListGet(exprValList *vlist, char *name, EXPRTYPE *val);
+int exprValListGetAddress(exprValList *vlist, char *name, EXPRTYPE **addr);
+int exprValListFree(exprValList *vlist);
+int exprValListClear(exprValList *vlist);
+int exprValListInit(exprValList *vlist);
 
 /* Functions for expression objects */
-int exprCreate(exprObj **o, exprFuncList *f, exprValList *v, exprValList *c,
-    exprMsgFuncType msg, exprBreakFuncType breaker, void *userdata);
-int exprFree(exprObj *o);
-int exprClear(exprObj *o);
-int exprParse(exprObj *o, char *expr);
-int exprEval(exprObj *o, EXPRTYPE *val);
-int exprEvalNode(exprObj *o, exprNode *n, int p, EXPRTYPE *val);
-exprFuncList *exprGetFuncList(exprObj *o);
-exprValList *exprGetVarList(exprObj *o);
-exprValList *exprGetConstList(exprObj *o);
-exprMsgFuncType exprGetMsgFunc(exprObj *o);
-exprBreakFuncType exprGetBreakFunc(exprObj *o);
-int exprGetBreakResult(exprObj *o);
-void* exprGetUserData(exprObj *o);
-void exprSetUserData(exprObj *o, void *userdata);
-void exprSetBreakerCount(exprObj *o, int count);
-void exprGetErrorPosition(exprObj *o, int *start, int *end);
+int exprCreate(exprObj **obj, exprFuncList *flist, exprValList *vlist, exprValList *clist,
+    exprBreakFuncType breaker, void *userdata);
+int exprFree(exprObj *obj);
+int exprClear(exprObj *obj);
+int exprParse(exprObj *obj, char *expr);
+int exprEval(exprObj *obj, EXPRTYPE *val);
+int exprEvalNode(exprObj *obj, exprNode *nodes, int curnode, EXPRTYPE *val);
+exprFuncList *exprGetFuncList(exprObj *obj);
+exprValList *exprGetVarList(exprObj *obj);
+exprValList *exprGetConstList(exprObj *obj);
+exprBreakFuncType exprGetBreakFunc(exprObj *obj);
+int exprGetBreakResult(exprObj *obj);
+void* exprGetUserData(exprObj *obj);
+void exprSetUserData(exprObj *obj, void *userdata);
+void exprSetBreakerCount(exprObj *obj, int count);
+void exprGetErrorPosition(exprObj *obj, int *start, int *end);
 
 /* Other useful routines */
 int exprValidIdent(char *name);

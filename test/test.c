@@ -7,6 +7,7 @@
 
 /* Includes */
 #include <stdio.h>
+#include <conio.h> /* For _kbhit */
 #include <time.h>
 #include <stdlib.h>
 #include <setjmp.h>
@@ -14,25 +15,24 @@
 #include "../expreval.h"
 
 /* Test function */
-EXPR_FUNCTIONSOLVER(my_func)
+int my_func(exprObj *obj, exprNode *nodes, int nodecount, EXPRTYPE **refs, int refcount, EXPRTYPE *val)
     {
     EXPRTYPE tmp;
     int err;
 
-    EXPR_REQUIREREFCOUNT(1);
-    EXPR_REQUIRECOUNT(1);
-
-    EXPR_EVALNODE(0, tmp);
+    err = exprEvalNode(obj, nodes, 0, &tmp);
+    if(err != EXPR_ERROR_NOERROR)
+        return err;
+   
 
     /* Set first ref item to the value of the parameter */
-    *refitems[0] = tmp;
+    *refs[0] = tmp;
     *val = tmp;
 
     return EXPR_ERROR_NOERROR;
     }
 
-
-int breaker(exprObj *o)
+int breaker(exprObj *obj)
     {
     return kbhit();
     }
@@ -159,7 +159,7 @@ void main(void)
 
 
     /* Create expr */
-    err = exprCreate(&e, f, v, c, NULL, breaker, 0);
+    err = exprCreate(&e, f, v, c, breaker, 0);
     if(err != EXPR_ERROR_NOERROR)
         {
         printf("Expr Creation Error\n");

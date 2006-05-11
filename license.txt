@@ -1,5 +1,5 @@
 ExprEval - Expression Evaluation Library
-Version 1.0
+Version 2.0
 
 Copyright (C) 2004 Brian Allen Vanderburg II
 

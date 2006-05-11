@@ -17,18 +17,18 @@
 
 /* Internal functions */
 static exprFunc *exprCreateFunc(char *name, exprFuncType ptr, int type, int min, int max, int refmin, int refmax);
-static void exprFuncListFreeData(exprFunc *f);
+static void exprFuncListFreeData(exprFunc *func);
 
 
 /* This function creates the function list, */
-int exprFuncListCreate(exprFuncList **f)
+int exprFuncListCreate(exprFuncList **flist)
     {
     exprFuncList *tmp;
 
-    if(f == NULL)
+    if(flist == NULL)
         return EXPR_ERROR_NULLPOINTER;
 
-    *f = NULL; /* Set to NULL initially */
+    *flist = NULL; /* Set to NULL initially */
 
     tmp = exprAllocMem(sizeof(exprFuncList));
 
@@ -36,19 +36,19 @@ int exprFuncListCreate(exprFuncList **f)
         return EXPR_ERROR_MEMORY; /* Could not allocate memory */
 
     /* Update pointer */
-    *f = tmp;
+    *flist = tmp;
 
     return EXPR_ERROR_NOERROR;
     }
 
 /* Add a function to the list */
-int exprFuncListAdd(exprFuncList *f, char *name, exprFuncType ptr, int min, int max, int refmin, int refmax)
+int exprFuncListAdd(exprFuncList *flist, char *name, exprFuncType ptr, int min, int max, int refmin, int refmax)
     {
     exprFunc *tmp;
     exprFunc *cur;
     int result;
 
-    if(f == NULL)
+    if(flist == NULL)
         return EXPR_ERROR_NULLPOINTER;
 
     /* Make sure the name is valid */
@@ -82,7 +82,7 @@ int exprFuncListAdd(exprFuncList *f, char *name, exprFuncType ptr, int min, int 
             }
         }
 
-    if(f->head == NULL)
+    if(flist->head == NULL)
         {
         /* Create the node right here */
         tmp = exprCreateFunc(name, ptr, EXPR_NODETYPE_FUNCTION, min, max, refmin, refmax);
@@ -90,12 +90,12 @@ int exprFuncListAdd(exprFuncList *f, char *name, exprFuncType ptr, int min, int 
         if(tmp == NULL)
             return EXPR_ERROR_MEMORY;
 
-        f->head = tmp;
+        flist->head = tmp;
         return EXPR_ERROR_NOERROR;
         }
 
     /* See if we can find where it goes */
-    cur = f->head;
+    cur = flist->head;
 
     do
         {
@@ -163,13 +163,13 @@ int exprFuncListAdd(exprFuncList *f, char *name, exprFuncType ptr, int min, int 
    pointer is NULL and the node type specifies the function
    to do.  exprEvalNode handles this, instead of calling
    a function solver. */
-int exprFuncListAddType(exprFuncList *f, char *name, int type, int min, int max, int refmin, int refmax)
+int exprFuncListAddType(exprFuncList *flist, char *name, int type, int min, int max, int refmin, int refmax)
     {
     exprFunc *tmp;
     exprFunc *cur;
     int result;
 
-    if(f == NULL)
+    if(flist == NULL)
         return EXPR_ERROR_NULLPOINTER;
 
     /* Make sure the name is valid */
@@ -203,7 +203,7 @@ int exprFuncListAddType(exprFuncList *f, char *name, int type, int min, int max,
             }
         }
 
-    if(f->head == NULL)
+    if(flist->head == NULL)
         {
         /* Create the node right here */
         tmp = exprCreateFunc(name, NULL, type, min, max, refmin, refmax);
@@ -211,12 +211,12 @@ int exprFuncListAddType(exprFuncList *f, char *name, int type, int min, int max,
         if(tmp == NULL)
             return EXPR_ERROR_MEMORY;
 
-        f->head = tmp;
+        flist->head = tmp;
         return EXPR_ERROR_NOERROR;
         }
 
     /* See if we can find where it goes */
-    cur = f->head;
+    cur = flist->head;
 
     do
         {
@@ -282,19 +282,19 @@ int exprFuncListAddType(exprFuncList *f, char *name, int type, int min, int max,
 
 
 /* Get the function from a list along with it's min an max data */
-int exprFuncListGet(exprFuncList *f, char *name, exprFuncType *ptr, int *type, int *min, int *max, int *refmin, int *refmax)
+int exprFuncListGet(exprFuncList *flist, char *name, exprFuncType *ptr, int *type, int *min, int *max, int *refmin, int *refmax)
     {
     exprFunc *cur;
     int result;
 
-    if(f == NULL)
+    if(flist == NULL)
         return EXPR_ERROR_NULLPOINTER;
 
     if(name == NULL || name[0] == '\0')
         return EXPR_ERROR_NOTFOUND;
 
     /* Search for the item */
-    cur = f->head;
+    cur = flist->head;
 
     while(cur != NULL)
         {
@@ -331,53 +331,53 @@ int exprFuncListGet(exprFuncList *f, char *name, exprFuncType *ptr, int *type, i
     }
 
 /* This routine will free the function list */
-int exprFuncListFree(exprFuncList *f)
+int exprFuncListFree(exprFuncList *flist)
     {
     /* Make sure it exists, if not it is not error */
-    if(f == NULL)
+    if(flist == NULL)
         return EXPR_ERROR_NOERROR;
 
     /* Free the nodes */
-    exprFuncListFreeData(f->head);
+    exprFuncListFreeData(flist->head);
 
     /* Free the container */
-    exprFreeMem(f);
+    exprFreeMem(flist);
 
     return EXPR_ERROR_NOERROR;
     }
 
 /* This routine will clear the function list */
-int exprFuncListClear(exprFuncList *f)
+int exprFuncListClear(exprFuncList *flist)
     {
-    if(f == NULL)
+    if(flist == NULL)
         return EXPR_ERROR_NOERROR;
 
     /* Free the nodes only */
-    if(f->head)
+    if(flist->head)
         {
-        exprFuncListFreeData(f->head);
+        exprFuncListFreeData(flist->head);
 
-        f->head = NULL;
+        flist->head = NULL;
         }
 
     return EXPR_ERROR_NOERROR;
     }
 
 /* This routine will free any child nodes, and then free itself */
-void exprFuncListFreeData(exprFunc *f)
+void exprFuncListFreeData(exprFunc *func)
     {
-    if(f == NULL)
+    if(func == NULL)
         return; /* Nothing to do */
 
     /* Free left and right sides */
-    exprFuncListFreeData(f->left);
-    exprFuncListFreeData(f->right);
+    exprFuncListFreeData(func->left);
+    exprFuncListFreeData(func->right);
 
     /* Free name */
-    exprFreeMem(f->fname);
+    exprFreeMem(func->fname);
 
     /* Free ourself */
-    exprFreeMem(f);
+    exprFreeMem(func);
     }
 
 /* This routine will create the function object */

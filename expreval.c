@@ -25,7 +25,7 @@
 
 
 /* This routine will evaluate an expression */
-int exprEval(exprObj *o, EXPRTYPE *val)
+int exprEval(exprObj *obj, EXPRTYPE *val)
     {
     EXPRTYPE dummy;
 
@@ -33,48 +33,48 @@ int exprEval(exprObj *o, EXPRTYPE *val)
         val = &dummy;
 
     /* Make sure it was parsed successfully */
-    if(!o->parsedbad && o->parsedgood && o->headnode)
+    if(!obj->parsedbad && obj->parsedgood && obj->headnode)
         {
         /* Do NOT reset the break count.  Let is accumulate
            between calls until breaker function is called */
-        return exprEvalNode(o, o->headnode, 0, val);
+        return exprEvalNode(obj, obj->headnode, 0, val);
         }
     else
         return EXPR_ERROR_BADEXPR;
     }
 
 /* Evaluate a node */
-int exprEvalNode(exprObj *o, exprNode *n, int p, EXPRTYPE *val)
+int exprEvalNode(exprObj *obj, exprNode *nodes, int curnode, EXPRTYPE *val)
     {
     int err;
     int pos;
     EXPRTYPE d1, d2;
 
-    if(o == NULL || n == NULL)
+    if(obj == NULL || nodes == NULL)
         return EXPR_ERROR_NULLPOINTER;
 
     /* Update n to point to correct node */
-    n += p;
+    nodes += curnode;
 
     /* Check breaker count */
-    if(o->breakcur-- <= 0)
+    if(obj->breakcur-- <= 0)
         {
-        if(exprGetBreakResult(o))
+        if(exprGetBreakResult(obj))
             {
             return EXPR_ERROR_BREAK;
             }
 
-        o->breakcur = o->breakcount;
+        obj->breakcur = obj->breakcount;
         }
 
-    switch(n->type)
+    switch(nodes->type)
         {
         case EXPR_NODETYPE_MULTI:
             {
             /* Multi for multiple expressions in one string */
-            for(pos = 0; pos < n->data.oper.count; pos++)
+            for(pos = 0; pos < nodes->data.oper.nodecount; pos++)
                 {
-                err = exprEvalNode(o, n->data.oper.nodes, pos, val);
+                err = exprEvalNode(obj, nodes->data.oper.nodes, pos, val);
                 if(err)
                     return err;
                 }
@@ -84,10 +84,10 @@ int exprEvalNode(exprObj *o, exprNode *n, int p, EXPRTYPE *val)
         case EXPR_NODETYPE_ADD:
             {
             /* Addition */
-            err = exprEvalNode(o, n->data.oper.nodes, 0, &d1);
+            err = exprEvalNode(obj, nodes->data.oper.nodes, 0, &d1);
 
             if(!err)
-                err = exprEvalNode(o, n->data.oper.nodes, 1, &d2);
+                err = exprEvalNode(obj, nodes->data.oper.nodes, 1, &d2);
 
             if(!err)
                 *val = d1 + d2;
@@ -100,10 +100,10 @@ int exprEvalNode(exprObj *o, exprNode *n, int p, EXPRTYPE *val)
         case EXPR_NODETYPE_SUBTRACT:
             {
             /* Subtraction */
-            err = exprEvalNode(o, n->data.oper.nodes, 0, &d1);
+            err = exprEvalNode(obj, nodes->data.oper.nodes, 0, &d1);
             
             if(!err)
-                err = exprEvalNode(o, n->data.oper.nodes, 1, &d2);
+                err = exprEvalNode(obj, nodes->data.oper.nodes, 1, &d2);
 
             if(!err)
                 *val = d1 - d2;
@@ -116,10 +116,10 @@ int exprEvalNode(exprObj *o, exprNode *n, int p, EXPRTYPE *val)
         case EXPR_NODETYPE_MULTIPLY:
             {
             /* Multiplication */
-            err = exprEvalNode(o, n->data.oper.nodes, 0, &d1);
+            err = exprEvalNode(obj, nodes->data.oper.nodes, 0, &d1);
 
             if(!err)
-                err = exprEvalNode(o, n->data.oper.nodes, 1, &d2);
+                err = exprEvalNode(obj, nodes->data.oper.nodes, 1, &d2);
 
             if(!err)
                 *val = d1 * d2;
@@ -132,10 +132,10 @@ int exprEvalNode(exprObj *o, exprNode *n, int p, EXPRTYPE *val)
         case EXPR_NODETYPE_DIVIDE:
             {
             /* Division */
-            err = exprEvalNode(o, n->data.oper.nodes, 0, &d1);
+            err = exprEvalNode(obj, nodes->data.oper.nodes, 0, &d1);
 
             if(!err)
-                err = exprEvalNode(o, n->data.oper.nodes, 1, &d2);
+                err = exprEvalNode(obj, nodes->data.oper.nodes, 1, &d2);
 
             if(!err)
                 {
@@ -160,10 +160,10 @@ int exprEvalNode(exprObj *o, exprNode *n, int p, EXPRTYPE *val)
         case EXPR_NODETYPE_EXPONENT:
             {
             /* Exponent */
-            err = exprEvalNode(o, n->data.oper.nodes, 0, &d1);
+            err = exprEvalNode(obj, nodes->data.oper.nodes, 0, &d1);
 
             if(!err)
-                err = exprEvalNode(o, n->data.oper.nodes, 1, &d2);
+                err = exprEvalNode(obj, nodes->data.oper.nodes, 1, &d2);
 
             if(!err)
                 {
@@ -180,7 +180,7 @@ int exprEvalNode(exprObj *o, exprNode *n, int p, EXPRTYPE *val)
         case EXPR_NODETYPE_NEGATE:
             {
             /* Negative value */
-            err = exprEvalNode(o, n->data.oper.nodes, 0, &d1);
+            err = exprEvalNode(obj, nodes->data.oper.nodes, 0, &d1);
 
             if(!err)
                 *val = -d1;
@@ -194,26 +194,26 @@ int exprEvalNode(exprObj *o, exprNode *n, int p, EXPRTYPE *val)
         case EXPR_NODETYPE_VALUE:
             {
             /* Directly access the value */
-            *val = n->data.value.value;
+            *val = nodes->data.value.value;
             break;
             }
 
         case EXPR_NODETYPE_VARIABLE:
             {
             /* Directly access the variable or constant */
-            *val = *(n->data.variable.var_addr);
+            *val = *(nodes->data.variable.vaddr);
             break;
             }
 
         case EXPR_NODETYPE_ASSIGN:
             {
             /* Evaluate assignment subnode */
-            err = exprEvalNode(o, n->data.assign.node, 0, val);
+            err = exprEvalNode(obj, nodes->data.assign.node, 0, val);
 
             if(!err)
                 {
                 /* Directly assign the variable */
-                *(n->data.assign.var_addr) = *val;
+                *(nodes->data.assign.vaddr) = *val;
                 }
             else
                 return err;
@@ -224,12 +224,12 @@ int exprEvalNode(exprObj *o, exprNode *n, int p, EXPRTYPE *val)
         case EXPR_NODETYPE_FUNCTION:
             {
             /* Evaluate the function */
-            if(n->data.function.fptr == NULL)
+            if(nodes->data.function.fptr == NULL)
                 {
                 /* No function pointer means we are not using
                    function solvers.  See if the function has a
                    type to solve directly. */
-                switch(n->data.function.type)
+                switch(nodes->data.function.type)
                     {
                     /* This is to keep the file from being too crowded.
                        See exprilfs.h for the definitions. */
@@ -244,7 +244,10 @@ int exprEvalNode(exprObj *o, exprNode *n, int p, EXPRTYPE *val)
                 }
             else
                 {
-                return (*(n->data.function.fptr))(o, n->data.function.nodes, n->data.function.nodecount, n->data.function.refitems, n->data.function.refcount, val);
+                /* Call the correct function */
+                return (*(nodes->data.function.fptr))(obj,
+                    nodes->data.function.nodes, nodes->data.function.nodecount,
+                    nodes->data.function.refs, nodes->data.function.refcount, val);
                 }
 
             break;

@@ -15,22 +15,22 @@
 
 /* Macro for adding a function node type */
 #define EXPR_ADDFUNC_TYPE(name, type, argmin, argmax, refmin, refmax) \
-err = exprFuncListAddType(f, name, type, argmin, argmax, refmin, refmax); \
+err = exprFuncListAddType(flist, name, type, argmin, argmax, refmin, refmax); \
 if(err != EXPR_ERROR_NOERROR) \
     return err;
 
 /* Macro for adding a constant */
 #define EXPR_ADDCONST(name, val) \
-err = exprValListAdd(v, name, val); \
+err = exprValListAdd(vlist, name, val); \
 if(err != EXPR_ERROR_NOERROR) \
     return err;
 
 /* Call this function to initialize these functions into a function list */
-int exprFuncListInit(exprFuncList *f)
+int exprFuncListInit(exprFuncList *flist)
     {
     int err;
 
-    if(f == NULL)
+    if(flist == NULL)
         return EXPR_ERROR_NULLPOINTER;
 
     EXPR_ADDFUNC_TYPE("abs", EXPR_NODEFUNC_ABS, 1, 1, 0, 0);
@@ -87,11 +87,11 @@ int exprFuncListInit(exprFuncList *f)
     }
 
 /* Call this function to initialize some constants into a value list */
-int exprValListInit(exprValList *v)
+int exprValListInit(exprValList *vlist)
     {
     int err;
 
-    if(v == NULL)
+    if(vlist == NULL)
         return EXPR_ERROR_NULLPOINTER;
 
     EXPR_ADDCONST("M_E", M_E);

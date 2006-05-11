@@ -26,8 +26,8 @@ extern "C" {
 /*
     Version number
 */
-#define EXPR_VERSIONMAJOR 1
-#define EXPR_VERSIONMINOR 9
+#define EXPR_VERSIONMAJOR 2
+#define EXPR_VERSIONMINOR 0
 
 /* Node types */
 enum
@@ -102,15 +102,18 @@ enum
     EXPR_NODEFUNC_MANY
     };
 
+/* Forward declarations */
+typedef struct _exprFunc exprFunc;
+typedef struct _exprVal exprVal;
+
 /* Expression object */
 struct _exprObj
     {
-    struct _exprFuncList *funcs; /* Functions */
-    struct _exprValList *vars; /* Variables */
-    struct _exprValList *consts; /* Constants */
+    struct _exprFuncList *flist; /* Functions */
+    struct _exprValList *vlist; /* Variables */
+    struct _exprValList *clist; /* Constants */
     struct _exprNode *headnode; /* Head parsed node */
 
-    exprMsgFuncType msgfunc; /* Message function type */
     exprBreakFuncType breakerfunc; /* Break function type */
 
     void *userdata; /* User data, can be any 32 bit value */
@@ -167,12 +170,12 @@ struct _exprNode
         struct _oper
             {
             struct _exprNode *nodes; /* Operation arguments */
-            int count; /* Number of arguments */
+            int nodecount; /* Number of arguments */
             } oper;
 
         struct _variable
             {
-            EXPRTYPE *var_addr; /* Used if EXPR_FAST_VAR_ACCESS defined */
+            EXPRTYPE *vaddr; /* Used if EXPR_FAST_VAR_ACCESS defined */
             } variable;
 
         struct _value
@@ -182,7 +185,7 @@ struct _exprNode
 
         struct _assign /* Assignment struct */
             {
-            EXPRTYPE *var_addr; /* Used if EXPR_FAST_VAR_ACCESS defined */
+            EXPRTYPE *vaddr; /* Used if EXPR_FAST_VAR_ACCESS defined */
             struct _exprNode *node; /* Node to evaluate */
             } assign;
 
@@ -191,7 +194,7 @@ struct _exprNode
             exprFuncType fptr; /* Function pointer */
             struct _exprNode *nodes; /* Array of argument nodes */
             int nodecount; /* Number of argument nodes */
-            EXPRTYPE **refitems; /* Reference variables */
+            EXPRTYPE **refs; /* Reference variables */
             int refcount; /* Number of variable references (not a reference counter) */
             int type; /* Type of function for exprEvalNode if fptr is NULL */
             } function;
@@ -201,24 +204,8 @@ struct _exprNode
 
 
 /* Functions for function lists */
-int exprFuncListAddType(exprFuncList *f, char *name, int type, int min, int max, int refmin, int refmax);
-int exprFuncListGet(exprFuncList *f, char *name, exprFuncType *ptr, int *type, int *min, int *max, int *refmin, int *refmax);
-
-
-/* Stuff for random functions */
-#define EXPR_RAND_MAX 32767
-
-static int expr_our_rand(EXPRTYPE *cookie)
-    {
-    long a = (long)(*cookie);
-
-    a = a * 214013L + 2531011L;
-
-    *cookie = (EXPRTYPE)a;
-
-    return (a >> 16) & 0x7fff;
-    }
-
+int exprFuncListAddType(exprFuncList *flist, char *name, int type, int min, int max, int refmin, int refmax);
+int exprFuncListGet(exprFuncList *flist, char *name, exprFuncType *ptr, int *type, int *min, int *max, int *refmin, int *refmax);
 
 
 #ifdef __cplusplus

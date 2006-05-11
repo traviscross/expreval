@@ -14,12 +14,12 @@
 #include "exprmem.h"
 
 /* Internal functions */
-static void exprFreeNodeData(exprNode *n);
+static void exprFreeNodeData(exprNode *node);
 
 
 /* Function to create an expression object */
-int exprCreate(exprObj **o, exprFuncList *f, exprValList *v, exprValList *c,
-    exprMsgFuncType msg, exprBreakFuncType breaker, void *userdata)
+int exprCreate(exprObj **obj, exprFuncList *flist, exprValList *vlist, exprValList *clist,
+    exprBreakFuncType breaker, void *userdata)
     {
     exprObj *tmp;
 
@@ -31,51 +31,50 @@ int exprCreate(exprObj **o, exprFuncList *f, exprValList *v, exprValList *c,
 
 
     /* Assign data */
-    tmp->funcs = f;
-    tmp->vars = v;
-    tmp->consts = c;
-    tmp->msgfunc = msg;
+    tmp->flist = flist;
+    tmp->vlist = vlist;
+    tmp->clist = clist;
     tmp->breakerfunc = breaker;
     tmp->userdata = userdata;
     tmp->breakcount = 100000; /* Default breaker count setting */
     tmp->breakcur = 0;
 
     /* Update pointer */
-    *o = tmp;
+    *obj = tmp;
 
     return EXPR_ERROR_NOERROR;
     }
 
 
 /* Free the expression */
-int exprFree(exprObj *o)
+int exprFree(exprObj *obj)
     {
-    if(o == NULL)
+    if(obj == NULL)
         return EXPR_ERROR_NOERROR;
 
     /* First free the node data */
-    exprFreeNodeData(o->headnode);
-    exprFreeMem(o->headnode);
+    exprFreeNodeData(obj->headnode);
+    exprFreeMem(obj->headnode);
 
     /* Free ourself */
-    exprFreeMem(o);
+    exprFreeMem(obj);
 
     return EXPR_ERROR_NOERROR;
     }
 
 /* Clear expression, keep lists, etc */
-int exprClear(exprObj *o)
+int exprClear(exprObj *obj)
     {
-    if(o == NULL)
+    if(obj == NULL)
         return EXPR_ERROR_NOERROR;
 
     /* Free the node data only, keep function, variable, constant lists */
-    exprFreeNodeData(o->headnode);
-    exprFreeMem(o->headnode);
+    exprFreeNodeData(obj->headnode);
+    exprFreeMem(obj->headnode);
 
-    o->headnode = NULL;
-    o->parsedbad = 0;
-    o->parsedgood = 0;
+    obj->headnode = NULL;
+    obj->parsedbad = 0;
+    obj->parsedgood = 0;
 
     return EXPR_ERROR_NOERROR;
     }
@@ -84,104 +83,98 @@ int exprClear(exprObj *o)
 /* Get functions to get information about the expression object */
 
 /* Get the function list */
-exprFuncList *exprGetFuncList(exprObj *o)
+exprFuncList *exprGetFuncList(exprObj *obj)
     {
-    return (o == NULL) ? NULL : o->funcs;
+    return (obj == NULL) ? NULL : obj->flist;
     }
 
 /* Get the variable list */
-exprValList *exprGetVarList(exprObj *o)
+exprValList *exprGetVarList(exprObj *obj)
     {
-    return (o == NULL) ? NULL : o->vars;
+    return (obj == NULL) ? NULL : obj->vlist;
     }
 
 /* Get the constant list */
-exprValList *exprGetConstList(exprObj *o)
+exprValList *exprGetConstList(exprObj *obj)
     {
-    return (o == NULL) ? NULL : o->consts;
-    }
-
-/* Get the message function */
-exprMsgFuncType exprGetMsgFunc(exprObj *o)
-    {
-    return (o == NULL) ? NULL : o->msgfunc;
+    return (obj == NULL) ? NULL : obj->clist;
     }
 
 /* Get the breaker function */
-exprBreakFuncType exprGetBreakFunc(exprObj *o)
+exprBreakFuncType exprGetBreakFunc(exprObj *obj)
     {
-    return (o == NULL) ? NULL : o->breakerfunc;
+    return (obj == NULL) ? NULL : obj->breakerfunc;
     }
 
 /* Check for break status */
-int exprGetBreakResult(exprObj *o)
+int exprGetBreakResult(exprObj *obj)
     {
-    if(o == NULL)
+    if(obj == NULL)
         return 0;
 
-    if(o->breakerfunc == NULL)
+    if(obj->breakerfunc == NULL)
         return 0;
 
-    return (*(o->breakerfunc))(o);
+    return (*(obj->breakerfunc))(obj);
     }
 
 /* Get the user data */
-void *exprGetUserData(exprObj *o)
+void *exprGetUserData(exprObj *obj)
     {
-    return (o == NULL) ? NULL : o->userdata;
+    return (obj == NULL) ? NULL : obj->userdata;
     }
 
 
 /* Set functions to set certain data */
 
 /* Set user data */
-void exprSetUserData(exprObj *o, void *userdata)
+void exprSetUserData(exprObj *obj, void *userdata)
     {
-    if(o)
-        o->userdata = userdata;
+    if(obj)
+        obj->userdata = userdata;
     }
 
 
 /* Set breaker count */
-void exprSetBreakerCount(exprObj *o, int count)
+void exprSetBreakerCount(exprObj *obj, int count)
     {
-    if(o)
+    if(obj)
         {
         /* If count is negative, make it positive */
         if(count < 0)
             count = -count;
 
-        o->breakcount = count;
+        obj->breakcount = count;
 
         /* Make sure the current value is not bigger than count */
-        if(o->breakcur > count)
-            o->breakcur = count;
+        if(obj->breakcur > count)
+            obj->breakcur = count;
         }
     }
 
 /* Get error position */
-void exprGetErrorPosition(exprObj *o, int *start, int *end)
+void exprGetErrorPosition(exprObj *obj, int *start, int *end)
     {
-    if(o)
+    if(obj)
         {
         if(start)
-            *start = o->starterr;
+            *start = obj->starterr;
 
         if(end)
-            *end = o->enderr;
+            *end = obj->enderr;
         }
     }
 
 /* This function will free a node's data */
-static void exprFreeNodeData(exprNode *n)
+static void exprFreeNodeData(exprNode *node)
     {
     int pos;
 
-    if(n == NULL)
+    if(node == NULL)
         return;
 
     /* free data based on type */
-    switch(n->type)
+    switch(node->type)
         {
         case EXPR_NODETYPE_ADD:
         case EXPR_NODETYPE_SUBTRACT:
@@ -191,12 +184,12 @@ static void exprFreeNodeData(exprNode *n)
         case EXPR_NODETYPE_NEGATE:
         case EXPR_NODETYPE_MULTI:
             /* Free operation data */
-            if(n->data.oper.nodes)
+            if(node->data.oper.nodes)
                 {
-                for(pos = 0; pos < n->data.oper.count; pos++)
-                    exprFreeNodeData(&(n->data.oper.nodes[pos]));
+                for(pos = 0; pos < node->data.oper.nodecount; pos++)
+                    exprFreeNodeData(&(node->data.oper.nodes[pos]));
 
-                exprFreeMem(n->data.oper.nodes);
+                exprFreeMem(node->data.oper.nodes);
                 }
 
             break;
@@ -212,29 +205,29 @@ static void exprFreeNodeData(exprNode *n)
 
         case EXPR_NODETYPE_FUNCTION:
             /* Free data of each subnode */
-            if(n->data.function.nodes)
+            if(node->data.function.nodes)
                 {
-                for(pos = 0; pos < n->data.function.nodecount; pos++)
-                    exprFreeNodeData(&(n->data.function.nodes[pos]));
+                for(pos = 0; pos < node->data.function.nodecount; pos++)
+                    exprFreeNodeData(&(node->data.function.nodes[pos]));
 
                 /* Free the subnode array */
-                exprFreeMem(n->data.function.nodes);
+                exprFreeMem(node->data.function.nodes);
                 }
 
             /* Free reference variable list */
-            if(n->data.function.refitems)
-                exprFreeMem(n->data.function.refitems);
+            if(node->data.function.refs)
+                exprFreeMem(node->data.function.refs);
 
             break;
 
         case EXPR_NODETYPE_ASSIGN:
             /* Free subnode data */
-            if(n->data.assign.node)
+            if(node->data.assign.node)
                 {
-                exprFreeNodeData(n->data.assign.node);
+                exprFreeNodeData(node->data.assign.node);
 
                 /* Free the subnode */
-                exprFreeMem(n->data.assign.node);
+                exprFreeMem(node->data.assign.node);
                 }
 
             break;

@@ -16,18 +16,18 @@
 
 /* Internal functions */
 static exprVal *exprCreateVal(char *name, EXPRTYPE val);
-static void exprValListFreeData(exprVal *v);
-static void exprValListResetData(exprVal *v);
+static void exprValListFreeData(exprVal *val);
+static void exprValListResetData(exprVal *val);
 
 /* This function creates the value list, */
-int exprValListCreate(exprValList **v)
+int exprValListCreate(exprValList **vlist)
     {
     exprValList *tmp;
 
-    if(v == NULL)
+    if(vlist == NULL)
         return EXPR_ERROR_NULLPOINTER;
 
-    *v = NULL; /* Set to NULL initially */
+    *vlist = NULL; /* Set to NULL initially */
 
     tmp = exprAllocMem(sizeof(exprValList));
 
@@ -35,26 +35,26 @@ int exprValListCreate(exprValList **v)
         return EXPR_ERROR_MEMORY; /* Could not allocate memory */
 
     /* Update pointer */
-    *v = tmp;
+    *vlist = tmp;
 
     return EXPR_ERROR_NOERROR;
     }
 
 /* Add a value to the list */
-int exprValListAdd(exprValList *v, char *name, EXPRTYPE val)
+int exprValListAdd(exprValList *vlist, char *name, EXPRTYPE val)
     {
     exprVal *tmp;
     exprVal *cur;
     int result;
 
-    if(v == NULL)
+    if(vlist == NULL)
         return EXPR_ERROR_NULLPOINTER;
 
     /* Make sure the name is valid */
     if(!exprValidIdent(name))
         return EXPR_ERROR_BADIDENTIFIER;
 
-    if(v->head == NULL)
+    if(vlist->head == NULL)
         {
         /* Create the node right here */
         tmp = exprCreateVal(name, val);
@@ -62,12 +62,12 @@ int exprValListAdd(exprValList *v, char *name, EXPRTYPE val)
         if(tmp == NULL)
             return EXPR_ERROR_MEMORY;
 
-        v->head = tmp;
+        vlist->head = tmp;
         return EXPR_ERROR_NOERROR;
         }
 
     /* See if we can find where it goes */
-    cur = v->head;
+    cur = vlist->head;
 
     do
         {
@@ -126,19 +126,19 @@ int exprValListAdd(exprValList *v, char *name, EXPRTYPE val)
     }
 
 /* Get the value from a list  */
-int exprValListGet(exprValList *v, char *name, EXPRTYPE *val)
+int exprValListGet(exprValList *vlist, char *name, EXPRTYPE *val)
     {
     exprVal *cur;
     int result;
 
-    if(v == NULL)
+    if(vlist == NULL)
         return EXPR_ERROR_NULLPOINTER;
 
     if(name == NULL || name[0] == '\0')
         return EXPR_ERROR_NOTFOUND;
 
     /* Search for the item */
-    cur = v->head;
+    cur = vlist->head;
 
     while(cur != NULL)
         {
@@ -169,7 +169,7 @@ int exprValListGet(exprValList *v, char *name, EXPRTYPE *val)
     }
 
 /* Get memory address of a variable value in a value list */
-int exprValListGetAddress(exprValList *v, char *name, EXPRTYPE **addr)
+int exprValListGetAddress(exprValList *vlist, char *name, EXPRTYPE **addr)
     {
     exprVal *cur;
     int result;
@@ -177,7 +177,7 @@ int exprValListGetAddress(exprValList *v, char *name, EXPRTYPE **addr)
     /* Not found yet */
     *addr = NULL;
 
-    if(v == NULL || addr == NULL)
+    if(vlist == NULL || addr == NULL)
         return EXPR_ERROR_NULLPOINTER;
 
 
@@ -185,7 +185,7 @@ int exprValListGetAddress(exprValList *v, char *name, EXPRTYPE **addr)
         return EXPR_ERROR_NOTFOUND;
 
     /* Search for the item */
-    cur = v->head;
+    cur = vlist->head;
 
     while(cur != NULL)
         {
@@ -216,64 +216,64 @@ int exprValListGetAddress(exprValList *v, char *name, EXPRTYPE **addr)
     }
 
 /* This routine will free the value list */
-int exprValListFree(exprValList *v)
+int exprValListFree(exprValList *vlist)
     {
     /* Make sure it exists, if not it is not error */
-    if(v == NULL)
+    if(vlist == NULL)
         return EXPR_ERROR_NOERROR;
 
     /* Free the nodes */
-    exprValListFreeData(v->head);
+    exprValListFreeData(vlist->head);
 
     /* Freethe container */
-    exprFreeMem(v);
+    exprFreeMem(vlist);
 
     return EXPR_ERROR_NOERROR;
     }
 
 /* This routine will reset the value list to 0.0 */
-int exprValListClear(exprValList *v)
+int exprValListClear(exprValList *vlist)
     {
-    if(v == NULL)
+    if(vlist == NULL)
         return EXPR_ERROR_NOERROR;
 
-    if(v->head)
+    if(vlist->head)
         {
-        exprValListResetData(v->head);
+        exprValListResetData(vlist->head);
         }
 
     return EXPR_ERROR_NOERROR;
     }
 
 /* This routine will free any child nodes, and then free itself */
-static void exprValListFreeData(exprVal *v)
+static void exprValListFreeData(exprVal *val)
     {
-    if(v == NULL)
+    if(val == NULL)
         return; /* Nothing to do */
 
     /* Free left and right items */
-    exprValListFreeData(v->left);
-    exprValListFreeData(v->right);
+    exprValListFreeData(val->left);
+    exprValListFreeData(val->right);
 
     /* Free name */
-    exprFreeMem(v->vname);
+    exprFreeMem(val->vname);
 
     /* Free ourself */
-    exprFreeMem(v);
+    exprFreeMem(val);
     }
 
 /* This routine will reset variables to 0.0 */
-static void exprValListResetData(exprVal *v)
+static void exprValListResetData(exprVal *val)
     {
-    if(v == NULL)
+    if(val == NULL)
         return; /* Nothing to do */
 
     /* Reset left and right branches */
-    exprValListResetData(v->left);
-    exprValListResetData(v->right);
+    exprValListResetData(val->left);
+    exprValListResetData(val->right);
 
     /* Reset data */
-    v->vval = 0.0;
+    val->vval = 0.0;
     }
 
 /* This routine will create the value object */

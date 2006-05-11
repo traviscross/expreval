@@ -12,18 +12,18 @@
     too crowded.
 
     Provided variables:
-    o: expression object point
-    n: node point to evaluate
+    obj: expression object point
+    nodes: function node with paramters
     d1, d2: variables
     err: error
-    val: value pointer
+    val: value pointer for resuld
     pos: integer
 
     Also EXPR_RESET_ERR() and EXPR_CHECK_ERR()
 
     The chunks below are included inside a statement that looks like this:
 
-    switch(n->data.function.type)
+    switch(nodes->data.function.type)
         {
         #include "exprilfs.h"
 
@@ -39,7 +39,7 @@
 /* abs */
 case EXPR_NODEFUNC_ABS:
     {
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1);
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1);
 
     if(!err)
         {
@@ -57,10 +57,10 @@ case EXPR_NODEFUNC_ABS:
 /* mod */
 case EXPR_NODEFUNC_MOD:
     {
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1);
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1);
 
     if(!err)
-        err = exprEvalNode(o, n->data.function.nodes, 1, &d2);
+        err = exprEvalNode(obj, nodes->data.function.nodes, 1, &d2);
 
     if(!err)
         {
@@ -77,7 +77,7 @@ case EXPR_NODEFUNC_MOD:
 /* ipart */
 case EXPR_NODEFUNC_IPART:
     {
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1);
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1);
 
     if(!err)
         {
@@ -94,7 +94,7 @@ case EXPR_NODEFUNC_IPART:
 /* fpart */
 case EXPR_NODEFUNC_FPART:
     {
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1);
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1);
 
     if(!err)
         {
@@ -111,13 +111,13 @@ case EXPR_NODEFUNC_FPART:
 /* min */
 case EXPR_NODEFUNC_MIN:
     {
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1);
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1);
 
     if(!err)
         {
-        for(pos = 1; pos < n->data.function.nodecount; pos++)
+        for(pos = 1; pos < nodes->data.function.nodecount; pos++)
             {
-            err = exprEvalNode(o, n->data.function.nodes, pos, &d2);
+            err = exprEvalNode(obj, nodes->data.function.nodes, pos, &d2);
             if(!err)
                 {
                 if(d2 < d1)
@@ -140,13 +140,13 @@ case EXPR_NODEFUNC_MAX:
     {
     int pos;
 
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1);
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1);
 
     if(!err)
         {
-        for(pos = 1; pos < n->data.function.nodecount; pos++)
+        for(pos = 1; pos < nodes->data.function.nodecount; pos++)
             {
-            err = exprEvalNode(o, n->data.function.nodes, pos, &d2);
+            err = exprEvalNode(obj, nodes->data.function.nodes, pos, &d2);
             if(!err)
                 {
                 if(d2 > d1)
@@ -167,10 +167,10 @@ case EXPR_NODEFUNC_MAX:
 /* pow */
 case EXPR_NODEFUNC_POW:
     {
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1);
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1);
 
     if(!err)
-        err = exprEvalNode(o, n->data.function.nodes, 1, &d2);
+        err = exprEvalNode(obj, nodes->data.function.nodes, 1, &d2);
 
     if(!err)
         {
@@ -187,7 +187,7 @@ case EXPR_NODEFUNC_POW:
 /* sqrt */
 case EXPR_NODEFUNC_SQRT:
     {
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1);
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1);
     
     if(!err)
         {
@@ -204,7 +204,7 @@ case EXPR_NODEFUNC_SQRT:
 /* sin */
 case EXPR_NODEFUNC_SIN:
     {
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1);
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1);
 
     if(!err)
         {
@@ -221,7 +221,7 @@ case EXPR_NODEFUNC_SIN:
 /* sinh */
 case EXPR_NODEFUNC_SINH:
     {
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1);
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1);
 
     if(!err)
         {
@@ -238,7 +238,7 @@ case EXPR_NODEFUNC_SINH:
 /* asin */
 case EXPR_NODEFUNC_ASIN:
     {
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1);
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1);
 
     if(!err)
         {
@@ -255,7 +255,7 @@ case EXPR_NODEFUNC_ASIN:
 /* cos */
 case EXPR_NODEFUNC_COS: 
     {
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1); 
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1); 
 
     if(!err)
         {
@@ -272,7 +272,7 @@ case EXPR_NODEFUNC_COS:
 /* cosh */
 case EXPR_NODEFUNC_COSH: 
     {
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1); 
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1); 
 
     if(!err)
         {
@@ -289,7 +289,7 @@ case EXPR_NODEFUNC_COSH:
 /* acos */
 case EXPR_NODEFUNC_ACOS: 
     {
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1); 
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1); 
 
     if(!err)
         {
@@ -306,7 +306,7 @@ case EXPR_NODEFUNC_ACOS:
 /* tan */
 case EXPR_NODEFUNC_TAN: 
     {
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1); 
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1); 
 
     if(!err)
         {
@@ -323,7 +323,7 @@ case EXPR_NODEFUNC_TAN:
 /* tanh */
 case EXPR_NODEFUNC_TANH: 
     {
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1); 
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1); 
 
     if(!err)
         {
@@ -340,7 +340,7 @@ case EXPR_NODEFUNC_TANH:
 /* atan */
 case EXPR_NODEFUNC_ATAN: 
     {
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1); 
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1); 
 
     if(!err)
         {
@@ -357,10 +357,10 @@ case EXPR_NODEFUNC_ATAN:
 /* atan2 */
 case EXPR_NODEFUNC_ATAN2: 
     {
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1);
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1);
 
     if(!err)
-        err = exprEvalNode(o, n->data.function.nodes, 1, &d2);
+        err = exprEvalNode(obj, nodes->data.function.nodes, 1, &d2);
 
     if(!err)
         {
@@ -377,7 +377,7 @@ case EXPR_NODEFUNC_ATAN2:
 /* log */
 case EXPR_NODEFUNC_LOG: 
     {
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1); 
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1); 
 
     if(!err)
         {
@@ -394,7 +394,7 @@ case EXPR_NODEFUNC_LOG:
 /* pow10 */
 case EXPR_NODEFUNC_POW10: 
     {
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1); 
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1); 
 
     if(!err)
         {
@@ -411,7 +411,7 @@ case EXPR_NODEFUNC_POW10:
 /* ln */
 case EXPR_NODEFUNC_LN: 
     {
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1); 
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1); 
 
     if(!err)
         {
@@ -428,7 +428,7 @@ case EXPR_NODEFUNC_LN:
 /* exp */
 case EXPR_NODEFUNC_EXP: 
     {
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1); 
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1); 
 
     if(!err)
         {
@@ -446,10 +446,10 @@ case EXPR_NODEFUNC_LOGN:
     {
     EXPRTYPE l1, l2;
 
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1); 
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1); 
 
     if(!err)
-        err = exprEvalNode(o, n->data.function.nodes, 1, &d2);
+        err = exprEvalNode(obj, nodes->data.function.nodes, 1, &d2);
 
     if(!err)
         {
@@ -481,7 +481,7 @@ case EXPR_NODEFUNC_LOGN:
 /* ceil */
 case EXPR_NODEFUNC_CEIL: 
     {
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1); 
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1); 
 
     if(!err)
         {
@@ -496,7 +496,7 @@ case EXPR_NODEFUNC_CEIL:
 /* floor */
 case EXPR_NODEFUNC_FLOOR: 
     {
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1); 
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1);
 
     if(!err)
         {
@@ -509,9 +509,15 @@ case EXPR_NODEFUNC_FLOOR:
     }
 
 /* rand */
-case EXPR_NODEFUNC_RAND: 
+case EXPR_NODEFUNC_RAND:
     {
-    *val = (EXPRTYPE)expr_our_rand(n->data.function.refitems[0]) / (EXPRTYPE)(EXPR_RAND_MAX + 1);
+    long a;
+    
+    /* Perform random routine directly */
+    a = ((long)(*(nodes->data.function.refs[0]))) * 214013L + 2531011L;
+    *(nodes->data.function.refs[0]) = (EXPRTYPE)a;
+
+    *val =  (EXPRTYPE)((a >> 16) & 0x7FFF) / (EXPRTYPE)(32768);
     break;
     }
 
@@ -519,16 +525,22 @@ case EXPR_NODEFUNC_RAND:
 case EXPR_NODEFUNC_RANDOM:
     {
     EXPRTYPE diff, rval;
+    long a;
 
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1);
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1);
 
     if(!err)
-        err = exprEvalNode(o, n->data.function.nodes, 1, &d2);
+        err = exprEvalNode(obj, nodes->data.function.nodes, 1, &d2);
 
     if(!err)
         {
         diff = d2 - d1;
-        rval = (EXPRTYPE)expr_our_rand(n->data.function.refitems[0]) / (EXPRTYPE)(EXPR_RAND_MAX);
+
+        /* Perform random routine directly */
+        a = ((long)(*(nodes->data.function.refs[0]))) * 214013L + 2531011L;
+        *(nodes->data.function.refs[0]) = (EXPRTYPE)a;
+
+        rval = (EXPRTYPE)((a >> 16) & 0x7FFF) / (EXPRTYPE)(32767);
 
         *val = (rval * diff) + d1;
         }
@@ -545,7 +557,7 @@ case EXPR_NODEFUNC_RANDOMIZE:
 
     curcall++;
 
-    *(n->data.function.refitems[0]) = (EXPRTYPE)((clock() + 1024 + curcall) * time(NULL));
+    *(nodes->data.function.refs[0]) = (EXPRTYPE)((clock() + 1024 + curcall) * time(NULL));
 
     break;
     }
@@ -553,7 +565,7 @@ case EXPR_NODEFUNC_RANDOMIZE:
 /* deg */
 case EXPR_NODEFUNC_DEG:
     {
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1);
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1);
     
     if(!err)
         {
@@ -568,7 +580,7 @@ case EXPR_NODEFUNC_DEG:
 /* rad */
 case EXPR_NODEFUNC_RAD:
     {
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1);
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1);
     
     if(!err)
         {
@@ -583,10 +595,10 @@ case EXPR_NODEFUNC_RAD:
 /* recttopolr */
 case EXPR_NODEFUNC_RECTTOPOLR:
     {
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1);
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1);
 
     if(!err)
-        err = exprEvalNode(o, n->data.function.nodes, 1, &d2);
+        err = exprEvalNode(obj, nodes->data.function.nodes, 1, &d2);
     
     if(!err)
         {
@@ -605,10 +617,10 @@ case EXPR_NODEFUNC_RECTTOPOLA:
     {
     EXPRTYPE tmp;
 
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1);
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1);
 
     if(!err)
-        err = exprEvalNode(o, n->data.function.nodes, 1, &d2);
+        err = exprEvalNode(obj, nodes->data.function.nodes, 1, &d2);
     
     if(!err)
         {
@@ -630,10 +642,10 @@ case EXPR_NODEFUNC_RECTTOPOLA:
 /* poltorectx */
 case EXPR_NODEFUNC_POLTORECTX:
     {
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1);
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1);
 
     if(!err)
-        err = exprEvalNode(o, n->data.function.nodes, 1, &d2);
+        err = exprEvalNode(obj, nodes->data.function.nodes, 1, &d2);
     
     if(!err)
         {
@@ -650,10 +662,10 @@ case EXPR_NODEFUNC_POLTORECTX:
 /* poltorecty */
 case EXPR_NODEFUNC_POLTORECTY:
     {
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1);
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1);
 
     if(!err)
-        err = exprEvalNode(o, n->data.function.nodes, 1, &d2);
+        err = exprEvalNode(obj, nodes->data.function.nodes, 1, &d2);
     
     if(!err)
         {
@@ -670,19 +682,19 @@ case EXPR_NODEFUNC_POLTORECTY:
 /* if */
 case EXPR_NODEFUNC_IF:
     {
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1);
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1);
 
     if(!err)
         {
         if(d1 != 0.0)
             {
-            err = exprEvalNode(o, n->data.function.nodes, 1, val);
+            err = exprEvalNode(obj, nodes->data.function.nodes, 1, val);
             if(err)
                 return err;
             }
         else
             {
-            err = exprEvalNode(o, n->data.function.nodes, 2, val);
+            err = exprEvalNode(obj, nodes->data.function.nodes, 2, val);
             if(err)
                 return err;
             }
@@ -696,33 +708,33 @@ case EXPR_NODEFUNC_IF:
 /* select */
 case EXPR_NODEFUNC_SELECT:
     {
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1);
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1);
 
     if(!err)
         {
         if(d1 < 0.0)
             {
-            err = exprEvalNode(o, n->data.function.nodes, 1, val);
+            err = exprEvalNode(obj, nodes->data.function.nodes, 1, val);
             if(err)
                 return err;
             }
         else if(d1 == 0.0)
             {
-            err = exprEvalNode(o, n->data.function.nodes, 2, val);
+            err = exprEvalNode(obj, nodes->data.function.nodes, 2, val);
             if(err)
                 return err;
             }
         else
             {
-            if(n->data.function.nodecount == 3)
+            if(nodes->data.function.nodecount == 3)
                 {
-                err = exprEvalNode(o, n->data.function.nodes, 2, val);
+                err = exprEvalNode(obj, nodes->data.function.nodes, 2, val);
                 if(err)
                     return err;
                 }
             else
                 {
-                err = exprEvalNode(o, n->data.function.nodes, 3, val);
+                err = exprEvalNode(obj, nodes->data.function.nodes, 3, val);
                 if(err)
                     return err;
                 }
@@ -737,10 +749,10 @@ case EXPR_NODEFUNC_SELECT:
 /* equal */
 case EXPR_NODEFUNC_EQUAL:
     {
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1);
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1);
 
     if(!err)
-        err = exprEvalNode(o, n->data.function.nodes, 1, &d2);
+        err = exprEvalNode(obj, nodes->data.function.nodes, 1, &d2);
     
     if(!err)
         {
@@ -755,10 +767,10 @@ case EXPR_NODEFUNC_EQUAL:
 /* above */
 case EXPR_NODEFUNC_ABOVE:
     {
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1);
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1);
 
     if(!err)
-        err = exprEvalNode(o, n->data.function.nodes, 1, &d2);
+        err = exprEvalNode(obj, nodes->data.function.nodes, 1, &d2);
     
     if(!err)
         {
@@ -773,10 +785,10 @@ case EXPR_NODEFUNC_ABOVE:
 /* below */
 case EXPR_NODEFUNC_BELOW:
     {
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1);
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1);
 
     if(!err)
-        err = exprEvalNode(o, n->data.function.nodes, 1, &d2);
+        err = exprEvalNode(obj, nodes->data.function.nodes, 1, &d2);
     
     if(!err)
         {
@@ -793,9 +805,9 @@ case EXPR_NODEFUNC_AVG:
     {
     d2 = 0.0;
     
-    for(pos = 0; pos < n->data.function.nodecount; pos++)
+    for(pos = 0; pos < nodes->data.function.nodecount; pos++)
         {
-        err = exprEvalNode(o, n->data.function.nodes, pos, &d1);
+        err = exprEvalNode(obj, nodes->data.function.nodes, pos, &d1);
         if(!err)
             {
             d2 += d1;
@@ -804,7 +816,7 @@ case EXPR_NODEFUNC_AVG:
             return err;
         }
 
-    *val = d2 / (EXPRTYPE)(n->data.function.nodecount);
+    *val = d2 / (EXPRTYPE)(nodes->data.function.nodecount);
 
     break;
     }
@@ -814,13 +826,13 @@ case EXPR_NODEFUNC_CLIP:
     {
     EXPRTYPE v;
 
-    err = exprEvalNode(o, n->data.function.nodes, 0, &v);
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &v);
 
     if(!err)
-        err = exprEvalNode(o, n->data.function.nodes, 1, &d1);
+        err = exprEvalNode(obj, nodes->data.function.nodes, 1, &d1);
 
     if(!err)
-        err = exprEvalNode(o, n->data.function.nodes, 1, &d2);
+        err = exprEvalNode(obj, nodes->data.function.nodes, 1, &d2);
     
     if(!err)
         {
@@ -842,13 +854,13 @@ case EXPR_NODEFUNC_CLAMP:
     {
     EXPRTYPE v, tmp;
 
-    err = exprEvalNode(o, n->data.function.nodes, 0, &v);
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &v);
 
     if(!err)
-        err = exprEvalNode(o, n->data.function.nodes, 1, &d1);
+        err = exprEvalNode(obj, nodes->data.function.nodes, 1, &d1);
 
     if(!err)
-        err = exprEvalNode(o, n->data.function.nodes, 1, &d2);
+        err = exprEvalNode(obj, nodes->data.function.nodes, 1, &d2);
     
     if(!err)
         {
@@ -873,19 +885,19 @@ case EXPR_NODEFUNC_PNTCHANGE:
     EXPRTYPE n1, n2, pnt;
     EXPRTYPE odiff, ndiff, perc;
 
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1);
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1);
 
     if(!err)
-        err = exprEvalNode(o, n->data.function.nodes, 1, &d2);
+        err = exprEvalNode(obj, nodes->data.function.nodes, 1, &d2);
 
     if(!err)
-        err = exprEvalNode(o, n->data.function.nodes, 2, &n1);
+        err = exprEvalNode(obj, nodes->data.function.nodes, 2, &n1);
 
     if(!err)
-        err = exprEvalNode(o, n->data.function.nodes, 3, &n2);
+        err = exprEvalNode(obj, nodes->data.function.nodes, 3, &n2);
 
     if(!err)
-        err = exprEvalNode(o, n->data.function.nodes, 4, &pnt);
+        err = exprEvalNode(obj, nodes->data.function.nodes, 4, &pnt);
     
     if(!err)
         {
@@ -913,16 +925,16 @@ case EXPR_NODEFUNC_POLY:
     {
     EXPRTYPE total, curpow;
 
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1);
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1);
 
     if(!err)
         {
-        curpow = (EXPRTYPE)(n->data.function.nodecount) - 2.0;
+        curpow = (EXPRTYPE)(nodes->data.function.nodecount) - 2.0;
         total = 0.0;
 
-        for(pos = 1; pos < n->data.function.nodecount; pos++)
+        for(pos = 1; pos < nodes->data.function.nodecount; pos++)
             {
-            err = exprEvalNode(o, n->data.function.nodes, pos, &d2);
+            err = exprEvalNode(obj, nodes->data.function.nodes, pos, &d2);
             if(err)
                 return err;
 
@@ -943,10 +955,10 @@ case EXPR_NODEFUNC_POLY:
 /* and */
 case EXPR_NODEFUNC_AND:
     {
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1);
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1);
     
     if(!err)
-        err = exprEvalNode(o, n->data.function.nodes, 1, &d2);
+        err = exprEvalNode(obj, nodes->data.function.nodes, 1, &d2);
 
     if(!err)
         {
@@ -964,10 +976,10 @@ case EXPR_NODEFUNC_AND:
 /* or */
 case EXPR_NODEFUNC_OR:
     {
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1);
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1);
     
     if(!err)
-        err = exprEvalNode(o, n->data.function.nodes, 1, &d2);
+        err = exprEvalNode(obj, nodes->data.function.nodes, 1, &d2);
 
     if(!err)
         {
@@ -985,7 +997,7 @@ case EXPR_NODEFUNC_OR:
 /* not */
 case EXPR_NODEFUNC_NOT:
     {
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1);
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1);
     
     if(!err)
         {
@@ -1006,27 +1018,27 @@ case EXPR_NODEFUNC_FOR:
     int pos;
     EXPRTYPE test;
 
-    err = exprEvalNode(o, n->data.function.nodes, 0, &d1);
+    err = exprEvalNode(obj, nodes->data.function.nodes, 0, &d1);
     
     if(!err)
-        err = exprEvalNode(o, n->data.function.nodes, 1, &test);
+        err = exprEvalNode(obj, nodes->data.function.nodes, 1, &test);
 
     if(!err)
         {
         while(test != 0.0)
             {
-            for(pos = 3; pos < n->data.function.nodecount; pos++)
+            for(pos = 3; pos < nodes->data.function.nodecount; pos++)
                 {
-                err = exprEvalNode(o, n->data.function.nodes, pos, val);
+                err = exprEvalNode(obj, nodes->data.function.nodes, pos, val);
                 if(err)
                     return err;
                 }
 
-            err = exprEvalNode(o, n->data.function.nodes, 2, &d1);
+            err = exprEvalNode(obj, nodes->data.function.nodes, 2, &d1);
             if(err)
                 return err;
 
-            err = exprEvalNode(o, n->data.function.nodes, 1, &test);
+            err = exprEvalNode(obj, nodes->data.function.nodes, 1, &test);
             if(err)
                 return err;
             }
@@ -1040,9 +1052,9 @@ case EXPR_NODEFUNC_FOR:
 /* many */
 case EXPR_NODEFUNC_MANY:
     {
-    for(pos = 0; pos < n->data.function.nodecount; pos++)
+    for(pos = 0; pos < nodes->data.function.nodecount; pos++)
         {
-        err = exprEvalNode(o, n->data.function.nodes, pos, val);
+        err = exprEvalNode(obj, nodes->data.function.nodes, pos, val);
         if(err)
             return err;
         }
