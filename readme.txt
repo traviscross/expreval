@@ -28,11 +28,60 @@ goes for constant lists.  Variable lists make it where
 one expression can depend on a variable set in another.
 
 
+Saturday, July 1, 2006
+----------------------
+Version 2.6
+
+* Added a new value list function 'exprValListGetNext' that can be used to
+  enumerate the items in a value list.  Any of the items not needed (name,
+  value, or address) can be NULL.  For example:
+  
+  char *name;
+  EXPRTYPE val;
+  void *cookie;
+  
+  cookie = exprValListGetNext(vlist, &name, &value, NULL, NULL);
+  while(cookie)
+    {
+    /* Do something with name and value */
+    cookie = exprValListGetNext(vlist, &name, &value, NULL, cookie);
+    }
+    
+  You must make sure not to actually edit the returned name, because it is a
+  pointer into the value list to the name.  This can also be used to have one
+  value list store globals.  Global variables can be added to a value list, then
+  additional lists can be created, and before any variables are added
+  or the expression is parsed, the global list can be enumerated for name and
+  address and the exprValListAddAddress can be used to add them.  This way,
+  expressions can have their own private list, but some variables may be shared
+  on each expression through the global list.  This is useful especially if the
+  globals are not known at compile time, but can be adjusted by the user.
+  For example:
+  
+  exprValList *globals;
+  exprValList *v1;
+  exprValList *v2;
+  char *name;
+  EXPRTYPE *addr;
+  void *cookie;
+  
+  exprValListCreate(&globals);
+  /* Add variables to the list, perhaps read from a user file or something */
+  
+  exprValListCreate(&v1);
+  cookie = exprValListGetNext(globals, &name, NULL, &addr, NULL);
+  while(cookie)
+    {
+    exprValListAddAddress(v1, name, addr);
+    cookie = exprValListGetNext(globals, &name, NULL, &addr, cookie);
+    }
+  
+
 Friday, June 30, 2006
 ---------------------
 Version 2.5
 
-* Added a new value list function: exprValListAddAddress.  This function adds
+* Added a new value list function 'exprValListAddAddress'.  This function adds
   a named value to the list, but uses the addresss of a stack variable.  The
   stack variable is then used to set/get the value instead of the internal list
   value.  You must ensure that the stack variable exists as long as it is used

@@ -54,6 +54,10 @@ void main(void)
     EXPRTYPE *e_pos, *e_res;
     int start, end;
     
+    char *vname;
+    EXPRTYPE vval;
+    void *cookie;
+    
     EXPRTYPE global_val;
 
     /* Seed random number generator */
@@ -214,6 +218,22 @@ void main(void)
         printf("Average Evaluations/Second: %f\n", (double)count / diff);
 
     printf("res=: %f\n", *e_res);
+    
+    /* Enumerate the items in the variable list */
+    
+    printf("Variable list items\n");
+    printf("-------------------\n");
+    
+    
+    cookie = exprValListGetNext(v, &vname, &vval, NULL, NULL);
+    
+    while(cookie)
+        {
+        printf("%s = %f\n", vname, vval);
+        
+        cookie = exprValListGetNext(v, &vname, &vval, NULL, cookie);
+        }
+    
 
     /* We are done */
     longjmp(jumper, -1);

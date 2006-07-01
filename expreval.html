@@ -697,6 +697,29 @@ int custom_func(exprObj *obj, exprNode *nodes, int count, EXPRTYPE **refs, int r
                         <li>Error code of the function</li>
                     </ul>
                 </li><br>
+                <li>void *exprValListGetNext(exprValList *vlist, char **name, EXPRTYPE *value, EXPRTYPE** addr, void *cookie);<br>
+                    Comment:
+                    <ul>
+                        <li>This is used to enumerate the items in the value list.
+                            Do NOT change the list while enumerating the items. Any
+                            of the information items can be NULL if it is not needed.</li>
+                    </ul>
+                    Parameters:
+                    <ul>
+                        <li>*vlist - Value list to use</li>
+                        <li>**name - Address of a pointer that will point to the
+                            name. Do not edit the name.</li>
+                        <li>*value - The current value of the item.</li>
+                        <li>**addr - Address of a pointer to store the address of the value.</li>
+                        <li>*cookie - NULL to find the first item, the return value to find
+                            subsequent items.</li>
+                    </ul>
+                    Returns:
+                    <ul>
+                        <li>NULL if the item could not be found.  Otherwise a cookie
+                            to be used to find additional items.</li>
+                    </ul>
+                </li><br>
                 <li>int exprValListFree(exprValList *vlist);<br>
                     Comments:
                     <ul>

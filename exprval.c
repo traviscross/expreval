@@ -256,6 +256,50 @@ int exprValListGetAddress(exprValList *vlist, char *name, EXPRTYPE **addr)
     /* If we got here, we did not find it in the list */
     return EXPR_ERROR_NOTFOUND;
     }
+    
+/* This function is used to enumerate the values in a value list */
+void *exprValListGetNext(exprValList *vlist, char **name, EXPRTYPE *value, EXPRTYPE** addr, void *cookie)
+    {
+    exprVal *cur;
+    
+    if(vlist == NULL)
+        return NULL;
+        
+    /* Get the current item */
+    cur = (exprVal*)cookie;
+    
+    /* Find the next item */
+    if(cur == NULL)
+        cur = vlist->head;
+    else
+        cur = cur->next;
+        
+    /* Set up the data */
+    if(cur)
+        {
+        if(name)
+            *name = cur->vname;
+           
+        if(value)
+            {
+            if(cur->vptr)
+                *value = *(cur->vptr);
+            else
+                *value = cur->vval;
+            }
+            
+        if(addr)
+            {
+            if(cur->vptr)
+                *addr = cur->vptr;
+            else
+                *addr = &(cur->vval);
+            }                                
+        }
+        
+    /* If there was no value, return NULL, otherwise, return the item */
+    return (void*)cur;
+    }
 
 /* This routine will free the value list */
 int exprValListFree(exprValList *vlist)

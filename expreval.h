@@ -91,6 +91,7 @@ int exprValListSet(exprValList *vlist, char *name, EXPRTYPE val);
 int exprValListGet(exprValList *vlist, char *name, EXPRTYPE *val);
 int exprValListAddAddress(exprValList *vlist, char *name, EXPRTYPE *addr);
 int exprValListGetAddress(exprValList *vlist, char *name, EXPRTYPE **addr);
+void *exprValListGetNext(exprValList *vlist, char **name, EXPRTYPE *value, EXPRTYPE** addr, void *cookie);
 int exprValListFree(exprValList *vlist);
 int exprValListClear(exprValList *vlist);
 int exprValListInit(exprValList *vlist);
