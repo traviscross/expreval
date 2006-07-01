@@ -53,9 +53,14 @@ void main(void)
     double diff;
     EXPRTYPE *e_pos, *e_res;
     int start, end;
+    
+    EXPRTYPE global_val;
 
     /* Seed random number generator */
     srand((clock() + 1024) * time(NULL));
+    
+    /* Set global value */
+    global_val = 27.2;
 
     /* Set error buffer */
     err = setjmp(jumper);
@@ -114,6 +119,14 @@ void main(void)
     if(err != EXPR_ERROR_NOERROR)
         {
         printf("Var List Creation Error\n");
+        longjmp(jumper, err);
+        }
+        
+    /* Init variable list */
+    err = exprValListAddAddress(v, "global", &global_val);
+    if(err != EXPR_ERROR_NOERROR)
+        {
+        printf("Var List Init Error\n");
         longjmp(jumper, err);
         }
 

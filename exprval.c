@@ -15,7 +15,7 @@
 
 
 /* Internal functions */
-static exprVal *exprCreateVal(char *name, EXPRTYPE val);
+static exprVal *exprCreateVal(char *name, EXPRTYPE val, EXPRTYPE *addr);
 static void exprValListFreeData(exprVal *val);
 static void exprValListResetData(exprVal *val);
 
@@ -57,7 +57,7 @@ int exprValListAdd(exprValList *vlist, char *name, EXPRTYPE val)
     if(vlist->head == NULL)
         {
         /* Create the node right here */
-        tmp = exprCreateVal(name, val);
+        tmp = exprCreateVal(name, val, NULL);
 
         if(tmp == NULL)
             return EXPR_ERROR_MEMORY;
@@ -66,64 +66,65 @@ int exprValListAdd(exprValList *vlist, char *name, EXPRTYPE val)
         return EXPR_ERROR_NOERROR;
         }
 
-    /* See if we can find where it goes */
+    /* See if already exists */
     cur = vlist->head;
 
-    do
+    while(cur)
         {
         result = strcmp(name, cur->vname);
-
+        
         if(result == 0)
-            {
-            /* This is it, just assign */
-            cur->vval = val;
-
-            break;
-            }
-        else if(result > 0) /* To the right */
-            {
-            if(cur->right == NULL)
-                {
-                /* It goes here */
-                tmp = exprCreateVal(name, val);
-
-                if(tmp == NULL)
-                    return EXPR_ERROR_MEMORY;
-
-                cur->right = tmp;
-                break;
-                }
-            else
-                {
-                /* Loop into the right node */
-                cur = cur->right;
-                }
-            }
-        else if(result < 0) /* To the left */
-            {
-            if(cur->left == NULL)
-                {
-                /* It goes right here */
-                tmp = exprCreateVal(name, val);
-
-                if(tmp == NULL)
-                    return EXPR_ERROR_MEMORY;
-
-                cur->left = tmp;
-                break;
-                }
-            else
-                {
-                /* Loop into the left node */
-                cur = cur->left;
-                }
-            }
+            return EXPR_ERROR_ALREADYEXISTS;
+            
+        cur = cur->next;
         }
-    while(1); /* Loop until we find where it goes */
+        
+    /* We did not find it, create it and add it to the beginning */
+    tmp = exprCreateVal(name, val, NULL);
 
-    /* We made it out of the loop, so it was successful */
+    if(tmp == NULL)
+        return EXPR_ERROR_MEMORY;
+        
+    tmp->next = vlist->head;
+    vlist->head = tmp;
+    
     return EXPR_ERROR_NOERROR;
     }
+    
+/* Set a value in the list */
+int exprValListSet(exprValList *vlist, char *name, EXPRTYPE val)
+    {
+    exprVal *cur;
+    int result;
+
+    if(vlist == NULL)
+        return EXPR_ERROR_NULLPOINTER;
+
+    if(name == NULL || name[0] == '\0')
+        return EXPR_ERROR_NOTFOUND;
+
+    /* Find and set it */
+    cur = vlist->head;
+
+    while(cur)
+        {
+        result = strcmp(name, cur->vname);
+        
+        if(result == 0)
+            {
+            if(cur->vptr)
+                *(cur->vptr) = val;
+            else
+                cur->vval = val;
+                
+            return EXPR_ERROR_NOERROR;                
+            }
+            
+        cur = cur->next;
+        }
+        
+    return EXPR_ERROR_NOTFOUND;
+    }    
 
 /* Get the value from a list  */
 int exprValListGet(exprValList *vlist, char *name, EXPRTYPE *val)
@@ -140,33 +141,79 @@ int exprValListGet(exprValList *vlist, char *name, EXPRTYPE *val)
     /* Search for the item */
     cur = vlist->head;
 
-    while(cur != NULL)
+    while(cur)
         {
         result = strcmp(name, cur->vname);
 
         if(result == 0)
             {
             /* We found it. */
-            *val = cur->vval;
+            if(cur->vptr)
+                *val = *(cur->vptr);
+            else
+                *val = cur->vval;
 
             /* return now */
             return EXPR_ERROR_NOERROR;
             }
-        else if(result < 0)
-            {
-            /* to the left */
-            cur = cur->left;
-            }
-        else if(result > 0)
-            {
-            /* to the right */
-            cur = cur->right;
-            }
+
+        cur = cur->next;
         }
 
     /* If we got here, we did not find the item in the list */
     return EXPR_ERROR_NOTFOUND;
     }
+    
+/* Add an address to the list */
+int exprValListAddAddress(exprValList *vlist, char *name, EXPRTYPE *addr)
+    {
+    exprVal *tmp;
+    exprVal *cur;
+    int result;
+
+    if(vlist == NULL)
+        return EXPR_ERROR_NULLPOINTER;
+
+    /* Make sure the name is valid */
+    if(!exprValidIdent(name))
+        return EXPR_ERROR_BADIDENTIFIER;
+
+    if(vlist->head == NULL)
+        {
+        /* Create the node right here */
+        tmp = exprCreateVal(name, (EXPRTYPE)0.0, addr);
+
+        if(tmp == NULL)
+            return EXPR_ERROR_MEMORY;
+
+        vlist->head = tmp;
+        return EXPR_ERROR_NOERROR;
+        }
+
+    /* See if it already exists */
+    cur = vlist->head;
+    
+    while(cur)
+        {
+        result = strcmp(name, cur->vname);
+
+        if(result == 0)
+            return EXPR_ERROR_ALREADYEXISTS;
+            
+        cur = cur->next;
+        }
+        
+    /* Add it to the list */
+    tmp = exprCreateVal(name, (EXPRTYPE)0.0, addr);
+
+    if(tmp == NULL)
+        return EXPR_ERROR_MEMORY;
+        
+    tmp->next = vlist->head;
+    vlist->head = tmp;
+
+    return EXPR_ERROR_NOERROR;
+    }    
 
 /* Get memory address of a variable value in a value list */
 int exprValListGetAddress(exprValList *vlist, char *name, EXPRTYPE **addr)
@@ -187,28 +234,23 @@ int exprValListGetAddress(exprValList *vlist, char *name, EXPRTYPE **addr)
     /* Search for the item */
     cur = vlist->head;
 
-    while(cur != NULL)
+    while(cur)
         {
         result = strcmp(name, cur->vname);
 
         if(result == 0)
             {
             /* We found it. */
-            *addr = &(cur->vval);
+            if(cur->vptr)
+                *addr = cur->vptr;
+            else
+                *addr = &(cur->vval);
 
             /* return now */
             return EXPR_ERROR_NOERROR;
             }
-        else if(result < 0)
-            {
-            /* to the left */
-            cur = cur->left;
-            }
-        else if(result > 0)
-            {
-            /* to the right */
-            cur = cur->right;
-            }
+            
+        cur = cur->next;
         }
 
     /* If we got here, we did not find it in the list */
@@ -237,10 +279,7 @@ int exprValListClear(exprValList *vlist)
     if(vlist == NULL)
         return EXPR_ERROR_NOERROR;
 
-    if(vlist->head)
-        {
-        exprValListResetData(vlist->head);
-        }
+    exprValListResetData(vlist->head);
 
     return EXPR_ERROR_NOERROR;
     }
@@ -248,36 +287,40 @@ int exprValListClear(exprValList *vlist)
 /* This routine will free any child nodes, and then free itself */
 static void exprValListFreeData(exprVal *val)
     {
-    if(val == NULL)
-        return; /* Nothing to do */
+    exprVal *next;
+    
+    while(val)
+        {
+        /* Remember the next */
+        next = val->next;
+        
+        /* Free name */
+        exprFreeMem(val->vname);
 
-    /* Free left and right items */
-    exprValListFreeData(val->left);
-    exprValListFreeData(val->right);
-
-    /* Free name */
-    exprFreeMem(val->vname);
-
-    /* Free ourself */
-    exprFreeMem(val);
+        /* Free ourself */
+        exprFreeMem(val);
+        
+        val = next;
+        }
     }
 
 /* This routine will reset variables to 0.0 */
 static void exprValListResetData(exprVal *val)
     {
-    if(val == NULL)
-        return; /* Nothing to do */
-
-    /* Reset left and right branches */
-    exprValListResetData(val->left);
-    exprValListResetData(val->right);
-
-    /* Reset data */
-    val->vval = 0.0;
+    while(val)
+        {
+        /* Reset data */
+        if(val->vptr)
+            *(val->vptr) = 0.0;
+      
+        val->vval = 0.0;
+        
+        val = val->next;
+        }
     }
 
 /* This routine will create the value object */
-static exprVal *exprCreateVal(char *name, EXPRTYPE val)
+static exprVal *exprCreateVal(char *name, EXPRTYPE val, EXPRTYPE *addr)
     {
     exprVal *tmp;
     char *vtmp;
@@ -302,6 +345,7 @@ static exprVal *exprCreateVal(char *name, EXPRTYPE val)
     strcpy(vtmp, name);
     tmp->vname = vtmp;
     tmp->vval = val;
+    tmp->vptr = addr;
 
     return tmp;
     }

@@ -28,6 +28,41 @@ goes for constant lists.  Variable lists make it where
 one expression can depend on a variable set in another.
 
 
+Friday, June 30, 2006
+---------------------
+Version 2.5
+
+* Added a new value list function: exprValListAddAddress.  This function adds
+  a named value to the list, but uses the addresss of a stack variable.  The
+  stack variable is then used to set/get the value instead of the internal list
+  value.  You must ensure that the stack variable exists as long as it is used
+  by the expression.  This can permit, for example, a value name to be shared
+  with two different value lists like such:
+  
+  EXPRTYPE global_value;
+  exprValListAddAddress(vlist, "global", &global_value);
+  exprValListAddAddress(vlist2, "global", &global_value);
+  
+  Like this, the value can be directly accessed by the application, and each
+  value list will share it.  This can also be used to replace code from this:
+  
+  EXPRTYPE *a;
+  exprValListAdd(vlist, "var", 0.0);
+  exprValListGetAddress(vlist, "var", &a);
+  
+  To look like this:
+  
+  EXPRTYPE a;
+  exprValListAddAddress(vlist, "var", &a);
+* Added a value list function exprValListSet to set the value of a variable
+  (using the slow search method).  This is because the add functions now return
+  and error if the item (function/value) already exists instead of setting the
+  value of the item.  You can still use the fast direct access method.
+* Changed internal lists for function and value lists from binary trees to
+  linked lists.
+  
+  
+
 
 Thursday, May 4, 2006
 ---------------------

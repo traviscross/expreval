@@ -94,67 +94,27 @@ int exprFuncListAdd(exprFuncList *flist, char *name, exprFuncType ptr, int min, 
         return EXPR_ERROR_NOERROR;
         }
 
-    /* See if we can find where it goes */
+    /* See if it already exists */
     cur = flist->head;
-
-    do
+    
+    while(cur)
         {
         result = strcmp(name, cur->fname);
-
+        
         if(result == 0)
-            {
-            /* This is it, just assign */
-            cur->fptr = ptr;
-            cur->min = min;
-            cur->max = max;
-            cur->refmin = refmin;
-            cur->refmax = refmax;
-            cur->type = EXPR_NODETYPE_FUNCTION;
-
-            break;
-            }
-        else if(result > 0) /* To the right */
-            {
-            if(cur->right == NULL)
-                {
-                /* It goes here */
-                tmp = exprCreateFunc(name, ptr, EXPR_NODETYPE_FUNCTION, min, max, refmin, refmax);
-
-                if(tmp == NULL)
-                    return EXPR_ERROR_MEMORY;
-
-                cur->right = tmp;
-                break;
-                }
-            else
-                {
-                /* Loop into the right node */
-                cur = cur->right;
-                }
-            }
-        else if(result < 0) /* To the left */
-            {
-            if(cur->left == NULL)
-                {
-                /* It goes right here */
-                tmp = exprCreateFunc(name, ptr, EXPR_NODETYPE_FUNCTION, min, max, refmin, refmax);
-
-                if(tmp == NULL)
-                    return EXPR_ERROR_MEMORY;
-
-                cur->left = tmp;
-                break;
-                }
-            else
-                {
-                /* Loop into the left node */
-                cur = cur->left;
-                }
-            }
+            return EXPR_ERROR_ALREADYEXISTS;
+            
+        cur = cur->next;
         }
-    while(1); /* Loop until we find where it goes */
-
-    /* We made it out of the loop, so it was successful */
+        
+    /* It did not exist, so add it at the head */
+    tmp = exprCreateFunc(name, ptr, EXPR_NODETYPE_FUNCTION, min, max, refmin, refmax);
+        
+    if(tmp == NULL)
+        return EXPR_ERROR_MEMORY;
+            
+    tmp->next = flist->head;
+    flist->head = tmp;
     return EXPR_ERROR_NOERROR;
     }
 
@@ -215,68 +175,27 @@ int exprFuncListAddType(exprFuncList *flist, char *name, int type, int min, int 
         return EXPR_ERROR_NOERROR;
         }
 
-    /* See if we can find where it goes */
+    /* See if it already exists */
     cur = flist->head;
-
-    do
+    
+    while(cur)
         {
         result = strcmp(name, cur->fname);
-
+        
         if(result == 0)
-            {
-            /* This is it, just assign */
-            cur->fptr = NULL;
-            cur->min = min;
-            cur->max = max;
-            cur->refmin = refmin;
-            cur->refmax = refmax;
-            cur->type = type;
-
-            break;
-            }
-        else if(result > 0) /* To the right */
-            {
-            if(cur->right == NULL)
-                {
-                /* It goes here */
-                tmp = exprCreateFunc(name, NULL, type, min, max, refmin, refmax);
-
-                if(tmp == NULL)
-                    return EXPR_ERROR_MEMORY;
-
-
-                cur->right = tmp;
-                break;
-                }
-            else
-                {
-                /* Loop into the right node */
-                cur = cur->right;
-                }
-            }
-        else if(result < 0) /* To the left */
-            {
-            if(cur->left == NULL)
-                {
-                /* It goes right here */
-                tmp = exprCreateFunc(name, NULL, type, min, max, refmin, refmax);
-
-                if(tmp == NULL)
-                    return EXPR_ERROR_MEMORY;
-
-                cur->left = tmp;
-                break;
-                }
-            else
-                {
-                /* Loop into the left node */
-                cur = cur->left;
-                }
-            }
+            return EXPR_ERROR_ALREADYEXISTS;
+            
+        cur = cur->next;
         }
-    while(1); /* Loop until we find where it goes */
-
-    /* We made it out of the loop, so it was successful */
+        
+    /* It did not exist, so add it at the head */
+    tmp = exprCreateFunc(name, NULL, type, min, max, refmin, refmax);
+    
+    if(tmp == NULL)
+        return EXPR_ERROR_MEMORY;
+        
+    tmp->next = flist->head;
+    flist->head = tmp;
     return EXPR_ERROR_NOERROR;
     }
 
@@ -295,8 +214,8 @@ int exprFuncListGet(exprFuncList *flist, char *name, exprFuncType *ptr, int *typ
 
     /* Search for the item */
     cur = flist->head;
-
-    while(cur != NULL)
+    
+    while(cur)
         {
         result = strcmp(name, cur->fname);
 
@@ -313,17 +232,8 @@ int exprFuncListGet(exprFuncList *flist, char *name, exprFuncType *ptr, int *typ
             /* return now */
             return EXPR_ERROR_NOERROR;
             }
-        else if(result < 0)
-            {
-            /* to the left */
-            cur = cur->left;
-            }
-        else if(result > 0)
-            {
-            /* to the right */
-            cur = cur->right;
-            }
-
+            
+        cur = cur->next;
         }
 
     /* If we got here, we did not find the item in the list */
@@ -366,18 +276,21 @@ int exprFuncListClear(exprFuncList *flist)
 /* This routine will free any child nodes, and then free itself */
 void exprFuncListFreeData(exprFunc *func)
     {
-    if(func == NULL)
-        return; /* Nothing to do */
+    exprFunc *next;
+    
+    while(func)
+        {
+        /* Remember the next item */
+        next = func->next;
 
-    /* Free left and right sides */
-    exprFuncListFreeData(func->left);
-    exprFuncListFreeData(func->right);
+        /* Free name */
+        exprFreeMem(func->fname);
 
-    /* Free name */
-    exprFreeMem(func->fname);
-
-    /* Free ourself */
-    exprFreeMem(func);
+        /* Free ourself */
+        exprFreeMem(func);
+        
+        func = next;
+        }
     }
 
 /* This routine will create the function object */

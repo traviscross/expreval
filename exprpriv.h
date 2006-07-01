@@ -27,7 +27,7 @@ extern "C" {
     Version number
 */
 #define EXPR_VERSIONMAJOR 2
-#define EXPR_VERSIONMINOR 0
+#define EXPR_VERSIONMINOR 5
 
 /* Node types */
 enum
@@ -134,8 +134,7 @@ struct _exprFunc
     int refmin, refmax; /* Min and max ref. variables for the function */
     int type; /* Function node type.  exprEvalNOde solves the function */
 
-    struct _exprFunc *left; /* For binary tree search */
-    struct _exprFunc *right;
+    struct _exprFunc *next; /* For linked list */
     };
 
 /* Function list object */
@@ -149,9 +148,9 @@ struct _exprVal
     {
     char *vname; /* Name of the value */
     EXPRTYPE vval; /* Value of the value */
+    EXPRTYPE *vptr; /* Pointer to a value.  Used only if not NULL */
 
-    struct _exprVal *left; /* For binary tree search */
-    struct _exprVal *right;
+    struct _exprVal *next; /* For linked list */
     };
 
 /* Value list */

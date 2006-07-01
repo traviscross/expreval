@@ -36,8 +36,7 @@ enum
     EXPR_ERROR_NOTFOUND, /* Item not found in a list */
     EXPR_ERROR_UNMATCHEDCOMMENT, /* Unmatched comment tags */
     EXPR_ERROR_INVALIDCHAR, /* Invalid characters in expression */
-    EXPR_ERROR_ALREADYEXISTS, /* For C++ Wrapper , already called create */
-    EXPR_ERROR_DOESNOTEXIST, /* C++ Wrapper, Expression object does not exist. call create */
+    EXPR_ERROR_ALREADYEXISTS, /* An item already called create */
     EXPR_ERROR_ALREADYPARSEDBAD, /* Expression parsed already, but unsuccessfully. call free or clear */
     EXPR_ERROR_ALREADYPARSEDGOOD, /* Expression parsed already, successfully, call free or clear */
     EXPR_ERROR_EMPTYEXPR, /* Empty expression string passed to parse */
@@ -88,7 +87,9 @@ int exprFuncListInit(exprFuncList *flist);
 /* Functions for value lists */
 int exprValListCreate(exprValList **vlist);
 int exprValListAdd(exprValList *vlist, char *name, EXPRTYPE val);
+int exprValListSet(exprValList *vlist, char *name, EXPRTYPE val);
 int exprValListGet(exprValList *vlist, char *name, EXPRTYPE *val);
+int exprValListAddAddress(exprValList *vlist, char *name, EXPRTYPE *addr);
 int exprValListGetAddress(exprValList *vlist, char *name, EXPRTYPE **addr);
 int exprValListFree(exprValList *vlist);
 int exprValListClear(exprValList *vlist);

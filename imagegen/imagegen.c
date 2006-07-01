@@ -89,7 +89,7 @@ void main(void)
     int w, h;
     int x, y;
     int err;
-    EXPRTYPE *e_x, *e_y;
+    EXPRTYPE e_x, e_y; /* test globals */
     EXPRTYPE *e_r, *e_g, *e_b;
     EXPRTYPE res;
 
@@ -200,21 +200,20 @@ void main(void)
 
 
     /* Create the variables needed in the variable list */
-    exprValListAdd(v, "x", 0.0);
-    exprValListAdd(v, "y", 0.0);
+    if(exprValListAddAddress(v, "x", &e_x) != EXPR_ERROR_NOERROR)
+        longjmp(jumper, 1);
+
+    if(exprValListAddAddress(v, "y", &e_y) != EXPR_ERROR_NOERROR)
+        longjmp(jumper, 1);
+        
     exprValListAdd(v, "r", 0.0);
     exprValListAdd(v, "g", 0.0);
     exprValListAdd(v, "b", 0.0);
 
     /* Get memory addresses of the variables */
-    exprValListGetAddress(v, "x", &e_x);
-    exprValListGetAddress(v, "y", &e_y);
     exprValListGetAddress(v, "r", &e_r);
     exprValListGetAddress(v, "g", &e_g);
     exprValListGetAddress(v, "b", &e_b);
-
-    if(e_x == NULL || e_y == NULL)
-        longjmp(jumper, 1);
 
     if(e_r == NULL || e_g == NULL || e_b == NULL)
         longjmp(jumper, 1);
@@ -268,14 +267,14 @@ void main(void)
     for(y = 0; (int)y < h; y++)
         {
         /* Do line expression */
-        *e_y = (EXPRTYPE)y; /* Set variable */
+        e_y = (EXPRTYPE)y; /* Set variable */
         exprEval(e_line, &res);
 
         for(x = 0; (int)x < w; x++)
             {
             /* Do pixel expression */
-            *e_x = (EXPRTYPE)x; /* Set both variables (in case expression changed them) */
-            *e_y = (EXPRTYPE)y;
+            e_x = (EXPRTYPE)x; /* Set both variables (in case expression changed them) */
+            e_y = (EXPRTYPE)y;
 
             exprEval(e_pix, &res);
 
