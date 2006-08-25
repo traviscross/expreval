@@ -200,12 +200,12 @@ void main(void)
         *e_pos = (EXPRTYPE)pos;
 
         err = exprEval(e, &val);
+        
 #if(1)
         if(err != EXPR_ERROR_NOERROR)
             printf("Eval Error: %d\n", err);
 #endif
         }
-
 
     t2 = time(NULL);
     diff = difftime(t2, t1);

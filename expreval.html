@@ -48,6 +48,7 @@ body {
             <a href="#Reference">Reference</a><br>
             <a href="#Compiling">Compiling the ExprEval Library</a><br>
             <a href="#Drawbacks">Drawbacks/Problems</a><br>
+            <a href="#Solutions">Problems and Solutions</a><br>
             <a href="#Example">Example Use</a><br>
         </ul>
     </h3>
@@ -966,7 +967,7 @@ int custom_func(exprObj *obj, exprNode *nodes, int count, EXPRTYPE **refs, int r
                         <li>Nothing</li>
                     </ul>
                 </li><br>
-                <li>void exprSetBreakerCount(exprObj *obj, int count);<br>
+                <li>void exprSetBreakCount(exprObj *obj, int count);<br>
                     Comments:
                     <ul>
                         <li>Set how often the breaker function is tested.
@@ -1073,6 +1074,60 @@ int custom_func(exprObj *obj, exprNode *nodes, int count, EXPRTYPE **refs, int r
                 done and delete all of them.</li>
         </ul>
     </p>
+</div>
+
+<div align="left" class="container">
+    <h2><a name="Solutions">Problems and Solutions</a></h2>
+    
+    <ul>
+        <li><b>Variables do not seem to change in a release/optimized build.</b><br>
+            I have noticed a small problem with this.  Rarely, a variable may not
+            appear to change in a release build.  The reason is to do with compiler
+            optimizations.  For example, look at the following code:
+            <blockquote>
+                <pre>
+EXPRTYPE k;
+
+/* Add variable to the list */
+exprValListAddAddress(list, "k", &k);
+
+k = 0.0;
+
+/* Evaluate expression */
+for(int x = 0; x &lt; 100; x++)
+    {
+    exprEval(expr, &result);
+    
+    doSomething(k);
+    }
+                </pre>
+            </blockquote>
+            Inside the loop, the variable 'k' does not appear to be changing, so
+            the compiler may optimize it by loading it into a register before the
+            loop and not accessing it from memory during the loop, even if
+            the expression does change it.  One way to avoid this is to use the
+            'volatile' keyword with the variable.  Then the compiler must
+            accesss it from memory each time it is accessed.
+            <blockquote>
+                <pre>
+volatile EXPRTYPE k;
+
+/* Add variable to the list */
+exprValListAddAddress(list, "k", (EXPRTYPE*)&k);
+
+k = 0.0;
+
+/* Evaluate expression */
+for(int x = 0; x &lt; 100; x++)
+    {
+    exprEval(expr, &result);
+    
+    doSomething(k);
+    }
+                </pre>
+            </blockquote>
+        </li>
+        
 </div>
 
 <div align="left" class="container">

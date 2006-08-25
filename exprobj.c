@@ -136,7 +136,7 @@ void exprSetUserData(exprObj *obj, void *userdata)
 
 
 /* Set breaker count */
-void exprSetBreakerCount(exprObj *obj, int count)
+void exprSetBreakCount(exprObj *obj, int count)
     {
     if(obj)
         {

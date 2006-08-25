@@ -59,12 +59,13 @@ int exprEvalNode(exprObj *obj, exprNode *nodes, int curnode, EXPRTYPE *val)
     /* Check breaker count */
     if(obj->breakcur-- <= 0)
         {
+        /* Reset count before returning */
+        obj->breakcur = obj->breakcount;
+                
         if(exprGetBreakResult(obj))
             {
             return EXPR_ERROR_BREAK;
             }
-
-        obj->breakcur = obj->breakcount;
         }
 
     switch(nodes->type)

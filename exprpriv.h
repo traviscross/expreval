@@ -27,7 +27,7 @@ extern "C" {
     Version number
 */
 #define EXPR_VERSIONMAJOR 2
-#define EXPR_VERSIONMINOR 5
+#define EXPR_VERSIONMINOR 7
 
 /* Node types */
 enum

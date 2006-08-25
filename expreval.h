@@ -111,7 +111,7 @@ exprBreakFuncType exprGetBreakFunc(exprObj *obj);
 int exprGetBreakResult(exprObj *obj);
 void* exprGetUserData(exprObj *obj);
 void exprSetUserData(exprObj *obj, void *userdata);
-void exprSetBreakerCount(exprObj *obj, int count);
+void exprSetBreakCount(exprObj *obj, int count);
 void exprGetErrorPosition(exprObj *obj, int *start, int *end);
 
 /* Other useful routines */
