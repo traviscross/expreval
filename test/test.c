@@ -7,7 +7,6 @@
 
 /* Includes */
 #include <stdio.h>
-#include <conio.h> /* For _kbhit */
 #include <time.h>
 #include <stdlib.h>
 #include <setjmp.h>
@@ -34,7 +33,7 @@ int my_func(exprObj *obj, exprNode *nodes, int nodecount, EXPRTYPE **refs, int r
 
 int breaker(exprObj *obj)
     {
-    return kbhit();
+    return 0;
     }
 
 void main(void)
