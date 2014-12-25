@@ -19,10 +19,6 @@
 #include "expreval.h"
 #include "exprconf.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /*
     Version number
 */
@@ -205,10 +201,5 @@ struct _exprNode
 /* Functions for function lists */
 int exprFuncListAddType(exprFuncList *flist, char *name, int type, int min, int max, int refmin, int refmax);
 int exprFuncListGet(exprFuncList *flist, char *name, exprFuncType *ptr, int *type, int *min, int *max, int *refmin, int *refmax);
-
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* __BAVII_EXPRPRIV_H */

@@ -12,12 +12,6 @@
 #ifndef __BAVII_EXPREVAL_H
 #define __BAVII_EXPREVAL_H
 
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-
 /* Define type of data to use */
 typedef double EXPRTYPE;
 
@@ -116,12 +110,5 @@ void exprGetErrorPosition(exprObj *obj, int *start, int *end);
 
 /* Other useful routines */
 int exprValidIdent(char *name);
-
-/* Name mangling */
-#ifdef __cplusplus
-}
-#endif
-
-
 
 #endif /* __BAVII_EXPREVAL_H */
