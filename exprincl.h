@@ -20,9 +20,6 @@
 #include <memory.h>
 #endif
 
-/* Memory allocation */
-#include <malloc.h>
-
 /* String routines */
 #include <string.h>
 
