@@ -233,5 +233,3 @@ static void exprFreeNodeData(exprNode *node)
             break;
         }
     }
-
-

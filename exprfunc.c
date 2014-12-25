@@ -96,23 +96,23 @@ int exprFuncListAdd(exprFuncList *flist, char *name, exprFuncType ptr, int min, 
 
     /* See if it already exists */
     cur = flist->head;
-    
+
     while(cur)
         {
         result = strcmp(name, cur->fname);
-        
+
         if(result == 0)
             return EXPR_ERROR_ALREADYEXISTS;
-            
+
         cur = cur->next;
         }
-        
+
     /* It did not exist, so add it at the head */
     tmp = exprCreateFunc(name, ptr, EXPR_NODETYPE_FUNCTION, min, max, refmin, refmax);
-        
+
     if(tmp == NULL)
         return EXPR_ERROR_MEMORY;
-            
+
     tmp->next = flist->head;
     flist->head = tmp;
     return EXPR_ERROR_NOERROR;
@@ -177,23 +177,23 @@ int exprFuncListAddType(exprFuncList *flist, char *name, int type, int min, int 
 
     /* See if it already exists */
     cur = flist->head;
-    
+
     while(cur)
         {
         result = strcmp(name, cur->fname);
-        
+
         if(result == 0)
             return EXPR_ERROR_ALREADYEXISTS;
-            
+
         cur = cur->next;
         }
-        
+
     /* It did not exist, so add it at the head */
     tmp = exprCreateFunc(name, NULL, type, min, max, refmin, refmax);
-    
+
     if(tmp == NULL)
         return EXPR_ERROR_MEMORY;
-        
+
     tmp->next = flist->head;
     flist->head = tmp;
     return EXPR_ERROR_NOERROR;
@@ -214,7 +214,7 @@ int exprFuncListGet(exprFuncList *flist, char *name, exprFuncType *ptr, int *typ
 
     /* Search for the item */
     cur = flist->head;
-    
+
     while(cur)
         {
         result = strcmp(name, cur->fname);
@@ -232,7 +232,7 @@ int exprFuncListGet(exprFuncList *flist, char *name, exprFuncType *ptr, int *typ
             /* return now */
             return EXPR_ERROR_NOERROR;
             }
-            
+
         cur = cur->next;
         }
 
@@ -277,7 +277,7 @@ int exprFuncListClear(exprFuncList *flist)
 void exprFuncListFreeData(exprFunc *func)
     {
     exprFunc *next;
-    
+
     while(func)
         {
         /* Remember the next item */
@@ -288,7 +288,7 @@ void exprFuncListFreeData(exprFunc *func)
 
         /* Free ourself */
         exprFreeMem(func);
-        
+
         func = next;
         }
     }

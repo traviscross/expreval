@@ -61,7 +61,7 @@ int exprEvalNode(exprObj *obj, exprNode *nodes, int curnode, EXPRTYPE *val)
         {
         /* Reset count before returning */
         obj->breakcur = obj->breakcount;
-                
+
         if(exprGetBreakResult(obj))
             {
             return EXPR_ERROR_BREAK;
@@ -102,7 +102,7 @@ int exprEvalNode(exprObj *obj, exprNode *nodes, int curnode, EXPRTYPE *val)
             {
             /* Subtraction */
             err = exprEvalNode(obj, nodes->data.oper.nodes, 0, &d1);
-            
+
             if(!err)
                 err = exprEvalNode(obj, nodes->data.oper.nodes, 1, &d2);
 
@@ -187,7 +187,7 @@ int exprEvalNode(exprObj *obj, exprNode *nodes, int curnode, EXPRTYPE *val)
                 *val = -d1;
             else
                 return err;
-           
+
             break;
             }
 
@@ -218,7 +218,7 @@ int exprEvalNode(exprObj *obj, exprNode *nodes, int curnode, EXPRTYPE *val)
                 }
             else
                 return err;
-            
+
             break;
             }
 
@@ -235,7 +235,7 @@ int exprEvalNode(exprObj *obj, exprNode *nodes, int curnode, EXPRTYPE *val)
                     /* This is to keep the file from being too crowded.
                        See exprilfs.h for the definitions. */
 #include "exprilfs.h"
-                   
+
 
                     default:
                         {
@@ -263,6 +263,3 @@ int exprEvalNode(exprObj *obj, exprNode *nodes, int curnode, EXPRTYPE *val)
 
     return EXPR_ERROR_NOERROR;
     }
-
-
-

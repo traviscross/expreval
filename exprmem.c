@@ -16,12 +16,12 @@
 void* exprAllocMem(size_t size)
     {
     void *data = malloc(size);
-    
+
     if(data)
         {
         memset(data, 0, size);
         }
-    
+
     return data;
     }
 

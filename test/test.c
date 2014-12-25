@@ -22,7 +22,7 @@ int my_func(exprObj *obj, exprNode *nodes, int nodecount, EXPRTYPE **refs, int r
     err = exprEvalNode(obj, nodes, 0, &tmp);
     if(err != EXPR_ERROR_NOERROR)
         return err;
-   
+
 
     /* Set first ref item to the value of the parameter */
     *refs[0] = tmp;
@@ -52,16 +52,16 @@ void main(void)
     double diff;
     EXPRTYPE *e_pos, *e_res;
     int start, end;
-    
+
     char *vname;
     EXPRTYPE vval;
     void *cookie;
-    
+
     EXPRTYPE global_val;
 
     /* Seed random number generator */
     srand((clock() + 1024) * time(NULL));
-    
+
     /* Set global value */
     global_val = 27.2;
 
@@ -124,7 +124,7 @@ void main(void)
         printf("Var List Creation Error\n");
         longjmp(jumper, err);
         }
-        
+
     /* Init variable list */
     err = exprValListAddAddress(v, "global", &global_val);
     if(err != EXPR_ERROR_NOERROR)
@@ -199,7 +199,7 @@ void main(void)
         *e_pos = (EXPRTYPE)pos;
 
         err = exprEval(e, &val);
-        
+
 #if(1)
         if(err != EXPR_ERROR_NOERROR)
             printf("Eval Error: %d\n", err);
@@ -217,22 +217,22 @@ void main(void)
         printf("Average Evaluations/Second: %f\n", (double)count / diff);
 
     printf("res=: %f\n", *e_res);
-    
+
     /* Enumerate the items in the variable list */
-    
+
     printf("Variable list items\n");
     printf("-------------------\n");
-    
-    
+
+
     cookie = exprValListGetNext(v, &vname, &vval, NULL, NULL);
-    
+
     while(cookie)
         {
         printf("%s = %f\n", vname, vval);
-        
+
         cookie = exprValListGetNext(v, &vname, &vval, NULL, cookie);
         }
-    
+
 
     /* We are done */
     longjmp(jumper, -1);

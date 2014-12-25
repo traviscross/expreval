@@ -1078,7 +1078,7 @@ int custom_func(exprObj *obj, exprNode *nodes, int count, EXPRTYPE **refs, int r
 
 <div align="left" class="container">
     <h2><a name="Solutions">Problems and Solutions</a></h2>
-    
+
     <ul>
         <li><b>Variables do not seem to change in a release/optimized build.</b><br>
             I have noticed a small problem with this.  Rarely, a variable may not
@@ -1097,7 +1097,7 @@ k = 0.0;
 for(int x = 0; x &lt; 100; x++)
     {
     exprEval(expr, &result);
-    
+
     doSomething(k);
     }
                 </pre>
@@ -1121,13 +1121,13 @@ k = 0.0;
 for(int x = 0; x &lt; 100; x++)
     {
     exprEval(expr, &result);
-    
+
     doSomething(k);
     }
                 </pre>
             </blockquote>
         </li>
-        
+
 </div>
 
 <div align="left" class="container">
@@ -1255,29 +1255,29 @@ void gen_image(char *name, int w, int h, char *expr);
     exprValListGetAddress(v, "r", &v_r);
     exprValListGetAddress(v, "g", &v_g);
     exprValListGetAddress(v, "g", &v_b);
-    
+
     /* A way to add global variables that can be used by two different lists. */
     exprValListAddAddress(v, "global", &global_value);
     /* exprValListAddAddress(v2, "global", &global_value); */
-    
+
     /* Also, exprValListAddAddress can be used to add variables directly.
        Instead of:
-       
+
        EXPRTYPE *a;
-       
+
        exprValListAdd(v, "a", 0.0);
        exprValListGetAddresss(v, "a", &a);
-       
+
        You can do:
-       
+
        EXPRTYPE a;
-       
+
        exprValListAddAddresss(v, "a", &a);
-       
+
        If you do this, you must ensure that the stack variable exists as long
        as it is used by expression, otherwise it may cause a memory access
        violation. */
-    
+
 
     for(y = 0; y < h; y++)
         {

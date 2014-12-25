@@ -509,7 +509,7 @@ int exprParse(exprObj *obj, char *expr)
     err = exprStringToTokenList(obj, expr, &tokens, &count);
     if(err != EXPR_ERROR_NOERROR)
         return err;
-    
+
     /* Create head pointer */
     tmp = exprAllocNodes(1);
     if(tmp == NULL)
@@ -970,7 +970,7 @@ int exprInternalParseSub(exprObj *obj, exprNode *node, exprToken *tokens, int st
     node->type = EXPR_NODETYPE_SUBTRACT;
     node->data.oper.nodes = tmp;
     node->data.oper.nodecount = 2;
-    
+
     /* parse the left side */
     err = exprInternalParse(obj, &(tmp[0]), tokens, start, index - 1);
     if(err != EXPR_ERROR_NOERROR)
@@ -1353,7 +1353,7 @@ int exprInternalParseFunction(exprObj *obj, exprNode *node, exprToken *tokens, i
                                     return EXPR_ERROR_SYNTAX;
                                     }
 
-                                
+
                                 /* Make sure it is not a constant */
                                 vars = exprGetConstList(obj);
                                 if(vars)
@@ -1414,7 +1414,7 @@ int exprInternalParseFunction(exprObj *obj, exprNode *node, exprToken *tokens, i
             if(lv != p2 - 2)
                 {
                 obj->starterr = tokens[lv].start;
-                obj->enderr = tokens[p2].end; 
+                obj->enderr = tokens[p2].end;
                 return EXPR_ERROR_SYNTAX;
                 }
 
@@ -1425,7 +1425,7 @@ int exprInternalParseFunction(exprObj *obj, exprNode *node, exprToken *tokens, i
                 obj->enderr = tokens[lv + 1].end;
                 return EXPR_ERROR_SYNTAX;
                 }
-            
+
             /* Make sure it is not a constant */
             vars = exprGetConstList(obj);
             if(vars)
@@ -1484,8 +1484,8 @@ int exprInternalParseVarVal(exprObj *obj, exprNode *node, exprToken *tokens, int
         {
         return EXPR_ERROR_UNKNOWN;
         }
-    
-    
+
+
     /* Are we an identifier */
     if(tokens[start].type == EXPR_TOKEN_IDENTIFIER)
         {

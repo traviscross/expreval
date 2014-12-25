@@ -111,5 +111,3 @@ int exprValListInit(exprValList *vlist)
 
     return EXPR_ERROR_NOERROR;
     }
-
-

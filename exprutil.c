@@ -39,5 +39,3 @@ int exprValidIdent(char *name)
     /* When the while breaks out, we should be at the end */
     return (*name == '\0') ? 1 : 0;
     }
-
-

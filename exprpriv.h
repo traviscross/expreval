@@ -212,4 +212,3 @@ int exprFuncListGet(exprFuncList *flist, char *name, exprFuncType *ptr, int *typ
 #endif
 
 #endif /* __BAVII_EXPRPRIV_H */
-

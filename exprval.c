@@ -72,25 +72,25 @@ int exprValListAdd(exprValList *vlist, char *name, EXPRTYPE val)
     while(cur)
         {
         result = strcmp(name, cur->vname);
-        
+
         if(result == 0)
             return EXPR_ERROR_ALREADYEXISTS;
-            
+
         cur = cur->next;
         }
-        
+
     /* We did not find it, create it and add it to the beginning */
     tmp = exprCreateVal(name, val, NULL);
 
     if(tmp == NULL)
         return EXPR_ERROR_MEMORY;
-        
+
     tmp->next = vlist->head;
     vlist->head = tmp;
-    
+
     return EXPR_ERROR_NOERROR;
     }
-    
+
 /* Set a value in the list */
 int exprValListSet(exprValList *vlist, char *name, EXPRTYPE val)
     {
@@ -109,22 +109,22 @@ int exprValListSet(exprValList *vlist, char *name, EXPRTYPE val)
     while(cur)
         {
         result = strcmp(name, cur->vname);
-        
+
         if(result == 0)
             {
             if(cur->vptr)
                 *(cur->vptr) = val;
             else
                 cur->vval = val;
-                
-            return EXPR_ERROR_NOERROR;                
+
+            return EXPR_ERROR_NOERROR;
             }
-            
+
         cur = cur->next;
         }
-        
+
     return EXPR_ERROR_NOTFOUND;
-    }    
+    }
 
 /* Get the value from a list  */
 int exprValListGet(exprValList *vlist, char *name, EXPRTYPE *val)
@@ -163,7 +163,7 @@ int exprValListGet(exprValList *vlist, char *name, EXPRTYPE *val)
     /* If we got here, we did not find the item in the list */
     return EXPR_ERROR_NOTFOUND;
     }
-    
+
 /* Add an address to the list */
 int exprValListAddAddress(exprValList *vlist, char *name, EXPRTYPE *addr)
     {
@@ -192,28 +192,28 @@ int exprValListAddAddress(exprValList *vlist, char *name, EXPRTYPE *addr)
 
     /* See if it already exists */
     cur = vlist->head;
-    
+
     while(cur)
         {
         result = strcmp(name, cur->vname);
 
         if(result == 0)
             return EXPR_ERROR_ALREADYEXISTS;
-            
+
         cur = cur->next;
         }
-        
+
     /* Add it to the list */
     tmp = exprCreateVal(name, (EXPRTYPE)0.0, addr);
 
     if(tmp == NULL)
         return EXPR_ERROR_MEMORY;
-        
+
     tmp->next = vlist->head;
     vlist->head = tmp;
 
     return EXPR_ERROR_NOERROR;
-    }    
+    }
 
 /* Get memory address of a variable value in a value list */
 int exprValListGetAddress(exprValList *vlist, char *name, EXPRTYPE **addr)
@@ -249,37 +249,37 @@ int exprValListGetAddress(exprValList *vlist, char *name, EXPRTYPE **addr)
             /* return now */
             return EXPR_ERROR_NOERROR;
             }
-            
+
         cur = cur->next;
         }
 
     /* If we got here, we did not find it in the list */
     return EXPR_ERROR_NOTFOUND;
     }
-    
+
 /* This function is used to enumerate the values in a value list */
 void *exprValListGetNext(exprValList *vlist, char **name, EXPRTYPE *value, EXPRTYPE** addr, void *cookie)
     {
     exprVal *cur;
-    
+
     if(vlist == NULL)
         return NULL;
-        
+
     /* Get the current item */
     cur = (exprVal*)cookie;
-    
+
     /* Find the next item */
     if(cur == NULL)
         cur = vlist->head;
     else
         cur = cur->next;
-        
+
     /* Set up the data */
     if(cur)
         {
         if(name)
             *name = cur->vname;
-           
+
         if(value)
             {
             if(cur->vptr)
@@ -287,16 +287,16 @@ void *exprValListGetNext(exprValList *vlist, char **name, EXPRTYPE *value, EXPRT
             else
                 *value = cur->vval;
             }
-            
+
         if(addr)
             {
             if(cur->vptr)
                 *addr = cur->vptr;
             else
                 *addr = &(cur->vval);
-            }                                
+            }
         }
-        
+
     /* If there was no value, return NULL, otherwise, return the item */
     return (void*)cur;
     }
@@ -332,18 +332,18 @@ int exprValListClear(exprValList *vlist)
 static void exprValListFreeData(exprVal *val)
     {
     exprVal *next;
-    
+
     while(val)
         {
         /* Remember the next */
         next = val->next;
-        
+
         /* Free name */
         exprFreeMem(val->vname);
 
         /* Free ourself */
         exprFreeMem(val);
-        
+
         val = next;
         }
     }
@@ -356,9 +356,9 @@ static void exprValListResetData(exprVal *val)
         /* Reset data */
         if(val->vptr)
             *(val->vptr) = 0.0;
-      
+
         val->vval = 0.0;
-        
+
         val = val->next;
         }
     }
