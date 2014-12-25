@@ -860,7 +860,7 @@ case EXPR_NODEFUNC_CLAMP:
         err = exprEvalNode(obj, nodes->data.function.nodes, 1, &d1);
 
     if(!err)
-        err = exprEvalNode(obj, nodes->data.function.nodes, 1, &d2);
+        err = exprEvalNode(obj, nodes->data.function.nodes, 2, &d2);
     
     if(!err)
         {
@@ -869,7 +869,7 @@ case EXPR_NODEFUNC_CLAMP:
         EXPR_CHECK_ERR();
 
         if(tmp < 0.0)
-            *val = tmp * d2;
+            *val = tmp + d2;
         else
             *val = tmp + d1;
         }
