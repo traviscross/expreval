@@ -1,10 +1,10 @@
 /*
-    File: exprpriv.h
-    Auth: Brian Allen Vanderburg II
-    Date: Tuesday, February 28, 2006
-    Desc: Private include file for ExprEval library
+  File: exprpriv.h
+  Auth: Brian Allen Vanderburg II
+  Date: Tuesday, February 28, 2006
+  Desc: Private include file for ExprEval library
 
-    This file is part of ExprEval.
+  This file is part of ExprEval.
 */
 
 
@@ -20,14 +20,14 @@
 #include "exprconf.h"
 
 /*
-    Version number
+  Version number
 */
 #define EXPR_VERSIONMAJOR 2
 #define EXPR_VERSIONMINOR 7
 
 /* Node types */
 enum
-    {
+  {
     EXPR_NODETYPE_UNKNOWN = 0,
     EXPR_NODETYPE_MULTI,
     EXPR_NODETYPE_ADD,
@@ -40,12 +40,12 @@ enum
     EXPR_NODETYPE_VARIABLE,
     EXPR_NODETYPE_ASSIGN,
     EXPR_NODETYPE_FUNCTION
-    };
+  };
 
 /* Functions can be evaluated directly in EXPREVAL.  If fptr
    is NULL, type is used to determine what the function is */
 enum
-    {
+  {
     EXPR_NODEFUNC_UNKNOWN = 0,
     EXPR_NODEFUNC_ABS,
     EXPR_NODEFUNC_MOD,
@@ -96,7 +96,7 @@ enum
     EXPR_NODEFUNC_NOT,
     EXPR_NODEFUNC_FOR,
     EXPR_NODEFUNC_MANY
-    };
+  };
 
 /* Forward declarations */
 typedef struct _exprFunc exprFunc;
@@ -104,97 +104,97 @@ typedef struct _exprVal exprVal;
 
 /* Expression object */
 struct _exprObj
-    {
-    struct _exprFuncList *flist; /* Functions */
-    struct _exprValList *vlist; /* Variables */
-    struct _exprValList *clist; /* Constants */
-    struct _exprNode *headnode; /* Head parsed node */
+{
+  struct _exprFuncList *flist; /* Functions */
+  struct _exprValList *vlist; /* Variables */
+  struct _exprValList *clist; /* Constants */
+  struct _exprNode *headnode; /* Head parsed node */
 
-    exprBreakFuncType breakerfunc; /* Break function type */
+  exprBreakFuncType breakerfunc; /* Break function type */
 
-    void *userdata; /* User data, can be any 32 bit value */
-    int parsedgood; /* non-zero if successfully parsed */
-    int parsedbad; /* non-zero if parsed but unsuccessful */
-    int breakcount; /* how often to check the breaker function */
-    int breakcur; /* do we check the breaker function yet */
-    int starterr; /* start position of an error */
-    int enderr; /* end position of an error */
-    };
+  void *userdata; /* User data, can be any 32 bit value */
+  int parsedgood; /* non-zero if successfully parsed */
+  int parsedbad; /* non-zero if parsed but unsuccessful */
+  int breakcount; /* how often to check the breaker function */
+  int breakcur; /* do we check the breaker function yet */
+  int starterr; /* start position of an error */
+  int enderr; /* end position of an error */
+};
 
 /* Object for a function */
 struct _exprFunc
-    {
-    char *fname; /* Name of the function */
-    exprFuncType fptr; /* Function pointer */
-    int min, max; /* Min and max args for the function. */
-    int refmin, refmax; /* Min and max ref. variables for the function */
-    int type; /* Function node type.  exprEvalNOde solves the function */
+{
+  char *fname; /* Name of the function */
+  exprFuncType fptr; /* Function pointer */
+  int min, max; /* Min and max args for the function. */
+  int refmin, refmax; /* Min and max ref. variables for the function */
+  int type; /* Function node type.  exprEvalNOde solves the function */
 
-    struct _exprFunc *next; /* For linked list */
-    };
+  struct _exprFunc *next; /* For linked list */
+};
 
 /* Function list object */
 struct _exprFuncList
-    {
-    struct _exprFunc *head;
-    };
+{
+  struct _exprFunc *head;
+};
 
 /* Object for values */
 struct _exprVal
-    {
-    char *vname; /* Name of the value */
-    EXPRTYPE vval; /* Value of the value */
-    EXPRTYPE *vptr; /* Pointer to a value.  Used only if not NULL */
+{
+  char *vname; /* Name of the value */
+  EXPRTYPE vval; /* Value of the value */
+  EXPRTYPE *vptr; /* Pointer to a value.  Used only if not NULL */
 
-    struct _exprVal *next; /* For linked list */
-    };
+  struct _exprVal *next; /* For linked list */
+};
 
 /* Value list */
 struct _exprValList
-    {
-    struct _exprVal *head;
-    };
+{
+  struct _exprVal *head;
+};
 
 /* Expression node type */
 struct _exprNode
+{
+  int type; /* Node type */
+
+  union _data /* Union of info for various types */
+  {
+    struct _oper
     {
-    int type; /* Node type */
+      struct _exprNode *nodes; /* Operation arguments */
+      int nodecount; /* Number of arguments */
+    } oper;
 
-    union _data /* Union of info for various types */
-        {
-        struct _oper
-            {
-            struct _exprNode *nodes; /* Operation arguments */
-            int nodecount; /* Number of arguments */
-            } oper;
+    struct _variable
+    {
+      EXPRTYPE *vaddr; /* Used if EXPR_FAST_VAR_ACCESS defined */
+    } variable;
 
-        struct _variable
-            {
-            EXPRTYPE *vaddr; /* Used if EXPR_FAST_VAR_ACCESS defined */
-            } variable;
+    struct _value
+    {
+      EXPRTYPE value; /* Value if type is value */
+    } value;
 
-        struct _value
-            {
-            EXPRTYPE value; /* Value if type is value */
-            } value;
+    struct _assign /* Assignment struct */
+    {
+      EXPRTYPE *vaddr; /* Used if EXPR_FAST_VAR_ACCESS defined */
+      struct _exprNode *node; /* Node to evaluate */
+    } assign;
 
-        struct _assign /* Assignment struct */
-            {
-            EXPRTYPE *vaddr; /* Used if EXPR_FAST_VAR_ACCESS defined */
-            struct _exprNode *node; /* Node to evaluate */
-            } assign;
-
-        struct _function
-            {
-            exprFuncType fptr; /* Function pointer */
-            struct _exprNode *nodes; /* Array of argument nodes */
-            int nodecount; /* Number of argument nodes */
-            EXPRTYPE **refs; /* Reference variables */
-            int refcount; /* Number of variable references (not a reference counter) */
-            int type; /* Type of function for exprEvalNode if fptr is NULL */
-            } function;
-        } data;
-    };
+    struct _function
+    {
+      exprFuncType fptr; /* Function pointer */
+      struct _exprNode *nodes; /* Array of argument nodes */
+      int nodecount; /* Number of argument nodes */
+      EXPRTYPE **refs; /* Reference variables */
+      int refcount; /* Number of variable references (not a reference counter) */
+      int type; /* Type of function for exprEvalNode if fptr is NULL */
+    } function;
+  } data;
+};
 
 
 

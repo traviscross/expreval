@@ -1,10 +1,10 @@
 /*
-    File: exprincl.h
-    Auth: Brian Allen Vanderburg II
-    Date: Thursday, April 24, 2003
-    Desc: Includes, macros, etc needed by this library
+  File: exprincl.h
+  Auth: Brian Allen Vanderburg II
+  Date: Thursday, April 24, 2003
+  Desc: Includes, macros, etc needed by this library
 
-    This file is part of ExprEval.
+  This file is part of ExprEval.
 */
 
 #ifndef __BAVII_EXPRINCL_H

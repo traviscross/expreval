@@ -1,10 +1,10 @@
 /*
-    File: exprmem.h
-    Auth: Brian Allen Vanderburg II
-    Date: Wednesday, April 30, 2003
-    Desc: Memory functions for ExprEval
+  File: exprmem.h
+  Auth: Brian Allen Vanderburg II
+  Date: Wednesday, April 30, 2003
+  Desc: Memory functions for ExprEval
 
-    This file is part of ExprEval.
+  This file is part of ExprEval.
 */
 
 #ifndef __BAVII_EXPRMEM_H
